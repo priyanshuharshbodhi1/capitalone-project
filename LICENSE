@@ -57,12 +57,8 @@ practices. Users are encouraged to use the system in ways that support
 environmental conservation and responsible farming methods.
 
 ATTRIBUTION (OPTIONAL):
-While not required, attribution to the EcoBolt project and Bolt.new platform
-is appreciated. This helps support the open-source agricultural technology
-community.
-
-Example attribution:
-"Powered by EcoBolt Agricultural IoT Monitoring System - Built with Bolt.new"
+While not required, attribution to the EcoBolt project is appreciated. This
+helps support the open-source agricultural technology community.
 
 COMMUNITY CONTRIBUTIONS:
 Contributions to improve agricultural monitoring capabilities, add support for
@@ -72,8 +68,7 @@ new sensors, or enhance sustainability features are welcomed and encouraged.
                                   CREDITS
 ================================================================================
 
-Built with Bolt.new - The AI-powered full-stack development platform
-https://bolt.new
+ 
 
 Special thanks to:
 - Supabase for providing the backend infrastructure

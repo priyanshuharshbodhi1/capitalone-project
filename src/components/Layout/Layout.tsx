@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
-import BoltLogo from './BoltLogo';
 
 const Layout: React.FC = () => {
   return (
@@ -10,7 +9,6 @@ const Layout: React.FC = () => {
       <main>
         <Outlet />
       </main>
-      <BoltLogo />
     </div>
   );
 };

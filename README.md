@@ -5,18 +5,10 @@
   ![Ecobolt Logo](https://img.shields.io/badge/Ecobolt-Smart%20Agriculture-blue?style=for-the-badge&logo=car&logoColor=white)
   
   **A comprehensive IoT monitoring system for agricultural environments**
-  
-  [![Built with Bolt](https://img.shields.io/badge/Built%20with-Bolt-blue)](https://bolt.new)
   [![React](https://img.shields.io/badge/React-18.3.1-blue)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue)](https://www.typescriptlang.org/)
   [![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.1-blue)](https://tailwindcss.com/)
-
-<a href="https://bolt.new" target="_blank">
-  <img src="./public/black_circle_360x360.png" alt="Built with Bolt.new" width="60" height="60" style="border-radius: 50%;">
-</a>
-
-**🚀 Built completely with [Bolt.new](https://bolt.new) - The AI-powered full-stack development platform**
 
 </div>
 
@@ -331,7 +323,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Bolt.new** - For the amazing development platform
 - **Supabase** - For the backend infrastructure
 - **IBM WatsonX** - For AI-powered recommendations
 - **OpenWeatherMap** - For weather data services
@@ -350,11 +341,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   
   **Made with ❤️ by Ayan Ghosh for sustainable agriculture**
-<br>
-<a href="https://bolt.new" target="_blank">
-  <img src="./public/black_circle_360x360.png" alt="Built with Bolt.new" width="80" height="80" style="border-radius: 50%; margin: 10px;">
-</a>
-  
-**🚀 Proudly built with [Bolt.new](https://bolt.new) - The future of AI-powered development**
 <br>
 </div>
