@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 .env
 
-# Local IDE artifacts (bolt)
-.bolt/
-src/components/Layout/BoltLogo.tsx

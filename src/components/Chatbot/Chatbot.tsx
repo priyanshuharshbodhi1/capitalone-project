@@ -26,9 +26,26 @@ const Chatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasUserMessage = messages.some(m => m.sender === 'user');
+  
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    // Initial check
+    checkIsMobile();
+    
+    // Add listener for window resize
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -113,8 +130,8 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col flex-grow py-4 sm:py-8">
         {/* Enhanced Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
@@ -134,7 +151,7 @@ const Chatbot: React.FC = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-4 overflow-hidden flex flex-col" style={{ minHeight: '70vh', maxHeight: '70vh' }}>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col flex-grow overflow-hidden">
           {/* Messages Container */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {messages.map((message) => (
@@ -190,14 +207,18 @@ const Chatbot: React.FC = () => {
             <div className="border-t border-gray-100 px-4 sm:px-6 py-3 bg-white">
               <h3 className="text-sm font-semibold text-gray-800 mb-2">Suggested Questions</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {[
+                {
+                  [
                   'How should I optimize irrigation?',
                   'When is the best time to apply fertilizer?',
                   "What's the optimal soil pH for my crops?",
                   'How can I prevent common plant diseases?',
                   'What crops are suitable for my current conditions?',
                   'How can I improve my soil quality?'
-                ].map((suggestion, index) => (
+                  ]
+                  // Show only first 3 questions on mobile
+                  .filter((_, idx) => !isMobile || idx < 3)
+                  .map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => {
