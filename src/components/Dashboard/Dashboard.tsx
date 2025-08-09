@@ -10,7 +10,6 @@ import {
   Loader2,
   BarChart3,
   Sparkles,
-  Brain,
   Plus,
   AlertTriangle
 } from 'lucide-react';
@@ -174,7 +173,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Welcome to EcoBolt!
+              Welcome to Shetkari!
             </h1>
             
             <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">

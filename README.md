@@ -1,8 +1,8 @@
-# EcoBolt - Agricultural IoT Monitoring System
+# Shetkari - Agricultural IoT Monitoring System
 
 <div align="center">  
   
-  ![Ecobolt Logo](https://img.shields.io/badge/Ecobolt-Smart%20Agriculture-blue?style=for-the-badge&logo=car&logoColor=white)
+  ![Shetkari Logo](https://img.shields.io/badge/Shetkari-Smart%20Agriculture-blue?style=for-the-badge&logo=car&logoColor=white)
   
   **A comprehensive IoT monitoring system for agricultural environments**
   [![React](https://img.shields.io/badge/React-18.3.1-blue)](https://reactjs.org/)
@@ -14,7 +14,7 @@
 
 ## 🌱 Overview
 
-EcoBolt is a modern, production-ready agricultural IoT monitoring system that provides real-time insights into farm environmental conditions. Built with React, TypeScript, and Supabase, it offers comprehensive monitoring, AI-powered recommendations, and automated alerting for optimal crop management.
+Shetkari is a modern, production-ready agricultural IoT monitoring system that provides real-time insights into farm environmental conditions. Built with React, TypeScript, and Supabase, it offers comprehensive monitoring, AI-powered recommendations, and automated alerting for optimal crop management.
 
 ## ✨ Key Features
 
@@ -148,7 +148,7 @@ The system includes a sophisticated webhook notification system that automatical
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Ayanghosh-agno/EcoBolt/
+   git clone 
    cd ecobolt-agricultural-iot
    ```
 
@@ -331,15 +331,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Ecobolt Team**
-- 🌐 Website: [EcoBolt](https://fanciful-otter-1e10b8.netlify.app/)
-- 📧 Email: ayanghosh974@gmail.com
-- 💼 LinkedIn: [Ayan Ghosh](https://www.linkedin.com/in/ayan-ghosh-4743841a1/)
-
 ---
 
 <div align="center">
   
-  **Made with ❤️ by Ayan Ghosh for sustainable agriculture**
+  **Made with ❤️ by Priyanshu for sustainable agriculture**
 <br>
 </div>

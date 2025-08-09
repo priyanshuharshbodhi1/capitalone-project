@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Create Supabase client with fallback for development
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
   {
@@ -59,6 +59,7 @@ export interface Database {
         Row: {
           id: string;
           full_name: string;
+          email: string | null;
           phone: string | null;
           farm_name: string | null;
           location: string | null;
@@ -68,6 +69,7 @@ export interface Database {
         Insert: {
           id: string;
           full_name: string;
+          email?: string | null;
           phone?: string | null;
           farm_name?: string | null;
           location?: string | null;
@@ -77,6 +79,7 @@ export interface Database {
         Update: {
           id?: string;
           full_name?: string;
+          email?: string | null;
           phone?: string | null;
           farm_name?: string | null;
           location?: string | null;

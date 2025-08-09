@@ -1,8 +1,8 @@
-import { SensorData, LoginCredentials, ApplianceStatus, AlertRequest, UserSettings, User } from '../types';
+import { SensorData, LoginCredentials, AlertRequest, UserSettings, User } from '../types';
 import { supabaseApi } from './supabaseApi';
 
 // Updated API service to work with Supabase
-class EcoBoltAPI {
+class ShetkariAPI {
   // Generate mock sensor data for demo purposes when no real data is available
   private generateMockSensorData(): SensorData {
     return {
@@ -176,7 +176,7 @@ class EcoBoltAPI {
     }
   }
 
-  async getCurrentUser(): User | null {
+  async getCurrentUser(): Promise<User | null> {
     try {
       return await supabaseApi.getCurrentUser();
     } catch (error) {
@@ -195,4 +195,4 @@ class EcoBoltAPI {
   }
 }
 
-export const api = new EcoBoltAPI();
+export const api = new ShetkariAPI();

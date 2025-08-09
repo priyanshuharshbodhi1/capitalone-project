@@ -5,8 +5,8 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, fullName: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (mounted) {
             setUser({
               id: 'demo-user',
-              email: 'demo@ecobolt.com',
+              email: 'demo@shetkari.com',
               name: 'Demo User',
               phone: '+1-555-0123',
               farmName: 'Demo Farm',
@@ -208,7 +208,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('🔐 AuthProvider: Attempting login...');
       setIsLoading(true);
@@ -225,21 +225,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           location: 'Demo Location',
         });
         setIsLoading(false);
-        return true;
+        return { success: true };
       }
       
       await supabaseApi.signIn(email, password);
       console.log('✅ AuthProvider: Login successful');
       // Don't set loading to false here - let the auth state change handler do it
-      return true;
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
       console.error('❌ AuthProvider: Login error:', error);
       setIsLoading(false);
-      return false;
+      // Map common supabase auth errors to friendly messages
+      const raw = (error?.message || '').toLowerCase();
+      let message = 'Login failed. Please try again.';
+      if (raw.includes('email not confirmed')) message = 'Email not confirmed. Please check your inbox for the verification email.';
+      else if (raw.includes('invalid login credentials')) message = 'Invalid email or password.';
+      else if (raw.includes('rate limit')) message = 'Too many attempts. Please wait a moment and try again.';
+      return { success: false, error: message };
     }
   };
 
-  const register = async (email: string, password: string, fullName: string): Promise<boolean> => {
+  const register = async (email: string, password: string, fullName: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('📝 AuthProvider: Attempting registration...');
       setIsLoading(true);
@@ -256,17 +262,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           location: '',
         });
         setIsLoading(false);
-        return true;
+        return { success: true };
       }
       
-      await supabaseApi.signUp(email, password, fullName);
+      const result = await supabaseApi.signUp(email, password, fullName);
       console.log('✅ AuthProvider: Registration successful');
-      // Don't set loading to false here - let the auth state change handler do it
-      return true;
-    } catch (error) {
+      // If email confirmation is required, there won't be a session and auth listener won't fire.
+      // In that case, stop loading so the UI can prompt the user to verify email.
+      if (!result?.session) {
+        console.log('📧 AuthProvider: Email confirmation likely required. Stopping loading.');
+        setIsLoading(false);
+      }
+      // If session exists, let the auth state change handler complete the flow.
+      return { success: true };
+    } catch (error: any) {
       console.error('❌ AuthProvider: Registration error:', error);
       setIsLoading(false);
-      return false;
+      const raw = (error?.message || '').toLowerCase();
+      let message = 'Registration failed. Please try again.';
+      if (raw.includes('password should be')) message = 'Password does not meet requirements.';
+      if (raw.includes('user already registered') || raw.includes('already registered')) message = 'User already registered. Try signing in.';
+      return { success: false, error: message };
     }
   };
 
@@ -281,9 +297,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsLoading(false);
       }
       console.log('✅ AuthProvider: Logout successful');
-    } catch (error) {
+    } catch (error: unknown) {
       // Check if the error is due to session not found
-      if (error.message.includes('Session from session_id claim in JWT does not exist')) {
+      const msg = error instanceof Error ? error.message : String(error || '');
+      if (msg.includes('Session from session_id claim in JWT does not exist')) {
         console.warn('⚠️ AuthProvider: Supabase session not found during logout, clearing client session anyway.');
         setUser(null); // Clear user state
       }

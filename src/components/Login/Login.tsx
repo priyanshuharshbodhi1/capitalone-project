@@ -4,7 +4,7 @@ import { Leaf, Mail, Lock, Loader2, User } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [email, setEmail] = useState('ayanghosh974@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('Bolt1234');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
@@ -19,17 +19,12 @@ const Login: React.FC = () => {
       return;
     }
 
-    let success = false;
     if (isLoginMode) {
-      success = await login(email, password);
-      if (!success) {
-        setError('Invalid credentials. Please try again.');
-      }
+      const res = await login(email, password);
+      if (!res.success) setError(res.error || 'Login failed. Please try again.');
     } else {
-      success = await register(email, password, fullName);
-      if (!success) {
-        setError('Registration failed. Please try again.');
-      }
+      const res = await register(email, password, fullName);
+      if (!res.success) setError(res.error || 'Registration failed. Please try again.');
     }
   };
 
@@ -50,7 +45,7 @@ const Login: React.FC = () => {
               <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">EcoBolt</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shetkari</h2>
           <p className="mt-2 text-gray-600 text-sm sm:text-base">Agricultural IoT Monitoring System</p>
         </div>
 
@@ -60,7 +55,7 @@ const Login: React.FC = () => {
               {isLoginMode ? 'Sign In' : 'Create Account'}
             </h3>
             <p className="text-gray-600 text-sm text-center mt-1">
-              {isLoginMode ? 'Welcome back to your farm dashboard' : 'Join EcoBolt to monitor your farm'}
+              {isLoginMode ? 'Welcome back to your farm dashboard' : 'Join Shetkari to monitor your farm'}
             </p>
           </div>
 

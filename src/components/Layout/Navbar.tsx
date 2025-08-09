@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import { Leaf, BarChart3, Settings, LogOut, User, TrendingUp, Menu, X } from 'lucide-react';
+import { Leaf, BarChart3, Settings, LogOut, User, TrendingUp, Menu, X, MessageSquare } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -9,7 +9,8 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: BarChart3 },
+    { name: 'Assistant', href: '/', icon: MessageSquare },
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
     { name: 'Analytics', href: '/analytics', icon: TrendingUp },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
@@ -36,7 +37,7 @@ const Navbar: React.FC = () => {
               <div className="bg-emerald-500 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">EcoBolt</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">Shetkari</span>
             </div>
             
             {/* Desktop Navigation */}

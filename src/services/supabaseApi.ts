@@ -83,26 +83,6 @@ export class SupabaseAPI {
 
     if (error) throw error;
 
-    // Create user profile if user was created
-    if (data.user) {
-      try {
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            id: data.user.id,
-            full_name: fullName,
-            email: email, // Store email in user_profiles for webhook access
-          });
-
-        if (profileError && profileError.code !== '23505') {
-          // 23505 is unique violation, which means profile already exists
-          console.error('Error creating profile:', profileError);
-        }
-      } catch (profileError) {
-        console.error('Error creating user profile:', profileError);
-      }
-    }
-
     return data;
   }
 
@@ -317,10 +297,16 @@ export class SupabaseAPI {
     
     try {
       console.log('📱 SupabaseAPI: Fetching user devices...');
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('⚠️ SupabaseAPI: No authenticated user for getUserDevices');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('devices')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -391,10 +377,16 @@ export class SupabaseAPI {
     
     try {
       console.log('📊 SupabaseAPI: Fetching latest sensor data...');
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('⚠️ SupabaseAPI: No authenticated user for getLatestSensorData');
+        return null;
+      }
+
       let query = supabase
         .from('sensor_data')
         .select('*')
+        .eq('user_id', user.id)
         .order('timestamp', { ascending: false })
         .limit(1);
 
@@ -552,10 +544,17 @@ export class SupabaseAPI {
 
       console.log(`📊 SupabaseAPI: Querying data from ${startTime.toISOString()} to ${now.toISOString()}`);
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('⚠️ SupabaseAPI: No authenticated user for getSensorDataHistory');
+        return [];
+      }
+
       let query = supabase
         .from('sensor_data')
         .select('*')
         .gte('timestamp', startTime.toISOString())
+        .eq('user_id', user.id)
         .order('timestamp', { ascending: true });
 
       if (deviceId) {
@@ -865,9 +864,16 @@ export class SupabaseAPI {
     }
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('⚠️ SupabaseAPI: No authenticated user for getAlerts');
+        return [];
+      }
+
       let query = supabase
         .from('alerts')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(limit);
 

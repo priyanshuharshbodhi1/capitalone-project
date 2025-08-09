@@ -5,12 +5,15 @@ import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import Analytics from './components/Analytics/Analytics';
 import Settings from './components/Settings/Settings';
+import Chatbot from './components/Chatbot/Chatbot';
 import Layout from './components/Layout/Layout';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
   console.log('🔒 PrivateRoute: isLoading:', isLoading, 'user:', user?.name || 'none');
+
+  // Authentication is required to access protected routes
 
   if (isLoading) {
     console.log('⏳ PrivateRoute: Showing loading screen');
@@ -70,7 +73,8 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           >
-            <Route index element={<Dashboard />} />
+            <Route index element={<Chatbot />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="settings" element={<Settings />} />
           </Route>
