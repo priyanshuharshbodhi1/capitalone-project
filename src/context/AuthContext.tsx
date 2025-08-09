@@ -215,7 +215,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (!isSupabaseConfigured()) {
         console.log('🔐 AuthProvider: Demo mode login');
-        // Demo mode login
+        
+        // Demo mode with credential validation
+        const validDemoCredentials = [
+          { email: 'demo@shetkari.com', password: 'demo123' },
+          { email: 'farmer@demo.com', password: 'farmer123' },
+          { email: 'test@demo.com', password: 'test123' }
+        ];
+        
+        const isValidCredentials = validDemoCredentials.some(
+          cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
+        );
+        
+        if (!isValidCredentials) {
+          setIsLoading(false);
+          return { 
+            success: false, 
+            error: 'Invalid email or password. Try demo@shetkari.com with password: demo123' 
+          };
+        }
         setUser({
           id: 'demo-user',
           email: email,
@@ -235,13 +253,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('❌ AuthProvider: Login error:', error);
       setIsLoading(false);
+      
       // Map common supabase auth errors to friendly messages
-      const raw = (error?.message || '').toLowerCase();
-      let message = 'Login failed. Please try again.';
-      if (raw.includes('email not confirmed')) message = 'Email not confirmed. Please check your inbox for the verification email.';
-      else if (raw.includes('invalid login credentials')) message = 'Invalid email or password.';
-      else if (raw.includes('rate limit')) message = 'Too many attempts. Please wait a moment and try again.';
-      return { success: false, error: message };
+      const rawMessage = (error?.message || error?.toString() || '').toLowerCase();
+      let userMessage = 'Login failed. Please try again.';
+      
+      if (rawMessage.includes('email not confirmed')) {
+        userMessage = 'Please check your email and verify your account before signing in.';
+      } else if (rawMessage.includes('invalid login credentials') || rawMessage.includes('invalid credentials')) {
+        userMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (rawMessage.includes('rate limit') || rawMessage.includes('too many')) {
+        userMessage = 'Too many login attempts. Please wait a few minutes and try again.';
+      } else if (rawMessage.includes('network') || rawMessage.includes('fetch')) {
+        userMessage = 'Network error. Please check your connection and try again.';
+      } else if (rawMessage.includes('configuration') || rawMessage.includes('supabase')) {
+        userMessage = 'Service configuration error. Please try again later.';
+      }
+      
+      console.error('❌ AuthProvider: Returning error to UI:', userMessage);
+      return { success: false, error: userMessage };
     }
   };
 
@@ -252,7 +282,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (!isSupabaseConfigured()) {
         console.log('📝 AuthProvider: Demo mode registration');
-        // Demo mode registration
+        
+        // Demo mode registration with basic validation
+        if (password.length < 6) {
+          setIsLoading(false);
+          return { 
+            success: false, 
+            error: 'Password must be at least 6 characters long.' 
+          };
+        }
+        
+        if (!email.includes('@') || !email.includes('.')) {
+          setIsLoading(false);
+          return { 
+            success: false, 
+            error: 'Please enter a valid email address.' 
+          };
+        }
+        
+        // Simulate existing user check
+        const existingDemoEmails = ['demo@shetkari.com', 'farmer@demo.com', 'test@demo.com'];
+        if (existingDemoEmails.some(existing => existing.toLowerCase() === email.toLowerCase())) {
+          setIsLoading(false);
+          return { 
+            success: false, 
+            error: 'An account with this email already exists. Try signing in instead.' 
+          };
+        }
         setUser({
           id: 'demo-user',
           email: email,
@@ -278,11 +334,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('❌ AuthProvider: Registration error:', error);
       setIsLoading(false);
-      const raw = (error?.message || '').toLowerCase();
-      let message = 'Registration failed. Please try again.';
-      if (raw.includes('password should be')) message = 'Password does not meet requirements.';
-      if (raw.includes('user already registered') || raw.includes('already registered')) message = 'User already registered. Try signing in.';
-      return { success: false, error: message };
+      
+      const rawMessage = (error?.message || error?.toString() || '').toLowerCase();
+      let userMessage = 'Registration failed. Please try again.';
+      
+      if (rawMessage.includes('password should be') || rawMessage.includes('password must')) {
+        userMessage = 'Password must be at least 6 characters long.';
+      } else if (rawMessage.includes('user already registered') || rawMessage.includes('already registered') || rawMessage.includes('email already')) {
+        userMessage = 'An account with this email already exists. Try signing in instead.';
+      } else if (rawMessage.includes('invalid email') || rawMessage.includes('email address is invalid')) {
+        userMessage = 'Please enter a valid email address.';
+      } else if (rawMessage.includes('network') || rawMessage.includes('fetch')) {
+        userMessage = 'Network error. Please check your connection and try again.';
+      } else if (rawMessage.includes('configuration') || rawMessage.includes('supabase')) {
+        userMessage = 'Service configuration error. Please try again later.';
+      }
+      
+      console.error('❌ AuthProvider: Returning error to UI:', userMessage);
+      return { success: false, error: userMessage };
     }
   };
 

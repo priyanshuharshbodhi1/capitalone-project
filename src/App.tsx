@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -55,6 +56,28 @@ const App: React.FC = () => {
   
   return (
     <AuthProvider>
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+          success: {
+            style: {
+              background: '#166534',
+            },
+          },
+          error: {
+            style: {
+              background: '#991b1b',
+            },
+          },
+        }}
+      />
       <Router>
         <Routes>
           <Route

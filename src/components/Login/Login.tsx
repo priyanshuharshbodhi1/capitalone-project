@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Leaf, Mail, Lock, Loader2, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Login: React.FC = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -15,16 +16,35 @@ const Login: React.FC = () => {
     setError('');
 
     if (!email || !password || (!isLoginMode && !fullName)) {
+      toast.error('Please fill in all fields');
       setError('Please fill in all fields');
       return;
     }
 
-    if (isLoginMode) {
-      const res = await login(email, password);
-      if (!res.success) setError(res.error || 'Login failed. Please try again.');
-    } else {
-      const res = await register(email, password, fullName);
-      if (!res.success) setError(res.error || 'Registration failed. Please try again.');
+    try {
+      if (isLoginMode) {
+        const res = await login(email, password);
+        if (!res.success) {
+          const errorMessage = res.error || 'Login failed. Please try again.';
+          toast.error(errorMessage);
+          setError(errorMessage);
+          return;
+        }
+        toast.success('Login successful!');
+      } else {
+        const res = await register(email, password, fullName);
+        if (!res.success) {
+          const errorMessage = res.error || 'Registration failed. Please try again.';
+          toast.error(errorMessage);
+          setError(errorMessage);
+          return;
+        }
+        toast.success('Account created successfully!');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -124,9 +144,11 @@ const Login: React.FC = () => {
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-red-600 text-sm">{error}</p>
+                <p className="text-red-600 text-sm font-medium">{error}</p>
               </div>
             )}
+
+
 
             <button
               type="submit"
