@@ -290,11 +290,5 @@ CREATE TRIGGER check_thresholds_trigger
   AFTER INSERT ON sensor_data
   FOR EACH ROW EXECUTE FUNCTION check_sensor_thresholds();
 
--- Insert default thresholds for common parameters
-INSERT INTO thresholds (device_id, user_id, parameter, min_value, max_value) VALUES
-  ('DEMO_DEVICE', '00000000-0000-0000-0000-000000000000', 'atmo_temp', 15.0, 35.0),
-  ('DEMO_DEVICE', '00000000-0000-0000-0000-000000000000', 'humidity', 40.0, 80.0),
-  ('DEMO_DEVICE', '00000000-0000-0000-0000-000000000000', 'moisture', 30.0, 70.0),
-  ('DEMO_DEVICE', '00000000-0000-0000-0000-000000000000', 'ph', 6.0, 7.5),
-  ('DEMO_DEVICE', '00000000-0000-0000-0000-000000000000', 'ec', 0.5, 2.0)
-ON CONFLICT (device_id, parameter) DO NOTHING;
+-- Note: Demo device and thresholds will be created programmatically when needed
+-- to avoid foreign key constraint issues with non-existent auth users

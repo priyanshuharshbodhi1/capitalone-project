@@ -1,12 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { supabaseApi } from '../services/supabaseApi';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+// import { logConfigStatus } from '../utils/configChecker';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
+  login: (userEmail: string, userPassword: string) => Promise<{ success: boolean; error?: string }>;
+  register: (userEmail: string, userPassword: string, userFullName: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -31,6 +33,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
+    let initTimeout: NodeJS.Timeout | null = null;
+    
     console.log('🔄 AuthProvider: Starting initialization...');
 
     const initializeAuth = async () => {
@@ -40,25 +44,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Check if Supabase is configured
         if (!isSupabaseConfigured()) {
           console.log('⚠️ AuthProvider: Supabase not configured, using demo mode');
+          
+          // Check for existing demo session
+          const existingDemoUser = localStorage.getItem('demo_user_session');
+          if (existingDemoUser && mounted) {
+            try {
+              const demoUser = JSON.parse(existingDemoUser);
+              setUser(demoUser);
+              console.log('✅ AuthProvider: Restored demo user from localStorage');
+            } catch {
+              console.warn('⚠️ AuthProvider: Invalid demo user data in localStorage');
+              localStorage.removeItem('demo_user_session');
+            }
+          }
+          
           if (mounted) {
-            setUser({
-              id: 'demo-user',
-              email: 'demo@shetkari.com',
-              name: 'Demo User',
-              phone: '+1-555-0123',
-              farmName: 'Demo Farm',
-              location: 'Demo Location',
-            });
             setIsLoading(false);
-            console.log('✅ AuthProvider: Demo user set, loading complete');
+            console.log('✅ AuthProvider: Demo mode ready');
           }
           return;
         }
 
         console.log('🔍 AuthProvider: Getting initial session...');
         
-        // Get session without timeout - let it take as long as needed
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Get session with timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          initTimeout = setTimeout(() => reject(new Error('Session timeout')), 8000);
+        });
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]);
+        
+        if (initTimeout) {
+          clearTimeout(initTimeout);
+          initTimeout = null;
+        }
         
         if (error) {
           console.error('❌ AuthProvider: Error getting session:', error);
@@ -71,144 +94,114 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('📋 AuthProvider: Session data:', session?.user?.id ? 'User found' : 'No user');
         
         if (session?.user && mounted) {
-          console.log('👤 AuthProvider: Getting user profile with session data...');
+          console.log('👤 AuthProvider: Loading user profile...');
           try {
-            // Pass user data from session to avoid additional auth calls
             const currentUser = await supabaseApi.getCurrentUser(
               session.user.id,
               session.user.email!,
               session.user.user_metadata
             );
             
-            if (mounted) {
-              console.log('✅ AuthProvider: User profile loaded:', currentUser?.name);
+            if (currentUser && mounted) {
+              console.log('✅ AuthProvider: Profile loaded successfully:', currentUser.name);
               setUser(currentUser);
             }
-          } catch (error) {
-            console.error('⚠️ AuthProvider: Error getting user profile, using fallback:', error);
-            // If profile doesn't exist, user is still authenticated but needs profile setup
+          } catch (profileError) {
+            console.warn('⚠️ AuthProvider: Profile load failed, using fallback');
             if (mounted) {
-              const fallbackUser = {
+              setUser({
                 id: session.user.id,
                 email: session.user.email!,
                 name: session.user.user_metadata?.full_name || 'User',
                 phone: '',
                 farmName: '',
                 location: '',
-              };
-              console.log('✅ AuthProvider: Fallback user set:', fallbackUser.name);
-              setUser(fallbackUser);
+              });
             }
           }
-        } else {
-          console.log('❌ AuthProvider: No session found');
         }
         
-        // Always set loading to false after processing session
         if (mounted) {
-          console.log('✅ AuthProvider: Setting loading to false after session check');
           setIsLoading(false);
+          console.log('✅ AuthProvider: Initialization complete');
         }
-      } catch (error) {
-        console.error('❌ AuthProvider: Error in initializeAuth:', error);
+      } catch (initError) {
+        console.error('❌ AuthProvider: Initialization error:', initError);
         if (mounted) {
           setIsLoading(false);
         }
       }
     };
 
+    // Start initialization immediately
     initializeAuth();
 
-    // Only set up auth listener if Supabase is configured
-    let subscription: any = null;
+    // Set up auth listener for Supabase
+    let authSubscription: { unsubscribe: () => void } | null = null;
     
     if (isSupabaseConfigured()) {
-      console.log('🔗 AuthProvider: Setting up auth state listener...');
-      // Listen for auth changes
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
-          console.log('🔄 AuthProvider: Auth state changed:', event, session?.user?.id || 'no user');
+          console.log('🔄 Auth event:', event);
           
-          if (!mounted) {
-            console.log('⚠️ AuthProvider: Component unmounted, ignoring auth change');
-            return;
-          }
+          if (!mounted) return;
           
-          if (event === 'SIGNED_IN' && session?.user) {
-            console.log('✅ AuthProvider: User signed in, getting profile with session data...');
-            setIsLoading(true); // Set loading while fetching profile
-            
-            try {
-              // Pass user data from session to avoid additional auth calls
+          // Handle different auth events
+          switch (event) {
+            case 'SIGNED_IN':
+              if (session?.user) {
+                try {
+                  const currentUser = await supabaseApi.getCurrentUser(
+                    session.user.id,
+                    session.user.email!,
+                    session.user.user_metadata
+                  );
+                  if (mounted) {
+                    setUser(currentUser);
+                  }
+                } catch {
+                  if (mounted) {
+                    setUser({
+                      id: session.user.id,
+                      email: session.user.email!,
+                      name: session.user.user_metadata?.full_name || 'User',
+                      phone: '',
+                      farmName: '',
+                      location: '',
+                    });
+                  }
+                }
+              }
+              break;
               
-              const fallbackUser = {
-                id: session.user.id,
-                email: session.user.email!,
-                name: session.user.user_metadata?.full_name || 'User',
-                phone: '',
-                farmName: '',
-                location: '',
-              };
+            case 'SIGNED_OUT':
+              setUser(null);
+              localStorage.removeItem('demo_user_session');
+              break;
               
-              setUser(fallbackUser);
-              
-              const currentUser = await supabaseApi.getCurrentUser(
-                session.user.id,
-                session.user.email!,
-                session.user.user_metadata
-              ); 
-              console.log('✅ AuthProvider: Profile loaded after sign in:', currentUser?.name);   
-              setUser(currentUser);  
-              
-            } catch (error) {
-              console.error('⚠️ AuthProvider: Error getting user after sign in, using fallback:', error);
-              // Fallback to basic user info
-              const fallbackUser = {
-                id: session.user.id,
-                email: session.user.email!,
-                name: session.user.user_metadata?.full_name || 'User',
-                phone: '',
-                farmName: '',
-                location: '',
-              };
-              console.log('✅ AuthProvider: Fallback user set after sign in:', fallbackUser.name);
-              setUser(fallbackUser);
-            } finally {
-              // Always set loading to false after handling sign in
-              console.log('✅ AuthProvider: Setting loading to false after sign in');
-              setIsLoading(false);
-            }
-          } else if (event === 'SIGNED_OUT') {
-            console.log('👋 AuthProvider: User signed out');
-            setUser(null);
-            setIsLoading(false);
-          } else if (event === 'TOKEN_REFRESHED') {
-            console.log('🔄 AuthProvider: Token refreshed');
-            // Don't change loading state for token refresh
-          } else {
-            console.log('🔄 AuthProvider: Other auth event:', event);
-            // Only set loading to false if we don't have a user yet
-            if (!user) {
-              console.log('✅ AuthProvider: Setting loading to false for event:', event);
-              setIsLoading(false);
-            }
+            case 'TOKEN_REFRESHED':
+              // Don't change user state on token refresh
+              break;
           }
         }
       );
       
-      subscription = authSubscription;
+      authSubscription = subscription;
     }
 
     return () => {
-      console.log('🧹 AuthProvider: Cleanup');
       mounted = false;
-      if (subscription) {
-        subscription.unsubscribe();
+      if (initTimeout) {
+        clearTimeout(initTimeout);
       }
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
+      console.log('🧹 AuthProvider: Cleanup complete');
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (userEmail: string, userPassword: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('🔐 AuthProvider: Attempting login...');
       setIsLoading(true);
@@ -217,38 +210,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🔐 AuthProvider: Demo mode login');
         
         // Demo mode with credential validation
-        const validDemoCredentials = [
-          { email: 'demo@shetkari.com', password: 'demo123' },
-          { email: 'farmer@demo.com', password: 'farmer123' },
-          { email: 'test@demo.com', password: 'test123' }
-        ];
-        
-        const isValidCredentials = validDemoCredentials.some(
-          cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
-        );
-        
-        if (!isValidCredentials) {
+        // Demo user credentials
+        if (userEmail === 'demo@shetkari.com' && userPassword === 'demo123') {
+          const demoUser = {
+            id: 'demo-user',
+            email: userEmail,
+            name: 'Demo User',
+            phone: '+1-555-0123',
+            farmName: 'Demo Farm',
+            location: 'Demo Location',
+          };
+          setUser(demoUser);
+          setIsLoading(false);
+          // Save demo session to localStorage for persistence across reloads
+          localStorage.setItem('demo_user_session', JSON.stringify(demoUser));
+          return { success: true };
+        } else {
           setIsLoading(false);
           return { 
             success: false, 
             error: 'Invalid email or password. Try demo@shetkari.com with password: demo123' 
           };
         }
-        setUser({
-          id: 'demo-user',
-          email: email,
-          name: 'Demo User',
-          phone: '+1-555-0123',
-          farmName: 'Demo Farm',
-          location: 'Demo Location',
-        });
-        setIsLoading(false);
-        return { success: true };
       }
       
-      await supabaseApi.signIn(email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: userPassword,
+      });
+      
       console.log('✅ AuthProvider: Login successful');
-      // Don't set loading to false here - let the auth state change handler do it
+      
+      // Get user profile after successful login
+      try {
+        const currentUser = await supabaseApi.getCurrentUser(
+          data.user!.id,
+          data.user!.email!,
+          data.user!.user_metadata
+        );
+        if (currentUser) {
+          setUser(currentUser);
+          console.log('✅ AuthProvider: User profile loaded after login:', currentUser.name);
+        }
+      } catch (profileError) {
+        console.warn('⚠️ AuthProvider: Could not load profile after login:', profileError);
+      }
+      
+      setIsLoading(false);
       return { success: true };
     } catch (error: any) {
       console.error('❌ AuthProvider: Login error:', error);
@@ -275,7 +283,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (email: string, password: string, fullName: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (userEmail: string, userPassword: string, userFullName: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('📝 AuthProvider: Attempting registration...');
       setIsLoading(true);
@@ -284,7 +292,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('📝 AuthProvider: Demo mode registration');
         
         // Demo mode registration with basic validation
-        if (password.length < 6) {
+        if (userPassword.length < 6) {
           setIsLoading(false);
           return { 
             success: false, 
@@ -292,7 +300,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
         }
         
-        if (!email.includes('@') || !email.includes('.')) {
+        if (!userEmail.includes('@') || !userEmail.includes('.')) {
           setIsLoading(false);
           return { 
             success: false, 
@@ -302,30 +310,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Simulate existing user check
         const existingDemoEmails = ['demo@shetkari.com', 'farmer@demo.com', 'test@demo.com'];
-        if (existingDemoEmails.some(existing => existing.toLowerCase() === email.toLowerCase())) {
+        if (existingDemoEmails.some(existing => existing.toLowerCase() === userEmail.toLowerCase())) {
           setIsLoading(false);
           return { 
             success: false, 
             error: 'An account with this email already exists. Try signing in instead.' 
           };
         }
-        setUser({
+        const newDemoUser = {
           id: 'demo-user',
-          email: email,
-          name: fullName,
+          email: userEmail,
+          name: userFullName,
           phone: '',
           farmName: '',
           location: '',
-        });
+        };
+        setUser(newDemoUser);
         setIsLoading(false);
+        // Save demo session to localStorage for persistence across reloads
+        localStorage.setItem('demo_user_session', JSON.stringify(newDemoUser));
         return { success: true };
       }
       
-      const result = await supabaseApi.signUp(email, password, fullName);
+      const { data, error } = await supabase.auth.signUp({
+        email: userEmail,
+        password: userPassword,
+        options: {
+          data: {
+            full_name: userFullName,
+          },
+        },
+      });
+      
+      if (error) {
+        console.error('❌ AuthProvider: Registration error:', error);
+        setIsLoading(false);
+        return { 
+          success: false, 
+          error: error.message || 'Registration failed. Please try again.' 
+        };
+      }
+      
       console.log('✅ AuthProvider: Registration successful');
       // If email confirmation is required, there won't be a session and auth listener won't fire.
       // In that case, stop loading so the UI can prompt the user to verify email.
-      if (!result?.session) {
+      if (!data.session) {
         console.log('📧 AuthProvider: Email confirmation likely required. Stopping loading.');
         setIsLoading(false);
       }
@@ -357,23 +386,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      console.log('👋 AuthProvider: Attempting logout...');
+      console.log('🚪 AuthProvider: Logging out...');
+      
+      // Clear demo session if it exists
+      localStorage.removeItem('demo_user_session');
+      
       if (isSupabaseConfigured()) {
-        await supabaseApi.signOut();
-      } else {
-        // Demo mode logout
-        setUser(null);
-        setIsLoading(false);
+        await supabase.auth.signOut();
+        console.log('✅ AuthProvider: Supabase signout successful');
       }
+      
+      setUser(null);
       console.log('✅ AuthProvider: Logout successful');
-    } catch (error: unknown) {
-      // Check if the error is due to session not found
-      const msg = error instanceof Error ? error.message : String(error || '');
-      if (msg.includes('Session from session_id claim in JWT does not exist')) {
-        console.warn('⚠️ AuthProvider: Supabase session not found during logout, clearing client session anyway.');
-        setUser(null); // Clear user state
-      }
-      // Always set loading to false after a logout attempt, regardless of error type
+    } catch (error) {
+      console.error('❌ AuthProvider: Logout error:', error);
+      // Clear user state even if logout fails
+      localStorage.removeItem('demo_user_session');
+      setUser(null);
+    } finally {
       setIsLoading(false);
     }
   };

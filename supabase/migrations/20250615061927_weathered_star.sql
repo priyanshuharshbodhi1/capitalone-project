@@ -119,11 +119,21 @@ CREATE TRIGGER alert_webhook_trigger
   EXECUTE FUNCTION send_alert_webhook();
 
 -- Add RLS policy for email column in user_profiles
-CREATE POLICY IF NOT EXISTS "Users can update own email in profile"
-  ON user_profiles FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'user_profiles' 
+    AND policyname = 'Users can update own email in profile'
+  ) THEN
+    CREATE POLICY "Users can update own email in profile"
+      ON user_profiles FOR UPDATE
+      TO authenticated
+      USING (auth.uid() = id)
+      WITH CHECK (auth.uid() = id);
+  END IF;
+END $$;
 
 -- Add a comment for documentation
 COMMENT ON FUNCTION send_alert_webhook() IS 'Automatically sends HTTP webhook when new alerts are created - includes user email from user_profiles table and uses service role key for authentication';

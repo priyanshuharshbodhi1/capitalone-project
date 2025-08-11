@@ -35,3 +35,5 @@ server/api/__pycache__
 server/infra/__pycache__
 
 # /resources
+
+server/agent/prompts/__pycache__
