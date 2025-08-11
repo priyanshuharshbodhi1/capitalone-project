@@ -265,10 +265,13 @@ const Chatbot: React.FC = () => {
                     key={index}
                     onClick={() => {
                       setInput(suggestion);
-                      // Immediately send as first user query
+                    }}
+                    onDoubleClick={() => {
+                      setInput(suggestion);
                       setTimeout(() => handleSend(), 0);
                     }}
                     className="bg-gray-50 hover:bg-gray-100 text-gray-800 text-xs sm:text-sm px-3 py-2 rounded-lg transition-colors text-left"
+                    title="Single click to add to message box, double click to send"
                   >
                     {suggestion}
                   </button>
