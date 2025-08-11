@@ -3,7 +3,12 @@ from typing import Any, Dict, List
 import json
 import os
 
-from ...infra.settings import settings
+from ..infra.settings import settings
+from .prompts.response_composition import (
+    SHETKARI_COMPOSER_SYSTEM_PROMPT,
+    GEMINI_COMPOSER_PROMPT_TEMPLATE,
+    FALLBACK_RESPONSES
+)
 
 # Gemini LLM (optional)
 try:
@@ -11,13 +16,6 @@ try:
     _GEMINI_AVAILABLE = True
 except Exception:  # pragma: no cover
     _GEMINI_AVAILABLE = False
-
-
-SYS_PROMPT = (
-    "You are Sherkari's Answer Composer. You MUST produce a helpful,"
-    " concise advisory ONLY using the provided tool outputs. Do not invent facts."
-    " Always include a TL;DR and numbered steps. End with citations array."
-)
 
 
 def _gemini_client():
@@ -50,11 +48,11 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
     client = _gemini_client()
     if client:
         tool_summaries = json.dumps({t["name"]: t.get("output", {}) for t in tools_used})
-        prompt = (
-            f"{SYS_PROMPT}\n\n"
-            f"Intent: {intent}. Locale: {locale or 'en-IN'}.\n"
-            f"TOOL_RESULTS_JSON: {tool_summaries}\n"
-            f"Compose a user-facing answer strictly from TOOL_RESULTS_JSON."
+        prompt = GEMINI_COMPOSER_PROMPT_TEMPLATE.format(
+            system_prompt=SHETKARI_COMPOSER_SYSTEM_PROMPT,
+            intent=intent,
+            locale=locale or 'en-IN',
+            tool_summaries=tool_summaries
         )
         try:
             resp = client.generate_content(prompt)
