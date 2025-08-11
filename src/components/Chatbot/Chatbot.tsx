@@ -7,6 +7,7 @@ import {
   User, 
   Sparkles
 } from 'lucide-react';
+import { completeAgent, type ChatMessage } from '../../services/agentApi';
 
 interface Message {
   id: string;
@@ -26,6 +27,8 @@ const Chatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const agentUrl = import.meta.env.VITE_AGENT_API_URL as string | undefined;
+  const agentEnabled = Boolean(agentUrl);
   const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,25 +63,63 @@ const Chatbot: React.FC = () => {
   }, []);
 
   const generateResponse = async (): Promise<string> => {
-    // This is a mock function that would be replaced with actual API call
-    setIsLoading(true);
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const responses = [
-      `Based on your soil moisture levels, I recommend watering your crops in the next 24 hours.`,
-      `The temperature is optimal for crop growth. No action needed at this time.`,
-      `Your soil nitrogen levels are low. Consider applying fertilizer within the next week.`,
-      `The humidity levels suggest potential for fungal growth. Consider preventative treatment.`,
-      `Based on your sensor data, crop conditions are optimal. Keep monitoring for changes.`,
-      `I've analyzed your data and everything looks good. Your farm is operating efficiently.`,
-    ];
-    
-    // For demo purposes, pick a random response
-    const response = responses[Math.floor(Math.random() * responses.length)];
-    setIsLoading(false);
-    return response;
+    // Fallback local mock if backend agent is not configured
+    if (!agentEnabled) {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const responses = [
+        `Based on nearby forecasts, conditions look stable.`,
+        `Market prices show moderate volatility this week.`,
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      setIsLoading(false);
+      return response;
+    }
+
+    // When agent backend is available, we will stream tokens and return final text
+    return new Promise<string>((resolve, reject) => {
+      (async () => {
+        try {
+          setIsLoading(true);
+          // Prepare message history for backend
+          const history: ChatMessage[] = messages.map(m => ({ role: m.sender === 'bot' ? 'assistant' : 'user', content: m.text }));
+          const payload = {
+            messages: [...history, { role: 'user' as const, content: input }],
+            context: { session_id: 'web-' + Date.now() }
+          };
+
+          // Create a placeholder assistant message to stream into
+          let streamed = '';
+          const placeholderId = (Date.now() + 2).toString();
+          setMessages(prev => [...prev, { id: placeholderId, text: '', sender: 'bot', timestamp: new Date() }]);
+
+          // Show "Thinking..." while waiting for response
+          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: 'Thinking...' } : m));
+          
+          // Get complete response
+          const response = await completeAgent<{ text: string }>(`${agentUrl}/agent/complete`, payload);
+          streamed = response?.text || 'No response received';
+          
+          // Update with final response
+          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: streamed } : m));
+
+          setIsLoading(false);
+          resolve(streamed || '');
+        } catch (err) {
+          setIsLoading(false);
+          const friendly = 'Sorry, I could not fetch a response. Please try again.';
+          setMessages(prev => {
+            const idx = prev.findIndex(m => m.sender === 'bot' && m.text === '');
+            if (idx === -1) {
+              // If placeholder wasn't created, append an error message
+              return [...prev, { id: (Date.now()).toString(), text: friendly, sender: 'bot' as const, timestamp: new Date() }];
+            }
+            return prev.map(m => m.id === prev[idx].id ? { ...m, text: friendly } : m);
+          });
+          reject(err);
+        }
+      })();
+    });
   };
 
   const handleSend = async () => {
@@ -97,14 +138,15 @@ const Chatbot: React.FC = () => {
     // Generate bot response
     try {
       const botResponse = await generateResponse();
-      const botMessage = {
-        id: (Date.now() + 1).toString(),
-        text: botResponse,
-        sender: 'bot' as const,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
+      if (!agentEnabled) {
+        const botMessage = {
+          id: (Date.now() + 1).toString(),
+          text: botResponse,
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      }
     } catch (error) {
       console.error('Error generating response:', error);
       const errorMessage = {

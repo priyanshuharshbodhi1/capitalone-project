@@ -24,3 +24,14 @@ dist-ssr
 *.sw?
 .env
 
+.venv
+
+server/agent/__pycache__
+server/__pycache__
+server/agent/memory/__pycache__
+server/agent/agents/__pycache__
+server/agent/nodes/__pycache__
+server/api/__pycache__
+server/infra/__pycache__
+
+# /resources
