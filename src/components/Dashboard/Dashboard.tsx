@@ -115,7 +115,7 @@ const Dashboard: React.FC = () => {
           </div>
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{t('common.loading')}</h2>
           <p className="text-gray-600 text-sm sm:text-base">
-            {checkingDevices ? 'Checking your devices...' : 'Fetching real-time sensor data...'}
+            {checkingDevices ? t('common.checkingDevices') : t('common.fetchingData')}
           </p>
         </div>
       </div>
@@ -129,21 +129,21 @@ const Dashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-6" />
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Configuration Error</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{t('common.configurationError')}</h2>
           <p className="text-gray-600 text-sm sm:text-base mb-6">{error}</p>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
-            <h3 className="font-medium text-yellow-800 mb-2">Setup Required:</h3>
+            <h3 className="font-medium text-yellow-800 mb-2">{t('common.setupRequired')}:</h3>
             <ol className="text-sm text-yellow-700 space-y-1">
-              <li>1. Create a Supabase project</li>
-              <li>2. Add your Supabase URL and API key to .env</li>
-              <li>3. Run the database migrations</li>
+              <li>1. {t('common.setupStep1')}</li>
+              <li>2. {t('common.setupStep2')}</li>
+              <li>3. {t('common.setupStep3')}</li>
             </ol>
           </div>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-200"
           >
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       </div>

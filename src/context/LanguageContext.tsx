@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { supabaseApi } from '../services/supabaseApi';
 import { useAuth } from './AuthContext';
 
-type Language = 'en' | 'mr' | 'hi';
+type Language = 'english' | 'hindi' | 'marathi' | 'assamese' | 'bengali' | 'bodo' | 'dogri' | 'gujarati' | 'kannada' | 'kashmiri' | 'konkani' | 'maithili' | 'malayalam' | 'manipuri' | 'nepali' | 'odia' | 'punjabi' | 'sanskrit' | 'santali' | 'sindhi' | 'tamil' | 'telugu' | 'urdu';
 
 interface LanguageContextType {
   currentLanguage: Language;
@@ -27,9 +27,29 @@ interface LanguageProviderProps {
 
 // Define languages outside component to prevent re-creation
 const LANGUAGES = [
-  { code: 'en' as Language, name: 'English', nativeName: 'English' },
-  { code: 'mr' as Language, name: 'Marathi', nativeName: 'मराठी' },
-  { code: 'hi' as Language, name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'english' as Language, name: 'English', nativeName: 'English' },
+  { code: 'hindi' as Language, name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'marathi' as Language, name: 'Marathi', nativeName: 'मराठी' },
+  { code: 'assamese' as Language, name: 'Assamese', nativeName: 'অসমীয়া' },
+  { code: 'bengali' as Language, name: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'bodo' as Language, name: 'Bodo', nativeName: 'बड़ो' },
+  { code: 'dogri' as Language, name: 'Dogri', nativeName: 'डोगरी' },
+  { code: 'gujarati' as Language, name: 'Gujarati', nativeName: 'ગુજરાતી' },
+  { code: 'kannada' as Language, name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+  { code: 'kashmiri' as Language, name: 'Kashmiri', nativeName: 'कॉशुर' },
+  { code: 'konkani' as Language, name: 'Konkani', nativeName: 'कोंकणी' },
+  { code: 'maithili' as Language, name: 'Maithili', nativeName: 'मैथिली' },
+  { code: 'malayalam' as Language, name: 'Malayalam', nativeName: 'മലയാളം' },
+  { code: 'manipuri' as Language, name: 'Manipuri', nativeName: 'মৈতৈলোন্' },
+  { code: 'nepali' as Language, name: 'Nepali', nativeName: 'नेपाली' },
+  { code: 'odia' as Language, name: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
+  { code: 'punjabi' as Language, name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'sanskrit' as Language, name: 'Sanskrit', nativeName: 'संस्कृतम्' },
+  { code: 'santali' as Language, name: 'Santali', nativeName: 'ᱥᱟᱱᱛᱟᱲᱤ' },
+  { code: 'sindhi' as Language, name: 'Sindhi', nativeName: 'سنڌي' },
+  { code: 'tamil' as Language, name: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'telugu' as Language, name: 'Telugu', nativeName: 'తెలుగు' },
+  { code: 'urdu' as Language, name: 'Urdu', nativeName: 'اردو' },
 ];
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
@@ -39,7 +59,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   // Initialize with saved language immediately
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem('userLanguage') as Language;
-    return (saved && LANGUAGES.some(lang => lang.code === saved)) ? saved : 'en';
+    return (saved && LANGUAGES.some(lang => lang.code === saved)) ? saved : 'english';
   });
 
   // Set initial language immediately
@@ -96,7 +116,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       // Final fallback - only if no saved language anywhere
       const browserLanguage = navigator.language.split('-')[0] as Language;
       const languageToUse = 
-        (LANGUAGES.some(lang => lang.code === browserLanguage)) ? browserLanguage : 'en';
+        (LANGUAGES.some(lang => lang.code === browserLanguage)) ? browserLanguage : 'english';
       
       setCurrentLanguage(languageToUse);
       await i18n.changeLanguage(languageToUse);

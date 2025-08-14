@@ -8,7 +8,6 @@ import {
   Phone, 
   Save, 
   Loader2, 
-  Settings as SettingsIcon,
   Sliders,
   AlertTriangle,
   CheckCircle,
@@ -27,8 +26,6 @@ import {
   BellOff,
   MessageSquare,
   MailIcon,
-  ToggleLeft,
-  ToggleRight,
   Globe
 } from 'lucide-react';
 import { api } from '../../services/api';
@@ -61,6 +58,7 @@ const Settings: React.FC = () => {
   const { t } = useTranslation();
   const { currentLanguage, changeLanguage, languages } = useLanguage();
   const [activeTab, setActiveTab] = useState<'profile' | 'devices' | 'thresholds' | 'language'>('profile');
+  const [showAllLanguages, setShowAllLanguages] = useState(false);
   
   // Profile state
   const [formData, setFormData] = useState({
@@ -93,16 +91,16 @@ const Settings: React.FC = () => {
 
   // Threshold parameter definitions
   const thresholdParameters = [
-    { key: 'atmo_temp', label: 'Atmospheric Temperature', unit: '°C', defaultMin: 15, defaultMax: 35 },
-    { key: 'humidity', label: 'Atmospheric Humidity', unit: '%', defaultMin: 40, defaultMax: 80 },
-    { key: 'light', label: 'Light Intensity', unit: 'lux', defaultMin: 300, defaultMax: 800 },
-    { key: 'soil_temp', label: 'Soil Temperature', unit: '°C', defaultMin: 18, defaultMax: 30 },
-    { key: 'moisture', label: 'Soil Moisture', unit: '%', defaultMin: 30, defaultMax: 70 },
-    { key: 'ec', label: 'Electrical Conductivity', unit: 'dS/m', defaultMin: 0.5, defaultMax: 2.0 },
-    { key: 'ph', label: 'Soil pH', unit: '', defaultMin: 6.0, defaultMax: 7.5 },
-    { key: 'nitrogen', label: 'Nitrogen (N)', unit: 'ppm', defaultMin: 20, defaultMax: 50 },
-    { key: 'phosphorus', label: 'Phosphorus (P)', unit: 'ppm', defaultMin: 15, defaultMax: 25 },
-    { key: 'potassium', label: 'Potassium (K)', unit: 'ppm', defaultMin: 15, defaultMax: 40 },
+    { key: 'atmo_temp', label: t('settings.thresholdParameters.atmo_temp'), unit: '°C', defaultMin: 15, defaultMax: 35 },
+    { key: 'humidity', label: t('settings.thresholdParameters.humidity'), unit: '%', defaultMin: 40, defaultMax: 80 },
+    { key: 'light', label: t('settings.thresholdParameters.light'), unit: 'lux', defaultMin: 300, defaultMax: 800 },
+    { key: 'soil_temp', label: t('settings.thresholdParameters.soil_temp'), unit: '°C', defaultMin: 18, defaultMax: 30 },
+    { key: 'moisture', label: t('settings.thresholdParameters.moisture'), unit: '%', defaultMin: 30, defaultMax: 70 },
+    { key: 'ec', label: t('settings.thresholdParameters.ec'), unit: 'dS/m', defaultMin: 0.5, defaultMax: 2.0 },
+    { key: 'ph', label: t('settings.thresholdParameters.ph'), unit: '', defaultMin: 6.0, defaultMax: 7.5 },
+    { key: 'nitrogen', label: t('settings.thresholdParameters.nitrogen'), unit: 'ppm', defaultMin: 20, defaultMax: 50 },
+    { key: 'phosphorus', label: t('settings.thresholdParameters.phosphorus'), unit: 'ppm', defaultMin: 15, defaultMax: 25 },
+    { key: 'potassium', label: t('settings.thresholdParameters.potassium'), unit: 'ppm', defaultMin: 15, defaultMax: 40 },
   ];
 
   // Default threshold values for sensor parameters
@@ -220,7 +218,7 @@ const Settings: React.FC = () => {
       if (editingDevice) {
         await supabaseApi.updateDevice(editingDevice.device_id, {
           device_name: deviceFormData.device_name,
-          location: deviceFormData.location || null,
+          location: deviceFormData.location || undefined,
         });
         setThresholdsSuccess('Device updated successfully');
       } else {
@@ -455,14 +453,21 @@ const Settings: React.FC = () => {
   // Check if user can add more devices (limit: 1)
   const canAddDevice = devices.length < 1;
 
+  // Priority languages to show first
+  const priorityLanguages = ['english', 'hindi', 'marathi', 'tamil', 'telugu'];
+  const filteredLanguages = showAllLanguages 
+    ? languages 
+    : languages.filter(lang => priorityLanguages.includes(lang.code));
+  const remainingLanguagesCount = languages.length - priorityLanguages.length;
+
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-sm rounded-xl border border-gray-100">
           {/* Header */}
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your account, devices, and alert thresholds</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">{t('settings.subtitle')}</p>
           </div>
 
           {/* Tab Navigation */}
@@ -478,7 +483,7 @@ const Settings: React.FC = () => {
               >
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span>Profile</span>
+                  <span>{t('settings.profile')}</span>
                 </div>
               </button>
               
@@ -492,7 +497,7 @@ const Settings: React.FC = () => {
               >
                 <div className="flex items-center space-x-2">
                   <Smartphone className="h-4 w-4" />
-                  <span>Devices</span>
+                  <span>{t('settings.devices')}</span>
                 </div>
               </button>
               
@@ -506,7 +511,7 @@ const Settings: React.FC = () => {
               >
                 <div className="flex items-center space-x-2">
                   <Sliders className="h-4 w-4" />
-                  <span>Thresholds</span>
+                  <span>{t('settings.thresholds')}</span>
                 </div>
               </button>
               
@@ -548,7 +553,7 @@ const Settings: React.FC = () => {
               <form onSubmit={handleProfileSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
+                    {t('settings.fullName')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -561,7 +566,7 @@ const Settings: React.FC = () => {
                       value={formData.name}
                       onChange={handleProfileChange}
                       className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                      placeholder="Enter your full name"
+                      placeholder={t('auth.enterFullName')}
                       required
                     />
                   </div>
@@ -569,7 +574,7 @@ const Settings: React.FC = () => {
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    {t('settings.emailAddress')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -582,7 +587,7 @@ const Settings: React.FC = () => {
                       value={formData.email}
                       onChange={handleProfileChange}
                       className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                      placeholder="Enter your email address"
+                      placeholder={t('auth.enterEmail')}
                       required
                     />
                   </div>
@@ -590,7 +595,7 @@ const Settings: React.FC = () => {
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
+                    {t('settings.phoneNumber')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -603,7 +608,7 @@ const Settings: React.FC = () => {
                       value={formData.phone}
                       onChange={handleProfileChange}
                       className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                      placeholder="Enter your phone number"
+                      placeholder={t('settings.enterPhoneNumber')}
                       required
                     />
                   </div>
@@ -618,12 +623,12 @@ const Settings: React.FC = () => {
                     {profileLoading ? (
                       <>
                         <Loader2 className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" />
-                        Saving...
+                        {t('common.saving')}
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Save Profile
+{t('settings.saveProfile')}
                       </>
                     )}
                   </button>
@@ -637,8 +642,8 @@ const Settings: React.FC = () => {
                 {/* Device Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">Device Management</h3>
-                    <p className="text-gray-600 text-sm">Manage your IoT device and monitor its status</p>
+                    <h3 className="text-lg font-medium text-gray-900">{t('common.deviceManagement')}</h3>
+                    <p className="text-gray-600 text-sm">{t('common.manageIoTDevice')}</p>
                   </div>
                   <button
                     onClick={() => setShowAddForm(true)}
@@ -654,7 +659,7 @@ const Settings: React.FC = () => {
                     ) : (
                       <Lock className="h-4 w-4 mr-2" />
                     )}
-                    {canAddDevice ? 'Add Device' : 'Device Limit Reached'}
+                    {canAddDevice ? t('common.addDevice') : t('common.deviceLimitReached')}
                   </button>
                 </div>
 
@@ -664,7 +669,7 @@ const Settings: React.FC = () => {
                     <div className="flex items-center">
                       <AlertTriangle className="h-5 w-5 text-blue-500 mr-2" />
                       <p className="text-blue-700 font-medium">
-                        Device Limit: You can only have one device per account. To add a new device, please delete your existing device first.
+                        {t('common.deviceLimit')}: {t('common.deviceLimitMessage')}
                       </p>
                     </div>
                   </div>
@@ -674,39 +679,39 @@ const Settings: React.FC = () => {
                 {showAddForm && (
                   <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                     <h4 className="text-lg font-medium text-gray-900 mb-4">
-                      {editingDevice ? 'Edit Device' : 'Add New Device'}
+                      {editingDevice ? t('common.editDevice') : t('common.addNewDevice')}
                     </h4>
                     
                     <form onSubmit={handleDeviceSubmit} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Device ID
+                            {t('common.deviceId')}
                           </label>
                           <input
                             type="text"
                             value={deviceFormData.device_id}
                             onChange={(e) => setDeviceFormData({ ...deviceFormData, device_id: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            placeholder="e.g., ESP32_001"
+                            placeholder={t('common.deviceIdPlaceholder')}
                             required
                             disabled={!!editingDevice}
                           />
                           {editingDevice && (
-                            <p className="text-xs text-gray-500 mt-1">Device ID cannot be changed</p>
+                            <p className="text-xs text-gray-500 mt-1">{t('common.deviceIdCannotChange')}</p>
                           )}
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Device Name
+                            {t('common.deviceName')}
                           </label>
                           <input
                             type="text"
                             value={deviceFormData.device_name}
                             onChange={(e) => setDeviceFormData({ ...deviceFormData, device_name: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            placeholder="e.g., Greenhouse Sensor"
+                            placeholder={t('common.deviceNamePlaceholder')}
                             required
                           />
                         </div>
@@ -714,22 +719,22 @@ const Settings: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Location (Optional)
+                          {t('common.locationOptional')}
                         </label>
                         <input
                           type="text"
                           value={deviceFormData.location}
                           onChange={(e) => setDeviceFormData({ ...deviceFormData, location: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                          placeholder="e.g., Greenhouse A, Field 1"
+                          placeholder={t('common.locationPlaceholder')}
                         />
                       </div>
 
                       {!editingDevice && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <h5 className="text-sm font-medium text-blue-900 mb-2">Default Thresholds</h5>
+                          <h5 className="text-sm font-medium text-blue-900 mb-2">{t('common.defaultThresholds')}</h5>
                           <p className="text-sm text-blue-700">
-                            The following default thresholds will be automatically created for this device:
+                            {t('common.defaultThresholdsMessage')}
                           </p>
                           <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-blue-600">
                             {defaultThresholds.map((threshold) => (
@@ -752,7 +757,7 @@ const Settings: React.FC = () => {
                           ) : (
                             <CheckCircle className="h-4 w-4 mr-2" />
                           )}
-                          {editingDevice ? 'Update Device' : 'Add Device'}
+                          {editingDevice ? t('common.updateDevice') : t('common.addDevice')}
                         </button>
                         
                         <button
@@ -760,7 +765,7 @@ const Settings: React.FC = () => {
                           onClick={resetDeviceForm}
                           className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </button>
                       </div>
                     </form>
@@ -771,13 +776,13 @@ const Settings: React.FC = () => {
                 {devicesLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-emerald-600 mr-2" />
-                    <span className="text-gray-600">Loading devices...</span>
+                    <span className="text-gray-600">{t('common.loadingDevices')}</span>
                   </div>
                 ) : devices.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                     <Smartphone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No devices found</h4>
-                    <p className="text-gray-600 mb-6">Add your IoT device to start monitoring sensor data</p>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">{t('common.noDevicesFound')}</h4>
+                    <p className="text-gray-600 mb-6">{t('common.addIoTDevice')}</p>
                     <button
                       onClick={() => setShowAddForm(true)}
                       disabled={!canAddDevice}
@@ -792,7 +797,7 @@ const Settings: React.FC = () => {
                       ) : (
                         <Lock className="h-4 w-4 mr-2" />
                       )}
-                      {canAddDevice ? 'Add Your Device' : 'Device Limit Reached'}
+                      {canAddDevice ? t('common.addYourDevice') : t('common.deviceLimitReached')}
                     </button>
                   </div>
                 ) : (
@@ -834,7 +839,7 @@ const Settings: React.FC = () => {
                           {/* Status */}
                           <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mb-3 ${getStatusColor(status)}`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
-                            {status === 'online' ? 'Online' : status === 'recent' ? 'Recently Active' : status === 'offline' ? 'Offline' : 'Never Connected'}
+                            {status === 'online' ? t('common.online') : status === 'recent' ? t('common.recentlyActive') : status === 'offline' ? t('common.offline') : t('common.neverConnected')}
                           </div>
 
                           {/* Device Info */}
@@ -848,13 +853,13 @@ const Settings: React.FC = () => {
                             
                             <div className="flex items-center text-sm text-gray-600">
                               <Calendar className="h-4 w-4 mr-2" />
-                              Added {new Date(device.created_at).toLocaleDateString()}
+                              {t('common.added')} {new Date(device.created_at).toLocaleDateString()}
                             </div>
 
                             {device.last_seen && (
                               <div className="flex items-center text-sm text-gray-600">
                                 <Wifi className="h-4 w-4 mr-2" />
-                                Last seen {new Date(device.last_seen).toLocaleString()}
+                                {t('common.lastSeen')} {new Date(device.last_seen).toLocaleString()}
                               </div>
                             )}
                           </div>
@@ -862,13 +867,13 @@ const Settings: React.FC = () => {
                           {/* API Key */}
                           <div className="border-t border-gray-100 pt-4">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-700">API Key</span>
+                              <span className="text-xs font-medium text-gray-700">{t('common.apiKey')}</span>
                               <button
                                 onClick={() => copyApiKey(device.api_key)}
                                 className="flex items-center text-xs text-emerald-600 hover:text-emerald-700 transition-colors duration-200"
                               >
                                 <Key className="h-3 w-3 mr-1" />
-                                Copy
+                                {t('common.copy')}
                               </button>
                             </div>
                             <div className="mt-1 font-mono text-xs text-gray-500 bg-gray-50 p-2 rounded border truncate">
@@ -892,7 +897,7 @@ const Settings: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                       <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Select Device
+                          {t('common.selectDevice')}
                         </label>
                         <div className="relative max-w-md">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -919,7 +924,7 @@ const Settings: React.FC = () => {
                           className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
                         >
                           <RefreshCw className={`h-4 w-4 mr-2 ${thresholdsLoading ? 'animate-spin' : ''}`} />
-                          Refresh
+                          {t('common.refresh')}
                         </button>
                         
                         <button
@@ -928,7 +933,7 @@ const Settings: React.FC = () => {
                           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
                         >
                           <Sliders className="h-4 w-4 mr-2" />
-                          Set Defaults
+                          {t('common.setDefaults')}
                         </button>
                       </div>
                     </div>
@@ -936,16 +941,15 @@ const Settings: React.FC = () => {
                     {/* Thresholds Configuration */}
                     {selectedDevice && (
                       <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-4">Sensor Thresholds & Alert Preferences</h4>
+                        <h4 className="text-lg font-medium text-gray-900 mb-4">{t('settings.sensorThresholds')}</h4>
                         <p className="text-sm text-gray-600 mb-6">
-                          Configure alert thresholds for your sensor parameters and choose how you want to receive notifications.
-                          Changes are saved automatically when you modify the values.
+                          {t('settings.configureAlerts')}
                         </p>
 
                         {thresholdsLoading ? (
                           <div className="flex items-center justify-center py-8">
                             <Loader2 className="h-6 w-6 animate-spin text-emerald-600 mr-2" />
-                            <span className="text-gray-600">Loading thresholds...</span>
+                            <span className="text-gray-600">{t('settings.loadingThresholds')}</span>
                           </div>
                         ) : (
                           <div className="space-y-4">
@@ -976,17 +980,17 @@ const Settings: React.FC = () => {
                                             } ${thresholdsSaving === param.key ? 'opacity-50 cursor-not-allowed' : ''}`}
                                           >
                                             {isActive ? <Bell className="h-3 w-3" /> : <BellOff className="h-3 w-3" />}
-                                            <span>{isActive ? 'Active' : 'Disabled'}</span>
+                                            <span>{isActive ? t('settings.active') : t('settings.disabled')}</span>
                                           </button>
                                         </div>
                                       </div>
-                                      <p className="text-sm text-gray-500">Unit: {param.unit || 'N/A'}</p>
+                                      <p className="text-sm text-gray-500">{t('settings.unit')}: {param.unit || 'N/A'}</p>
                                     </div>
                                     
                                     {thresholdsSaving === param.key && (
                                       <div className="flex items-center text-sm text-blue-600 mt-2 sm:mt-0">
                                         <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                                        Saving...
+                                        {t('settings.saving')}
                                       </div>
                                     )}
                                   </div>
@@ -995,7 +999,7 @@ const Settings: React.FC = () => {
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                     <div>
                                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                                        Minimum Value
+                                        {t('settings.minimumValue')}
                                       </label>
                                       <input
                                         type="number"
@@ -1004,13 +1008,13 @@ const Settings: React.FC = () => {
                                         onChange={(e) => handleThresholdChange(param.key, 'min', e.target.value)}
                                         disabled={thresholdsSaving === param.key || !isActive}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                        placeholder={`Default: ${param.defaultMin}`}
+                                        placeholder={`${t('settings.defaultValue')}: ${param.defaultMin}`}
                                       />
                                     </div>
                                     
                                     <div>
                                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                                        Maximum Value
+                                        {t('settings.maximumValue')}
                                       </label>
                                       <input
                                         type="number"
@@ -1019,14 +1023,14 @@ const Settings: React.FC = () => {
                                         onChange={(e) => handleThresholdChange(param.key, 'max', e.target.value)}
                                         disabled={thresholdsSaving === param.key || !isActive}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                        placeholder={`Default: ${param.defaultMax}`}
+                                        placeholder={`${t('settings.defaultValue')}: ${param.defaultMax}`}
                                       />
                                     </div>
                                   </div>
 
                                   {/* Alert Preferences */}
                                   <div className="border-t border-gray-200 pt-4">
-                                    <h6 className="text-sm font-medium text-gray-700 mb-3">Alert Preferences</h6>
+                                    <h6 className="text-sm font-medium text-gray-700 mb-3">{t('settings.alertPreferences')}</h6>
                                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
                                       {/* Email Alert Toggle */}
                                       <div className="flex items-center space-x-3">
@@ -1045,7 +1049,7 @@ const Settings: React.FC = () => {
                                         </button>
                                         <div className="flex items-center space-x-1">
                                           <MailIcon className="h-4 w-4 text-gray-500" />
-                                          <span className="text-sm text-gray-700">Email Alerts</span>
+                                          <span className="text-sm text-gray-700">{t('settings.emailAlerts')}</span>
                                         </div>
                                       </div>
 
@@ -1066,16 +1070,16 @@ const Settings: React.FC = () => {
                                         </button>
                                         <div className="flex items-center space-x-1">
                                           <MessageSquare className="h-4 w-4 text-gray-500" />
-                                          <span className="text-sm text-gray-700">SMS Alerts</span>
+                                          <span className="text-sm text-gray-700">{t('settings.smsAlerts')}</span>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                   
                                   <div className="mt-3 text-xs text-gray-500">
-                                    Default range: {param.defaultMin} - {param.defaultMax} {param.unit}
+                                    {t('settings.defaultRange')}: {param.defaultMin} - {param.defaultMax} {param.unit}
                                     {!isActive && (
-                                      <span className="ml-2 text-red-600 font-medium">• Alerts disabled for this parameter</span>
+                                      <span className="ml-2 text-red-600 font-medium">• {t('settings.alertsDisabled')}</span>
                                     )}
                                   </div>
                                 </div>
@@ -1089,16 +1093,16 @@ const Settings: React.FC = () => {
                 ) : (
                   <div className="text-center py-8">
                     <Smartphone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Devices Found</h4>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">{t('common.noDevicesFound')}</h4>
                     <p className="text-gray-600 mb-4">
-                      You need to add a device first before configuring thresholds.
+                      {t('settings.needDeviceForThresholds')}
                     </p>
                     <button
                       onClick={() => setActiveTab('devices')}
                       className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200"
                     >
                       <Smartphone className="h-4 w-4 mr-2" />
-                      Go to Device Management
+                      {t('common.goToDeviceManagement')}
                     </button>
                   </div>
                 )}
@@ -1107,39 +1111,67 @@ const Settings: React.FC = () => {
 
             {/* Language Tab Content */}
             {activeTab === 'language' && (
-              <div className="p-4 sm:p-6">
-                <div className="max-w-md">
+              <div className="space-y-6">
+                <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     {t('settings.selectLanguage')}
                   </h3>
-                  <div className="space-y-3">
-                    {languages.map((language) => (
-                      <div key={language.code} className="relative">
-                        <button
-                          onClick={() => changeLanguage(language.code)}
-                          className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all duration-200 ${
-                            currentLanguage === language.code
-                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <Globe className="h-5 w-5" />
-                            <div className="text-left">
-                              <div className="font-medium">{language.name}</div>
-                              <div className="text-sm opacity-75">{language.nativeName}</div>
-                            </div>
+                  
+                  {/* Language Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                    {filteredLanguages.map((language) => (
+                      <button
+                        key={language.code}
+                        onClick={() => changeLanguage(language.code)}
+                        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                          currentLanguage === language.code
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                          <Globe className="h-5 w-5 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium truncate">{language.name}</div>
+                            <div className="text-sm opacity-75 truncate">{language.nativeName}</div>
                           </div>
-                          {currentLanguage === language.code && (
-                            <CheckCircle className="h-5 w-5 text-emerald-600" />
-                          )}
-                        </button>
-                      </div>
+                        </div>
+                        {currentLanguage === language.code && (
+                          <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 ml-2" />
+                        )}
+                      </button>
                     ))}
                   </div>
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+
+                  {/* Show All Languages Toggle */}
+                  {!showAllLanguages && remainingLanguagesCount > 0 && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => setShowAllLanguages(true)}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200"
+                      >
+                        <Globe className="h-4 w-4 mr-2" />
+                        Show All 22 Languages (+{remainingLanguagesCount} more)
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Show Less Button */}
+                  {showAllLanguages && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => setShowAllLanguages(false)}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200"
+                      >
+                        Show Less Languages
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Language Preference Notice */}
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                     <div className="flex items-start space-x-2">
-                      <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                       <div className="text-sm text-blue-800">
                         <div className="font-medium mb-1">Language Preference</div>
                         <div>Your language preference will be saved to your profile and applied automatically when you sign in.</div>

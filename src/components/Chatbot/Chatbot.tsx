@@ -7,6 +7,7 @@ import {
   User, 
   Sparkles
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { completeAgent, type ChatMessage } from '../../services/agentApi';
 
 interface Message {
@@ -17,14 +18,8 @@ interface Message {
 }
 
 const Chatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I\'m your Shetkari farming assistant. How can I help you today?',
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const { t } = useTranslation();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const agentUrl = import.meta.env.VITE_AGENT_API_URL as string | undefined;
@@ -33,6 +28,25 @@ const Chatbot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasUserMessage = messages.some(m => m.sender === 'user');
+  
+  // Initialize greeting message when component mounts or language changes
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        id: '1',
+        text: t('assistant.greeting'),
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    } else {
+      // Update greeting message if language changes
+      setMessages(prev => prev.map((msg, index) => 
+        index === 0 && msg.sender === 'bot' 
+          ? { ...msg, text: t('assistant.greeting') }
+          : msg
+      ));
+    }
+  }, [t]);
   
   // Location state for weather features
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
@@ -136,7 +150,7 @@ const Chatbot: React.FC = () => {
           setMessages(prev => [...prev, { id: placeholderId, text: '', sender: 'bot', timestamp: new Date() }]);
 
           // Show "Thinking..." while waiting for response
-          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: 'Thinking...' } : m));
+          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: t('common.thinking') } : m));
           
           // Get complete response
           const response = await completeAgent<{ text: string }>(`${agentUrl}/agent/complete`, payload);
@@ -224,11 +238,11 @@ const Chatbot: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Shetkari Assistant
+                {t('assistant.title')}
               </h1>
               <p className="text-gray-600 mt-1 flex items-center text-sm sm:text-base">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-emerald-500" />
-                AI-powered farming recommendations
+                {t('assistant.subtitle')}
               </p>
             </div>
           </div>
@@ -260,7 +274,7 @@ const Chatbot: React.FC = () => {
                   <div>
                     <div className="flex items-center mb-1">
                       <span className="font-medium">
-                        {message.sender === 'user' ? 'You' : 'Shetkari Assistant'}
+                        {message.sender === 'user' ? 'You' : t('assistant.title')}
                       </span>
                       <span className={`text-xs ml-2 ${message.sender === 'user' ? 'text-emerald-200' : 'text-gray-500'}`}>
                         {formatTime(message.timestamp)}
@@ -278,7 +292,7 @@ const Chatbot: React.FC = () => {
                   <div className="flex items-center">
                     <Bot className="h-5 w-5 text-emerald-600 mr-2" />
                     <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-                    <span className="ml-2 text-sm text-gray-500">Thinking...</span>
+                    <span className="ml-2 text-sm text-gray-500">{t('common.thinking')}</span>
                   </div>
                 </div>
               </div>
@@ -289,16 +303,16 @@ const Chatbot: React.FC = () => {
           {/* Inline suggestions inside chat card (show only until first user message) */}
           {!hasUserMessage && (
             <div className="border-t border-gray-100 px-4 sm:px-6 py-3 bg-white">
-              <h3 className="text-sm font-semibold text-gray-800 mb-2">Suggested Questions</h3>
+              <h3 className="text-sm font-semibold text-gray-800 mb-2">{t('assistant.suggestedQuestions')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {
                   [
-                  'How should I optimize irrigation?',
-                  'When is the best time to apply fertilizer?',
-                  "What's the optimal soil pH for my crops?",
-                  'How can I prevent common plant diseases?',
-                  'What crops are suitable for my current conditions?',
-                  'How can I improve my soil quality?'
+                  t('assistant.optimizeIrrigation'),
+                  t('assistant.bestTimeForFertilizer'),
+                  t('assistant.optimalSoilPH'),
+                  t('assistant.preventPlantDiseases'),
+                  t('assistant.suitableCrops'),
+                  t('assistant.improveSoilQuality')
                   ]
                   // Show only first 3 questions on mobile
                   .filter((_, idx) => !isMobile || idx < 3)
@@ -331,7 +345,7 @@ const Chatbot: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message here..."
+                placeholder={t('assistant.typeMessage')}
                 className="flex-1 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
               />
               <button

@@ -22,10 +22,12 @@ import {
   CloudFog,
   Moon
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { WeatherData } from '../../types';
 import { weatherApi } from '../../services/weatherApi';
 
 const WeatherWidget: React.FC = () => {
+  const { t } = useTranslation();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,11 +94,11 @@ const WeatherWidget: React.FC = () => {
   };
 
   const getUVIndexLabel = (uvIndex: number) => {
-    if (uvIndex <= 2) return 'Low';
-    if (uvIndex <= 5) return 'Moderate';
-    if (uvIndex <= 7) return 'High';
-    if (uvIndex <= 10) return 'Very High';
-    return 'Extreme';
+    if (uvIndex <= 2) return t('weather.uvLevels.low');
+    if (uvIndex <= 5) return t('weather.uvLevels.moderate');
+    if (uvIndex <= 7) return t('weather.uvLevels.high');
+    if (uvIndex <= 10) return t('weather.uvLevels.veryHigh');
+    return t('weather.uvLevels.extreme');
   };
 
   if (loading) {
@@ -106,8 +108,8 @@ const WeatherWidget: React.FC = () => {
         <div className="relative flex items-center justify-center h-32 sm:h-40">
           <div className="text-center">
             <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-white/80 mx-auto mb-4" />
-            <p className="text-white/70 font-medium text-sm sm:text-base">Loading weather data...</p>
-            <p className="text-white/50 text-xs sm:text-sm mt-1">Getting your location...</p>
+            <p className="text-white/70 font-medium text-sm sm:text-base">{t('weather.loadingWeatherData')}</p>
+            <p className="text-white/50 text-xs sm:text-sm mt-1">{t('weather.gettingLocation')}</p>
           </div>
         </div>
       </div>
@@ -121,10 +123,10 @@ const WeatherWidget: React.FC = () => {
         <div className="relative text-center">
           <Cloud className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-white/50" />
           <p className="text-white/70 font-medium text-sm sm:text-base">
-            {error || 'Weather data unavailable'}
+            {error || t('weather.weatherDataUnavailable')}
           </p>
           <p className="text-white/50 text-xs sm:text-sm mt-1">
-            Please check your internet connection
+            {t('weather.checkInternetConnection')}
           </p>
         </div>
       </div>
@@ -145,7 +147,7 @@ const WeatherWidget: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">Current Weather</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">{t('weather.currentWeather')}</h3>
             <div className="flex items-center space-x-2">
               <Navigation className="h-3 w-3 sm:h-4 sm:w-4 text-blue-200" />
               <p className="text-blue-100 font-medium text-sm sm:text-base">{weatherData.location}</p>
@@ -182,7 +184,7 @@ const WeatherWidget: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-blue-100 text-xs sm:text-sm font-medium mb-1">Feels like</div>
+            <div className="text-blue-100 text-xs sm:text-sm font-medium mb-1">{t('weather.feelsLike')}</div>
             <div className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
               {weatherData.feelsLike}°
             </div>
@@ -198,7 +200,7 @@ const WeatherWidget: React.FC = () => {
               </div>
               <div>
                 <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.humidity}%</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Humidity</div>
+                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.humidity')}</div>
               </div>
             </div>
           </div>
@@ -210,7 +212,7 @@ const WeatherWidget: React.FC = () => {
               </div>
               <div>
                 <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.pressure}</div>
-                <div className="text-blue-200 text-xs sm:text-sm">hPa</div>
+                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.hPa')}</div>
               </div>
             </div>
           </div>
@@ -225,7 +227,7 @@ const WeatherWidget: React.FC = () => {
                   {weatherData.windSpeed} m/s
                 </div>
                 <div className="text-blue-200 text-xs sm:text-sm">
-                  {getWindDirection(weatherData.windDirection)} Wind
+                  {getWindDirection(weatherData.windDirection)} {t('weather.wind')}
                 </div>
               </div>
             </div>
@@ -238,7 +240,7 @@ const WeatherWidget: React.FC = () => {
               </div>
               <div>
                 <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.visibility} km</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Visibility</div>
+                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.visibility')}</div>
               </div>
             </div>
           </div>
@@ -252,8 +254,8 @@ const WeatherWidget: React.FC = () => {
                 <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-200" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm sm:text-base">UV Index</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Solar radiation level</div>
+                <div className="text-white font-semibold text-sm sm:text-base">{t('weather.uvIndex')}</div>
+                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.solarRadiation')}</div>
               </div>
             </div>
             <div className="text-right">
@@ -272,9 +274,9 @@ const WeatherWidget: React.FC = () => {
           <div className="flex justify-between items-center text-xs sm:text-sm">
             <div className="flex items-center space-x-2 text-blue-200">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>Live data from OpenWeatherMap</span>
+              <span>{t('weather.liveDataFrom')}</span>
             </div>
-            <span className="text-blue-200">Updated just now</span>
+            <span className="text-blue-200">{t('weather.updatedJustNow')}</span>
           </div>
         </div>
       </div>

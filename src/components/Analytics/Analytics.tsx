@@ -3,15 +3,16 @@ import {
   BarChart3, 
   RefreshCw, 
   Loader2,
-  TrendingUp,
   Calendar,
   Activity
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SensorChart from '../Dashboard/SensorChart';
 import { SensorData } from '../../types';
 import { api } from '../../services/api';
 
 const Analytics: React.FC = () => {
+  const { t } = useTranslation();
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,16 +40,16 @@ const Analytics: React.FC = () => {
   };
 
   const sensorParameters = [
-    { key: 'atmoTemp', title: 'Atmospheric Temperature', unit: '°C', color: '#EF4444' },
-    { key: 'humidity', title: 'Atmospheric Humidity', unit: '%', color: '#3B82F6' },
-    { key: 'light', title: 'Light Intensity', unit: 'lux', color: '#F59E0B' },
-    { key: 'ec', title: 'Soil EC', unit: 'dS/m', color: '#8B5CF6' },
-    { key: 'soilTemp', title: 'Soil Temperature', unit: '°C', color: '#F97316' },
-    { key: 'moisture', title: 'Soil Moisture', unit: '%', color: '#06B6D4' },
-    { key: 'n', title: 'Nitrogen (N)', unit: 'ppm', color: '#10B981' },
-    { key: 'p', title: 'Phosphorus (P)', unit: 'ppm', color: '#14B8A6' },
-    { key: 'k', title: 'Potassium (K)', unit: 'ppm', color: '#059669' },
-    { key: 'ph', title: 'Soil pH', unit: '', color: '#6366F1' },
+    { key: 'atmoTemp', title: t('sensors.atmosphericTemperature'), unit: '°C', color: '#EF4444' },
+    { key: 'humidity', title: t('sensors.atmosphericHumidity'), unit: '%', color: '#3B82F6' },
+    { key: 'light', title: t('sensors.lightIntensity'), unit: 'lux', color: '#F59E0B' },
+    { key: 'ec', title: t('sensors.ec'), unit: 'dS/m', color: '#8B5CF6' },
+    { key: 'soilTemp', title: t('sensors.soilTemperature'), unit: '°C', color: '#F97316' },
+    { key: 'moisture', title: t('sensors.moisture'), unit: '%', color: '#06B6D4' },
+    { key: 'n', title: t('sensors.n'), unit: 'ppm', color: '#10B981' },
+    { key: 'p', title: t('sensors.p'), unit: 'ppm', color: '#14B8A6' },
+    { key: 'k', title: t('sensors.k'), unit: 'ppm', color: '#059669' },
+    { key: 'ph', title: t('sensors.ph'), unit: '', color: '#6366F1' },
   ];
 
   if (loading) {
@@ -56,7 +57,7 @@ const Analytics: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-emerald-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">Loading analytics...</p>
+          <p className="text-gray-600 text-sm sm:text-base">{t('common.loadingAnalytics')}</p>
         </div>
       </div>
     );
@@ -73,8 +74,8 @@ const Analytics: React.FC = () => {
                 <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics</h1>
-                <p className="text-gray-600 mt-1 text-sm sm:text-base">Comprehensive sensor data analysis with statistics</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('analytics.title')}</h1>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base">{t('analytics.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -91,7 +92,7 @@ const Analytics: React.FC = () => {
                   }`}
                 >
                   <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  {range}
+                  {t(`common.${range}`)}
                 </button>
               ))}
             </div>
@@ -101,7 +102,7 @@ const Analytics: React.FC = () => {
               className="flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm sm:text-base"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Refreshing...' : 'Refresh'}
+              {refreshing ? t('common.refreshing') : t('common.refresh')}
             </button>
           </div>
         </div>
@@ -110,24 +111,24 @@ const Analytics: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex items-center mb-4">
             <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 mr-2" />
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Statistical Analysis Overview</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('analytics.statisticalAnalysis')}</h2>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center p-3 sm:p-4 bg-emerald-50 rounded-lg">
               <div className="text-xl sm:text-2xl font-bold text-emerald-600">10</div>
-              <div className="text-xs sm:text-sm text-emerald-700">Active Sensors</div>
+              <div className="text-xs sm:text-sm text-emerald-700">{t('analytics.activeSensors')}</div>
             </div>
             <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-blue-600">{timeRange}</div>
-              <div className="text-xs sm:text-sm text-blue-700">Time Range</div>
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{t(`common.${timeRange}`)}</div>
+              <div className="text-xs sm:text-sm text-blue-700">{t('analytics.timeRange')}</div>
             </div>
             <div className="text-center p-3 sm:p-4 bg-purple-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-purple-600">Real-time</div>
-              <div className="text-xs sm:text-sm text-purple-700">Data Updates</div>
+              <div className="text-xl sm:text-2xl font-bold text-purple-600">{t('analytics.realTimeUpdates')}</div>
+              <div className="text-xs sm:text-sm text-purple-700">{t('analytics.dataUpdates')}</div>
             </div>
             <div className="text-center p-3 sm:p-4 bg-orange-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-orange-600">Min/Max/Avg</div>
-              <div className="text-xs sm:text-sm text-orange-700">Statistics</div>
+              <div className="text-xl sm:text-2xl font-bold text-orange-600">{t('analytics.minMaxAvg')}</div>
+              <div className="text-xs sm:text-sm text-orange-700">{t('analytics.statistics')}</div>
             </div>
           </div>
         </div>
@@ -150,7 +151,7 @@ const Analytics: React.FC = () => {
         {/* Data Summary */}
         {sensorData && (
           <div className="mt-6 sm:mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Current Readings Summary</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.currentReadings')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 text-sm">
               {sensorParameters.map((param) => (
                 <div key={param.key} className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
@@ -163,7 +164,7 @@ const Analytics: React.FC = () => {
               ))}
             </div>
             <div className="mt-4 text-xs text-gray-500 text-center">
-              Last updated: {new Date(sensorData.timestamp).toLocaleString()}
+              {t('analytics.lastUpdated')}: {new Date(sensorData.timestamp).toLocaleString()}
             </div>
           </div>
         )}

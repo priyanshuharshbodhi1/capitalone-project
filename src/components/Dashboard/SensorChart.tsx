@@ -8,10 +8,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
   ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { SensorData } from '../../types';
 import { api } from '../../services/api';
 import { Loader2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -23,7 +25,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 interface SensorChartProps {
@@ -49,6 +52,7 @@ const SensorChart: React.FC<SensorChartProps> = ({
   timeRange: propTimeRange,
   showStats = false 
 }) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<SensorData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>(propTimeRange || '24h');
@@ -177,7 +181,7 @@ const SensorChart: React.FC<SensorChartProps> = ({
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {range}
+                {t(`common.${range}`)}
               </button>
             ))}
           </div>
@@ -190,7 +194,7 @@ const SensorChart: React.FC<SensorChartProps> = ({
           <div className="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 mr-1" />
-              <span className="text-xs font-medium text-red-700">MIN</span>
+              <span className="text-xs font-medium text-red-700">{t('analytics.min')}</span>
             </div>
             <div className="text-sm sm:text-lg font-bold text-red-600">
               {stats.min}
@@ -201,7 +205,7 @@ const SensorChart: React.FC<SensorChartProps> = ({
           <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2 sm:p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Minus className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 mr-1" />
-              <span className="text-xs font-medium text-emerald-700">AVG</span>
+              <span className="text-xs font-medium text-emerald-700">{t('analytics.avg')}</span>
             </div>
             <div className="text-sm sm:text-lg font-bold text-emerald-600">
               {stats.avg}
@@ -212,7 +216,7 @@ const SensorChart: React.FC<SensorChartProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 mr-1" />
-              <span className="text-xs font-medium text-blue-700">MAX</span>
+              <span className="text-xs font-medium text-blue-700">{t('analytics.max')}</span>
             </div>
             <div className="text-sm sm:text-lg font-bold text-blue-600">
               {stats.max}
