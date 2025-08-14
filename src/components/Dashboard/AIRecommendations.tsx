@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Brain, 
   Sparkles, 
@@ -16,6 +18,7 @@ import {
 } from 'lucide-react';
 import { SensorData } from '../../types';
 import { watsonxApi } from '../../services/watsonxApi';
+import { sarvamApi } from '../../services/sarvamApi';
 
 interface AIRecommendation {
   type: 'practice' | 'fertilizer' | 'crop' | 'insight';
@@ -32,11 +35,14 @@ interface AIRecommendationsProps {
 }
 
 const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => {
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [configStatus, setConfigStatus] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<'watsonx' | 'fallback' | null>(null);
@@ -54,7 +60,6 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
 
   const fetchRecommendations = async (isManualRefresh = false) => {
     if (!sensorData) {
-      console.log('🤖 AIRecommendations: No sensor data available');
       setLoading(false);
       return;
     }
@@ -66,19 +71,55 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         setRefreshing(true);
       }
       
-      console.log('🤖 AIRecommendations: Fetching AI recommendations...');
-      
       // Always use the edge function approach (which handles both WatsonX and fallback)
       const recs = await watsonxApi.getRecommendations(sensorData);
-      setRecommendations(recs);
+      
+      // 🌍 DEMO: Translate AI responses using Sarvam API
+      if (currentLanguage !== 'en') {
+        console.log(`🌍 AIRecommendations: Translating ${recs.length} recommendations to ${currentLanguage}`);
+        setTranslating(true);
+        
+        try {
+          // Transform recommendations to match Sarvam API format
+          const recsForTranslation = recs.map(rec => ({
+            id: rec.type + Math.random().toString(36).substr(2, 9),
+            text: rec.description,
+            confidence: rec.confidence,
+            reasoning: rec.reasoning,
+            priority: rec.priority,
+          }));
+          
+          // Translate using Sarvam API
+          const translatedRecs = await sarvamApi.translateRecommendations(
+            recsForTranslation, 
+            currentLanguage
+          );
+          
+          // Transform back to original format
+          const finalRecs = recs.map((rec, index) => ({
+            ...rec,
+            description: translatedRecs[index]?.text || rec.description,
+            reasoning: translatedRecs[index]?.reasoning || rec.reasoning,
+          }));
+          
+          console.log('✅ AIRecommendations: Translation completed via Sarvam API');
+          setRecommendations(finalRecs);
+          
+        } catch (translationError) {
+          console.warn('⚠️ AIRecommendations: Translation failed, using original text:', translationError);
+          setRecommendations(recs); // Fallback to original if translation fails
+        } finally {
+          setTranslating(false);
+        }
+      } else {
+        setRecommendations(recs);
+      }
       
       // Determine source based on configuration and results
       if (isConfigured && recs.length > 0) {
         setSource('watsonx');
-        console.log(`✅ AIRecommendations: Received ${recs.length} recommendations via edge function`);
       } else {
         setSource('fallback');
-        console.log(`⚠️ AIRecommendations: Using fallback recommendations (${recs.length} items)`);
       }
       
       setHasLoadedOnce(true);
@@ -98,11 +139,9 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
   useEffect(() => {
     // Only fetch recommendations on first load (first login)
     if (sensorData && !hasLoadedOnce) {
-      console.log('🤖 AIRecommendations: First load, fetching recommendations...');
       setLoading(true);
       fetchRecommendations();
     } else if (sensorData && hasLoadedOnce) {
-      console.log('🤖 AIRecommendations: Subsequent load, skipping automatic fetch');
       setLoading(false);
     }
   }, [sensorData, hasLoadedOnce]);
@@ -185,17 +224,29 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
             <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">WatsonX AI Recommendations</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
             <div className="flex items-center space-x-2 mt-1">
-              {source === 'watsonx' ? (
+              {translating && (
+                <>
+                  <Loader2 className="h-3 w-3 text-blue-500 animate-spin" />
+                  <span className="text-xs text-blue-600 font-medium">🌍 Translating via Sarvam AI...</span>
+                </>
+              )}
+              {!translating && source === 'watsonx' ? (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
                   <span className="text-xs text-indigo-600 font-medium">WatsonX AI Powered</span>
+                  {currentLanguage !== 'en' && (
+                    <span className="text-xs text-green-600 font-medium">• Translated via Sarvam AI</span>
+                  )}
                 </>
-              ) : source === 'fallback' ? (
+              ) : !translating && source === 'fallback' ? (
                 <>
                   <Cloud className="h-3 w-3 text-yellow-500" />
-                  <span className="text-xs text-yellow-600 font-medium">Fallback Mode</span>
+                  <span className="text-xs text-yellow-600 font-medium">{t('ai.fallbackMode')}</span>
+                  {currentLanguage !== 'en' && (
+                    <span className="text-xs text-green-600 font-medium">• Translated via Sarvam AI</span>
+                  )}
                 </>
               ) : (
                 <>

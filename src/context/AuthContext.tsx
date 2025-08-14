@@ -35,15 +35,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let mounted = true;
     let initTimeout: NodeJS.Timeout | null = null;
     
-    console.log('🔄 AuthProvider: Starting initialization...');
+    // Starting initialization...
 
     const initializeAuth = async () => {
       try {
-        console.log('🔍 AuthProvider: Checking Supabase configuration...');
+        // Checking Supabase configuration
         
         // Check if Supabase is configured
         if (!isSupabaseConfigured()) {
-          console.log('⚠️ AuthProvider: Supabase not configured, using demo mode');
+          // Supabase not configured, using demo mode
           
           // Check for existing demo session
           const existingDemoUser = localStorage.getItem('demo_user_session');
@@ -51,16 +51,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
               const demoUser = JSON.parse(existingDemoUser);
               setUser(demoUser);
-              console.log('✅ AuthProvider: Restored demo user from localStorage');
+              // Restored demo user from localStorage
             } catch {
-              console.warn('⚠️ AuthProvider: Invalid demo user data in localStorage');
+              // Invalid demo user data in localStorage
               localStorage.removeItem('demo_user_session');
             }
           }
           
           if (mounted) {
             setIsLoading(false);
-            console.log('✅ AuthProvider: Demo mode ready');
+            // Demo mode ready
           }
           return;
         }

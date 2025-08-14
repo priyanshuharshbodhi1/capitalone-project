@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   AlertTriangle, 
   Clock, 
@@ -19,6 +20,7 @@ import { supabaseApi } from '../../services/supabaseApi';
 import { format } from 'date-fns';
 
 const AlertHistory: React.FC = () => {
+  const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -122,7 +124,7 @@ const AlertHistory: React.FC = () => {
           <div className="bg-orange-500 p-2 rounded-lg mr-3">
             <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Alert History</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('alerts.title')}</h2>
         </div>
         
         <div className="flex items-center justify-center py-8 sm:py-12">
@@ -144,9 +146,9 @@ const AlertHistory: React.FC = () => {
             <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Alert History</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('alerts.title')}</h2>
             <p className="text-gray-600 text-xs sm:text-sm mt-1">
-              Recent alerts and notifications from your devices
+              {t('alerts.subtitle')}
             </p>
           </div>
         </div>
@@ -165,15 +167,15 @@ const AlertHistory: React.FC = () => {
       <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg">
           <div className="text-xl sm:text-2xl font-bold text-gray-600">{alerts.length}</div>
-          <div className="text-xs sm:text-sm text-gray-700">Total Alerts</div>
+          <div className="text-xs sm:text-sm text-gray-700">{t('alerts.totalAlerts')}</div>
         </div>
         <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
           <div className="text-xl sm:text-2xl font-bold text-green-600">{sentCount}</div>
-          <div className="text-xs sm:text-sm text-green-700">Sent</div>
+          <div className="text-xs sm:text-sm text-green-700">{t('alerts.sent')}</div>
         </div>
         <div className="text-center p-3 sm:p-4 bg-yellow-50 rounded-lg">
           <div className="text-xl sm:text-2xl font-bold text-yellow-600">{pendingCount}</div>
-          <div className="text-xs sm:text-sm text-yellow-700">Pending</div>
+          <div className="text-xs sm:text-sm text-yellow-700">{t('alerts.pending')}</div>
         </div>
       </div>
 
@@ -190,7 +192,7 @@ const AlertHistory: React.FC = () => {
             }`}
           >
             <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+{filterType === 'all' ? t('alerts.all') : t(`alerts.${filterType}`)}
             {filterType === 'all' && ` (${alerts.length})`}
             {filterType === 'sent' && ` (${sentCount})`}
             {filterType === 'pending' && ` (${pendingCount})`}
@@ -210,12 +212,12 @@ const AlertHistory: React.FC = () => {
         <div className="text-center py-8 sm:py-12">
           <AlertTriangle className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 font-medium text-sm sm:text-base">
-            {filter === 'all' ? 'No alerts found' : `No ${filter} alerts found`}
+            {filter === 'all' ? t('alerts.noAlerts') : t(`alerts.no${filter.charAt(0).toUpperCase() + filter.slice(1)}Alerts`)}
           </p>
           <p className="text-gray-500 text-xs sm:text-sm mt-1">
             {filter === 'all' 
-              ? 'Your devices are operating within normal parameters'
-              : `Try changing the filter to see other alerts`
+              ? t('alerts.normalOperation')
+              : t('alerts.tryChangingFilter')
             }
           </p>
         </div>
@@ -309,9 +311,9 @@ const AlertHistory: React.FC = () => {
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></div>
-            <span>Real-time alert monitoring</span>
+            <span>{t('alerts.realTimeMonitoring')}</span>
           </div>
-          <span>Last updated: {new Date().toLocaleTimeString()}</span>
+          <span>{t('alerts.lastUpdated')}: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
     </div>

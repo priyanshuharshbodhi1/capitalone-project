@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import Analytics from './components/Analytics/Analytics';
@@ -56,53 +57,55 @@ const App: React.FC = () => {
   
   return (
     <AuthProvider>
-      <Toaster 
-        position="top-center"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#333',
-            color: '#fff',
-            padding: '16px',
-            borderRadius: '8px',
-          },
-          success: {
+      <LanguageProvider>
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
             style: {
-              background: '#166534',
+              background: '#333',
+              color: '#fff',
+              padding: '16px',
+              borderRadius: '8px',
             },
-          },
-          error: {
-            style: {
-              background: '#991b1b',
+            success: {
+              style: {
+                background: '#166534',
+              },
             },
-          },
-        }}
-      />
-      <Router>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Layout />
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<Chatbot />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </Router>
+            error: {
+              style: {
+                background: '#991b1b',
+              },
+            },
+          }}
+        />
+        <Router>
+          <Routes>
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }
+            >
+              <Route index element={<Chatbot />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </Router>
+      </LanguageProvider>
     </AuthProvider>
   );
 };

@@ -34,6 +34,40 @@ const Chatbot: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasUserMessage = messages.some(m => m.sender === 'user');
   
+  // Location state for weather features
+  const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'requesting' | 'granted' | 'denied' | 'unavailable'>('requesting');
+  
+  // Auto-request location access on component mount for weather features
+  useEffect(() => {
+    const requestLocation = () => {
+      if (!navigator.geolocation) {
+        setLocationStatus('unavailable');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lon: longitude });
+          setLocationStatus('granted');
+          console.log('✅ Location access granted:', { lat: latitude, lon: longitude });
+        },
+        (error) => {
+          setLocationStatus('denied');
+          console.warn('⚠️ Location access denied:', error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes cache
+        }
+      );
+    };
+
+    requestLocation();
+  }, []);
+
   // Check for mobile viewport
   useEffect(() => {
     const checkIsMobile = () => {
@@ -83,9 +117,17 @@ const Chatbot: React.FC = () => {
           setIsLoading(true);
           // Prepare message history for backend
           const history: ChatMessage[] = messages.map(m => ({ role: m.sender === 'bot' ? 'assistant' : 'user', content: m.text }));
+          // Include location data in context for weather features
+          const context = { 
+            session_id: 'web-' + Date.now(),
+            locale: 'en-IN',
+            location_status: locationStatus,
+            ...(userLocation && { lat: userLocation.lat, lon: userLocation.lon })
+          }
+
           const payload = {
             messages: [...history, { role: 'user' as const, content: input }],
-            context: { session_id: 'web-' + Date.now() }
+            context
           };
 
           // Create a placeholder assistant message to stream into

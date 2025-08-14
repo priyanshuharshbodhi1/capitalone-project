@@ -19,6 +19,7 @@ export interface User {
   phone: string;
   farmName?: string;
   location?: string;
+  language?: string;
 }
 
 export interface ApplianceStatus {

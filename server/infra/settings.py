@@ -1,5 +1,12 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
 
 
 def _get(name: str, default: str | None = None, required: bool = False) -> str | None:
@@ -14,6 +21,7 @@ class Settings:
     gemini_api_key: str | None = _get("GEMINI_API_KEY", None, required=False)
     datagovin_api_key: str | None = _get("DATA_GOV_IN_API_KEY")
     openweather_api_key: str | None = _get("OPENWEATHER_API_KEY")
+    perplexity_api_key: str | None = _get("PERPLEXITY_API_KEY")
     redis_url: str | None = _get("REDIS_URL", "redis://localhost:6379/0")
     pg_dsn: str | None = _get("PG_DSN")
     allow_origins: list[str] = tuple((os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:5173").split(",")))  # Vite default

@@ -63,6 +63,7 @@ export interface Database {
           phone: string | null;
           farm_name: string | null;
           location: string | null;
+          language: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -73,6 +74,7 @@ export interface Database {
           phone?: string | null;
           farm_name?: string | null;
           location?: string | null;
+          language?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -83,6 +85,7 @@ export interface Database {
           phone?: string | null;
           farm_name?: string | null;
           location?: string | null;
+          language?: string | null;
           created_at?: string;
           updated_at?: string;
         };

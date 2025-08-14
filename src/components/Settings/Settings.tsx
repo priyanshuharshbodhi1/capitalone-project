@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { 
   User, 
   Mail, 
@@ -26,7 +28,8 @@ import {
   MessageSquare,
   MailIcon,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Globe
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { supabaseApi } from '../../services/supabaseApi';
@@ -55,7 +58,9 @@ interface Device {
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'devices' | 'thresholds'>('profile');
+  const { t } = useTranslation();
+  const { currentLanguage, changeLanguage, languages } = useLanguage();
+  const [activeTab, setActiveTab] = useState<'profile' | 'devices' | 'thresholds' | 'language'>('profile');
   
   // Profile state
   const [formData, setFormData] = useState({
@@ -462,10 +467,10 @@ const Settings: React.FC = () => {
 
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-4 sm:px-6">
+            <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto pb-2 sm:pb-0">
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex-shrink-0 ${
                   activeTab === 'profile'
                     ? 'border-emerald-500 text-emerald-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -479,7 +484,7 @@ const Settings: React.FC = () => {
               
               <button
                 onClick={() => setActiveTab('devices')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex-shrink-0 ${
                   activeTab === 'devices'
                     ? 'border-emerald-500 text-emerald-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -493,7 +498,7 @@ const Settings: React.FC = () => {
               
               <button
                 onClick={() => setActiveTab('thresholds')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex-shrink-0 ${
                   activeTab === 'thresholds'
                     ? 'border-emerald-500 text-emerald-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -502,6 +507,20 @@ const Settings: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <Sliders className="h-4 w-4" />
                   <span>Thresholds</span>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('language')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex-shrink-0 ${
+                  activeTab === 'language'
+                    ? 'border-emerald-500 text-emerald-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Globe className="h-4 w-4" />
+                  <span>{t('settings.language')}</span>
                 </div>
               </button>
             </nav>
@@ -1083,6 +1102,51 @@ const Settings: React.FC = () => {
                     </button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Language Tab Content */}
+            {activeTab === 'language' && (
+              <div className="p-4 sm:p-6">
+                <div className="max-w-md">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    {t('settings.selectLanguage')}
+                  </h3>
+                  <div className="space-y-3">
+                    {languages.map((language) => (
+                      <div key={language.code} className="relative">
+                        <button
+                          onClick={() => changeLanguage(language.code)}
+                          className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all duration-200 ${
+                            currentLanguage === language.code
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Globe className="h-5 w-5" />
+                            <div className="text-left">
+                              <div className="font-medium">{language.name}</div>
+                              <div className="text-sm opacity-75">{language.nativeName}</div>
+                            </div>
+                          </div>
+                          {currentLanguage === language.code && (
+                            <CheckCircle className="h-5 w-5 text-emerald-600" />
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <div className="font-medium mb-1">Language Preference</div>
+                        <div>Your language preference will be saved to your profile and applied automatically when you sign in.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

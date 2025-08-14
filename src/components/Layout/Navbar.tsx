@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { Leaf, BarChart3, Settings, LogOut, User, TrendingUp, Menu, X, MessageSquare } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Assistant', href: '/', icon: MessageSquare },
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: t('navigation.assistant'), href: '/', icon: MessageSquare },
+    { name: t('navigation.dashboard'), href: '/dashboard', icon: BarChart3 },
+    { name: t('navigation.analytics'), href: '/analytics', icon: TrendingUp },
+    { name: t('navigation.settings'), href: '/settings', icon: Settings },
   ];
 
   const isActive = (path: string) => {
@@ -37,7 +39,7 @@ const Navbar: React.FC = () => {
               <div className="bg-emerald-500 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Shetkari</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">{t('app.name')}</span>
             </div>
             
             {/* Desktop Navigation */}
@@ -74,7 +76,7 @@ const Navbar: React.FC = () => {
               className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200"
             >
               <LogOut className="h-4 w-4 mr-1" />
-              Logout
+              {t('common.logout')}
             </button>
           </div>
 
@@ -140,7 +142,7 @@ const Navbar: React.FC = () => {
                 className="flex items-center w-full px-3 py-3 rounded-md text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               >
                 <LogOut className="h-5 w-5 mr-3" />
-                Logout
+                {t('common.logout')}
               </button>
             </div>
           </div>

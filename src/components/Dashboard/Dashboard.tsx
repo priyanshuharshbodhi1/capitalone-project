@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Thermometer, 
   Droplets, 
@@ -25,6 +26,7 @@ import { supabaseApi } from '../../services/supabaseApi';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,10 +36,8 @@ const Dashboard: React.FC = () => {
 
   const fetchSensorData = async () => {
     try {
-      console.log('📊 Dashboard: Fetching sensor data...');
       setError(null);
       const data = await api.getLatestSensorData();
-      console.log('✅ Dashboard: Sensor data fetched:', data ? 'success' : 'no data');
       setSensorData(data);
     } catch (error) {
       console.error('❌ Dashboard: Error fetching sensor data:', error);
@@ -45,45 +45,34 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
       setRefreshing(false);
-      console.log('✅ Dashboard: Sensor data loading complete');
     }
   };
 
   const checkDevices = async () => {
     try {
-      console.log('🔍 Dashboard: Checking devices...');
       if (!isSupabaseConfigured()) {
-        console.log('⚠️ Dashboard: Supabase not configured, skipping device check');
         setHasDevices(false);
         return;
       }
       
       const devices = await supabaseApi.getUserDevices();
-      console.log('📱 Dashboard: Found devices:', devices.length);
       setHasDevices(devices.length > 0);
     } catch (error) {
       console.error('❌ Dashboard: Error checking devices:', error);
       setHasDevices(false);
     } finally {
       setCheckingDevices(false);
-      console.log('✅ Dashboard: Device check complete');
     }
   };
 
   useEffect(() => {
-    console.log('🚀 Dashboard: Component mounted, initializing...');
-    
     const initializeDashboard = async () => {
       try {
-        console.log('🔄 Dashboard: Starting initialization...');
-        
         // Always fetch sensor data first (will use mock data if no real data available)
         await fetchSensorData();
         
         // Check devices in parallel
         await checkDevices();
-        
-        console.log('✅ Dashboard: Initialization complete');
       } catch (error) {
         console.error('❌ Dashboard: Error initializing dashboard:', error);
         setError('Failed to initialize dashboard');
@@ -96,23 +85,23 @@ const Dashboard: React.FC = () => {
     
     // Set up auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      console.log('🔄 Dashboard: Auto-refreshing sensor data...');
       fetchSensorData();
     }, 30000);
     
     return () => {
-      console.log('🧹 Dashboard: Cleanup');
       clearInterval(interval);
     };
   }, []);
 
   const handleRefresh = () => {
-    console.log('🔄 Dashboard: Manual refresh triggered');
     setRefreshing(true);
     fetchSensorData();
   };
 
-  console.log('🎯 Dashboard: Current state - loading:', loading, 'checkingDevices:', checkingDevices, 'hasDevices:', hasDevices, 'sensorData:', !!sensorData);
+  // Current state logging only in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎯 Dashboard: Current state - loading:', loading, 'checkingDevices:', checkingDevices, 'hasDevices:', hasDevices, 'sensorData:', !!sensorData);
+  }
 
   // Show loading only while checking devices AND loading sensor data
   if (checkingDevices && loading) {
@@ -124,7 +113,7 @@ const Dashboard: React.FC = () => {
             <Loader2 className="h-16 w-16 animate-spin text-emerald-600 mx-auto mb-6" />
             <div className="absolute inset-0 h-16 w-16 border-4 border-emerald-200 rounded-full mx-auto animate-pulse"></div>
           </div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Loading Dashboard</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{t('common.loading')}</h2>
           <p className="text-gray-600 text-sm sm:text-base">
             {checkingDevices ? 'Checking your devices...' : 'Fetching real-time sensor data...'}
           </p>
@@ -173,12 +162,11 @@ const Dashboard: React.FC = () => {
             </div>
             
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Welcome to Shetkari!
+              {t('dashboard.welcomeToShetkari')}
             </h1>
             
             <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
-              To start monitoring your farm's environmental conditions, you need to add your first IoT device. 
-              Once configured, you'll see real-time sensor data, analytics, and AI-powered recommendations.
+              {t('dashboard.noDevicesMessage')}
             </p>
             
             <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
@@ -187,7 +175,7 @@ const Dashboard: React.FC = () => {
                 className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 text-lg font-medium"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                Add Your First Device
+                {t('dashboard.addFirstDevice')}
               </Link>
               
               <button
@@ -198,28 +186,28 @@ const Dashboard: React.FC = () => {
                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 text-lg font-medium"
               >
                 <BarChart3 className="h-5 w-5 mr-2" />
-                View Demo Data
+                {t('dashboard.viewDemoData')}
               </button>
             </div>
             
             <div className="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-3">Quick Setup Guide</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-3">{t('dashboard.quickSetupGuide')}</h3>
               <div className="text-left space-y-2 text-blue-800">
                 <div className="flex items-center">
                   <span className="bg-blue-200 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">1</span>
-                  Go to Settings and add your ESP32 device with a unique Device ID
+                  {t('dashboard.setupGuideStep1')}
                 </div>
                 <div className="flex items-center">
                   <span className="bg-blue-200 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">2</span>
-                  Copy the generated API key for your device
+                  {t('dashboard.setupGuideStep2')}
                 </div>
                 <div className="flex items-center">
                   <span className="bg-blue-200 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">3</span>
-                  Configure your ESP32 to send data to our endpoint
+                  {t('dashboard.setupGuideStep3')}
                 </div>
                 <div className="flex items-center">
                   <span className="bg-blue-200 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">4</span>
-                  Start monitoring real-time sensor data!
+                  {t('dashboard.setupGuideStep4')}
                 </div>
               </div>
             </div>
@@ -242,11 +230,11 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Dashboard
+                {t('dashboard.title')}
               </h1>
               <p className="text-gray-600 mt-1 flex items-center text-sm sm:text-base">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-emerald-500" />
-                {isSupabaseConfigured() ? 'Real-time agricultural monitoring' : 'Demo agricultural monitoring'}
+                {t('dashboard.overview')}
               </p>
             </div>
           </div>
@@ -264,7 +252,7 @@ const Dashboard: React.FC = () => {
               className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg sm:rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none text-sm sm:text-base"
             >
               <RefreshCw className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Refreshing...' : 'Refresh'}
+              {refreshing ? t('common.loading') : 'Refresh'}
             </button>
           </div>
         </div>
@@ -275,7 +263,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center">
               <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
               <p className="text-yellow-700 font-medium">
-                Demo Mode: Supabase not configured. Showing mock data only.
+                {t('dashboard.demoMode')}
               </p>
             </div>
           </div>
@@ -305,7 +293,7 @@ const Dashboard: React.FC = () => {
               {/* First Row - Environmental Parameters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6">
                 <SensorCard
-                  title="Atmospheric Temperature"
+                  title={t('sensors.atmoTemp')}
                   value={sensorData.atmoTemp}
                   unit="°C"
                   icon={Thermometer}
@@ -313,7 +301,7 @@ const Dashboard: React.FC = () => {
                   trend="stable"
                 />
                 <SensorCard
-                  title="Humidity"
+                  title={t('sensors.atmoHumidity')}
                   value={sensorData.humidity}
                   unit="%"
                   icon={Droplets}
@@ -321,7 +309,7 @@ const Dashboard: React.FC = () => {
                   trend="up"
                 />
                 <SensorCard
-                  title="Light Intensity"
+                  title={t('sensors.lightIntensity')}
                   value={sensorData.light}
                   unit="lux"
                   icon={Sun}
@@ -329,7 +317,7 @@ const Dashboard: React.FC = () => {
                   trend="stable"
                 />
                 <SensorCard
-                  title="Soil EC"
+                  title={t('sensors.soilEC')}
                   value={sensorData.ec}
                   unit="dS/m"
                   icon={Zap}
@@ -337,7 +325,7 @@ const Dashboard: React.FC = () => {
                   trend="down"
                 />
                 <SensorCard
-                  title="Soil Temperature"
+                  title={t('sensors.soilTemperature')}
                   value={sensorData.soilTemp}
                   unit="°C"
                   icon={Thermometer}
@@ -356,7 +344,7 @@ const Dashboard: React.FC = () => {
               {/* Second Row - Soil Parameters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
                 <SensorCard
-                  title="Soil Moisture"
+                  title={t('sensors.soilMoisture')}
                   value={sensorData.moisture}
                   unit="%"
                   icon={Droplets}
@@ -364,7 +352,7 @@ const Dashboard: React.FC = () => {
                   trend="up"
                 />
                 <SensorCard
-                  title="Nitrogen (N)"
+                  title={t('sensors.nitrogen')}
                   value={sensorData.n}
                   unit="ppm"
                   icon={Leaf}
@@ -372,7 +360,7 @@ const Dashboard: React.FC = () => {
                   trend="stable"
                 />
                 <SensorCard
-                  title="Phosphorus (P)"
+                  title={t('sensors.phosphorus')}
                   value={sensorData.p}
                   unit="ppm"
                   icon={Leaf}
@@ -380,7 +368,7 @@ const Dashboard: React.FC = () => {
                   trend="down"
                 />
                 <SensorCard
-                  title="Potassium (K)"
+                  title={t('sensors.potassium')}
                   value={sensorData.k}
                   unit="ppm"
                   icon={Leaf}
@@ -388,7 +376,7 @@ const Dashboard: React.FC = () => {
                   trend="stable"
                 />
                 <SensorCard
-                  title="Soil pH"
+                  title={t('sensors.soilPH')}
                   value={sensorData.ph}
                   unit=""
                   icon={Activity}

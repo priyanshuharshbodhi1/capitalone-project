@@ -9,31 +9,10 @@ export class SupabaseAPI {
     }
   }
 
-  // Debug function to test raw Supabase client
+  // Debug function to test raw Supabase client (reduced logging)
   private async debugSupabaseClient() {
-    console.log('🔍 SupabaseAPI: Debugging Supabase client...');
-    
     try {
-      // Test 1: Check if client exists
-      console.log('🔍 SupabaseAPI: Client exists:', !!supabase);
-      console.log('🔍 SupabaseAPI: Client auth exists:', !!supabase.auth);
-      console.log('🔍 SupabaseAPI: Client from exists:', !!supabase.from);
-      
-      // Test 2: Try a simple operation that should always work
-      console.log('🔍 SupabaseAPI: Testing basic client functionality...');
-      
-      // This should work even without authentication
-      const testPromise = supabase.auth.getSession();
-      console.log('🔍 SupabaseAPI: getSession promise created:', !!testPromise);
-      
-      // Add promise state logging
-      testPromise.then(
-        (result) => console.log('✅ SupabaseAPI: getSession resolved:', !!result),
-        (error) => console.log('❌ SupabaseAPI: getSession rejected:', error)
-      );
-      
-      return testPromise;
-      
+      return await supabase.auth.getSession();
     } catch (error) {
       console.error('❌ SupabaseAPI: Error in debugSupabaseClient:', error);
       throw error;
@@ -43,9 +22,7 @@ export class SupabaseAPI {
   // Simple connection test that doesn't rely on specific tables
   private async testConnection() {
     try {
-      console.log('🔗 SupabaseAPI: Testing Supabase connection...');
-      
-      // First debug the client
+      // Test client functionality
       await this.debugSupabaseClient();
       
       // Use a simple auth check instead of table query
@@ -53,13 +30,8 @@ export class SupabaseAPI {
         setTimeout(() => reject(new Error('Connection timeout')), 5000);
       });
       
-      console.log('🔗 SupabaseAPI: Creating connection promise...');
       const connectionPromise = supabase.auth.getSession();
-      
-      console.log('🔗 SupabaseAPI: Racing promises...');
       await Promise.race([connectionPromise, timeoutPromise]);
-      
-      console.log('✅ SupabaseAPI: Connection test successful');
       return true;
     } catch (error) {
       console.error('❌ SupabaseAPI: Connection test failed:', error);
@@ -117,19 +89,14 @@ export class SupabaseAPI {
 
   async getCurrentUser(userId?: string, userEmail?: string, userMetadata?: any): Promise<User | null> {
     if (!isSupabaseConfigured()) {
-      console.log('🔧 SupabaseAPI: Not configured, returning null');
       return null;
     }
     
     try {
-      console.log('👤 SupabaseAPI: Getting current user with provided ID:', userId);
       
       // If userId is provided, use it directly and skip connection test
       if (userId && userEmail) {
-        console.log('📋 SupabaseAPI: Using provided user data, attempting profile fetch...');
-        
         try {
-          console.log('🔍 SupabaseAPI: Creating profile query for user:', userId);
           
           // Create the query but don't await it yet
           const profileQuery = supabase
@@ -261,6 +228,7 @@ export class SupabaseAPI {
           phone: profile?.phone || '',
           farmName: profile?.farm_name || '',
           location: profile?.location || '',
+          language: profile?.language || 'en',
         };
 
         console.log('✅ SupabaseAPI: User data assembled:', userData.name);
@@ -934,7 +902,7 @@ export class SupabaseAPI {
   }
 
   // Profile Management
-  async updateProfile(updates: { full_name?: string; phone?: string; farm_name?: string; location?: string; email?: string }) {
+  async updateProfile(updates: { full_name?: string; phone?: string; farm_name?: string; location?: string; email?: string; language?: string }) {
     this.checkConfiguration();
     
     const { data: { user } } = await supabase.auth.getUser();

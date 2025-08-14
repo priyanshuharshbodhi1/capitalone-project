@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Leaf, Mail, Lock, Loader2, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('Bolt1234');
@@ -16,8 +18,8 @@ const Login: React.FC = () => {
     setError('');
 
     if (!email || !password || (!isLoginMode && !fullName)) {
-      toast.error('Please fill in all fields');
-      setError('Please fill in all fields');
+      toast.error(t('auth.fillAllFields'));
+      setError(t('auth.fillAllFields'));
       return;
     }
 
@@ -25,24 +27,24 @@ const Login: React.FC = () => {
       if (isLoginMode) {
         const res = await login(email, password);
         if (!res.success) {
-          const errorMessage = res.error || 'Login failed. Please try again.';
+          const errorMessage = res.error || t('auth.loginError');
           toast.error(errorMessage);
           setError(errorMessage);
           return;
         }
-        toast.success('Login successful!');
+        toast.success(t('auth.loginSuccess'));
       } else {
         const res = await register(email, password, fullName);
         if (!res.success) {
-          const errorMessage = res.error || 'Registration failed. Please try again.';
+          const errorMessage = res.error || t('auth.registerError');
           toast.error(errorMessage);
           setError(errorMessage);
           return;
         }
-        toast.success('Account created successfully!');
+        toast.success(t('auth.registerSuccess'));
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      const errorMessage = err instanceof Error ? err.message : t('auth.unexpectedError');
       toast.error(errorMessage);
       setError(errorMessage);
     }
@@ -65,17 +67,17 @@ const Login: React.FC = () => {
               <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shetkari</h2>
-          <p className="mt-2 text-gray-600 text-sm sm:text-base">Agricultural IoT Monitoring System</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('app.name')}</h2>
+          <p className="mt-2 text-gray-600 text-sm sm:text-base">{t('app.subtitle')}</p>
         </div>
 
         <div className="bg-white shadow-2xl rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-900 text-center">
-              {isLoginMode ? 'Sign In' : 'Create Account'}
+              {isLoginMode ? t('auth.loginTitle') : t('auth.registerTitle')}
             </h3>
             <p className="text-gray-600 text-sm text-center mt-1">
-              {isLoginMode ? 'Welcome back to your farm dashboard' : 'Join Shetkari to monitor your farm'}
+              {isLoginMode ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
             </p>
           </div>
 
@@ -83,7 +85,7 @@ const Login: React.FC = () => {
             {!isLoginMode && (
               <div>
                 <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
+                  {t('common.fullName')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,17 +97,17 @@ const Login: React.FC = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                    placeholder="Enter your full name"
+                    placeholder={t('auth.enterFullName')}
                     disabled={isLoading}
                   />
                 </div>
               </div>
             )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
+                          <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('common.email')}
+                </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
@@ -116,7 +118,7 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.enterEmail')}
                   disabled={isLoading}
                 />
               </div>
@@ -124,7 +126,7 @@ const Login: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                {t('common.password')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -136,7 +138,7 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.enterPassword')}
                   disabled={isLoading}
                 />
               </div>
@@ -158,10 +160,10 @@ const Login: React.FC = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" />
-                  {isLoginMode ? 'Signing In...' : 'Creating Account...'}
+                  {isLoginMode ? t('auth.signIn') + '...' : t('auth.createAccount') + '...'}
                 </>
               ) : (
-                isLoginMode ? 'Sign In' : 'Create Account'
+                isLoginMode ? t('auth.signIn') : t('auth.createAccount')
               )}
             </button>
           </form>
@@ -172,8 +174,8 @@ const Login: React.FC = () => {
               className="text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors duration-200"
             >
               {isLoginMode 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Sign in"
+                ? t('auth.dontHaveAccount') + ' ' + t('auth.signUp')
+                : t('auth.alreadyHaveAccount') + ' ' + t('auth.signIn')
               }
             </button>
           </div>
