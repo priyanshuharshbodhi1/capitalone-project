@@ -98,6 +98,10 @@ const MockSensor: React.FC = () => {
         next[k] = String(generateValue(k as string, thresholds as any[], { mostlyWithin }));
       }
       setFields(next);
+      
+      // Log generated values for debugging
+      console.log('🎲 MockSensor: Generated values:', next);
+      console.log('📊 MockSensor: Current thresholds:', thresholds);
 
       toast.success(sendAfter ? 'Random data generated. Sending…' : 'Random data generated');
 
@@ -319,14 +323,14 @@ const MockSensor: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-5 mt-6">
-          <div className="flex items-center justify-between mb-4">
+        {/* Auto-Send Section */}
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-5 mt-6">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              {/* Auto-send toggle next to title */}
               <button
                 type="button"
                 onClick={() => setAutoSend(v => !v)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${autoSend ? 'bg-red-600' : 'bg-red-200'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${autoSend ? 'bg-blue-600' : 'bg-blue-300'}`}
                 aria-pressed={autoSend}
                 aria-label="Toggle auto-send"
               >
@@ -334,11 +338,30 @@ const MockSensor: React.FC = () => {
                   className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${autoSend ? 'translate-x-5' : 'translate-x-1'}`}
                 />
               </button>
-              <h2 className="text-lg font-medium text-red-900">Send Sensor Data</h2>
+              <h2 className="text-lg font-medium text-blue-900">🔄 Auto-Send Mode</h2>
             </div>
             {autoSend && (
-              <span className="text-xs text-red-700">Auto-sending every 15s</span>
+              <span className="text-sm text-blue-700 font-medium">✅ Active - Sending every 15s</span>
             )}
+          </div>
+          <p className="text-sm text-blue-700 mb-2">
+            <strong>Purpose:</strong> Automatically generates and sends realistic sensor data every 15 seconds to simulate continuous IoT monitoring.
+          </p>
+          <p className="text-xs text-blue-600">
+            💡 Perfect for testing AI recommendations, alerts, and dashboard updates in real-time without manual intervention.
+          </p>
+        </div>
+
+        {/* Manual Send Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-5 mt-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-medium text-red-900 mb-2">📝 Manual Data Entry</h2>
+            <p className="text-sm text-red-700 mb-2">
+              <strong>Purpose:</strong> Manually configure specific sensor values to test particular scenarios or trigger specific AI recommendations and alerts.
+            </p>
+            <p className="text-xs text-red-600">
+              💡 Use this to test edge cases, simulate critical conditions, or validate alert thresholds with custom values.
+            </p>
           </div>
           <form className="space-y-4" onSubmit={handleSend}>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

@@ -932,6 +932,93 @@ export class SupabaseAPI {
     }
   }
 
+  async clearAllAlerts() {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase is not properly configured');
+    }
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const { error } = await supabase
+        .from('alerts')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('❌ SupabaseAPI: Error clearing alerts:', error);
+        throw error;
+      }
+
+      console.log('✅ SupabaseAPI: All alerts cleared for user:', user.id);
+    } catch (error) {
+      console.error('❌ SupabaseAPI: Error in clearAllAlerts:', error);
+      throw error;
+    }
+  }
+
+  async createAlert(alertData: {
+    device_id: string;
+    user_id: string;
+    parameter: string;
+    current_value: number;
+    threshold_min: number | null;
+    threshold_max: number | null;
+    alert_type: string;
+    message: string;
+    created_at: string;
+    is_sent: boolean;
+  }): Promise<string> {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase is not properly configured');
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('alerts')
+        .insert([alertData])
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('❌ SupabaseAPI: Error creating alert:', error);
+        throw error;
+      }
+
+      console.log('✅ SupabaseAPI: Alert created:', data.id);
+      return data.id;
+    } catch (error) {
+      console.error('❌ SupabaseAPI: Error in createAlert:', error);
+      throw error;
+    }
+  }
+
+  async updateAlertStatus(alertId: string, isSent: boolean) {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase is not properly configured');
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('alerts')
+        .update({ is_sent: isSent })
+        .eq('id', alertId);
+
+      if (error) {
+        console.error('❌ SupabaseAPI: Error updating alert status:', error);
+        throw error;
+      }
+
+      console.log('✅ SupabaseAPI: Alert status updated:', alertId, 'sent:', isSent);
+    } catch (error) {
+      console.error('❌ SupabaseAPI: Error in updateAlertStatus:', error);
+      throw error;
+    }
+  }
+
   // Real-time subscriptions
   subscribeToSensorData(deviceId: string, callback: (data: any) => void) {
     if (!isSupabaseConfigured()) {
@@ -970,6 +1057,32 @@ export class SupabaseAPI {
         callback
       )
       .subscribe();
+  }
+
+  // Device Management
+  async getDevices(userId: string) {
+    this.checkConfiguration();
+    
+    const { data, error } = await supabase
+      .from('devices')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return { data };
+  }
+
+  async createDevice(deviceData: any) {
+    this.checkConfiguration();
+    
+    const { data, error } = await supabase
+      .from('devices')
+      .insert(deviceData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   // Profile Management

@@ -25,6 +25,7 @@ const AlertHistory: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'sent' | 'pending'>('all');
   const [error, setError] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
 
   const fetchAlerts = async (isRefresh = false) => {
     try {
@@ -70,6 +71,25 @@ const AlertHistory: React.FC = () => {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchAlerts(true);
+  };
+
+  const handleClearAll = async () => {
+    try {
+      setClearing(true);
+      setError(null);
+      
+      console.log('🗑️ AlertHistory: Clearing all alerts...');
+      await supabaseApi.clearAllAlerts();
+      console.log('✅ AlertHistory: All alerts cleared');
+      
+      // Refresh the alerts list
+      await fetchAlerts();
+    } catch (error) {
+      console.error('❌ AlertHistory: Error clearing alerts:', error);
+      setError('Failed to clear alerts');
+    } finally {
+      setClearing(false);
+    }
   };
 
   const getFilteredAlerts = () => {
@@ -168,14 +188,24 @@ const AlertHistory: React.FC = () => {
           </div>
         </div>
         
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
-        >
-          <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleClearAll}
+            disabled={alerts.length === 0 || refreshing || clearing}
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
+          >
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            {clearing ? 'Clearing...' : 'Clear All'}
+          </button>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
+          >
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Statistics */}

@@ -1,4 +1,5 @@
-import { SensorData } from '../types';
+import { SensorData, User } from '../types';
+import { supabaseApi } from './supabaseApi';
 
 interface AlertRule {
   parameter: keyof SensorData;
@@ -39,6 +40,7 @@ interface AlertPayload {
   user: {
     name: string;
     phone: string | null;
+    email: string | null;
   };
   timestamp: string;
   severity: 'LOW' | 'HIGH' | 'NORMAL';
@@ -98,15 +100,19 @@ class AlertService {
   }
 
   // Check sensor data against alert rules
-  checkAlerts(sensorData: SensorData, recommendations?: AIRecommendation[]): AlertPayload[] {
+  async processAlerts(sensorData: SensorData, user: User): Promise<AlertPayload[]> {
     const alerts: AlertPayload[] = [];
     const timestamp = new Date().toISOString();
 
+    // Get or create device for this user
+    const deviceId = await this.getOrCreateDevice(user.id);
+
     // Check threshold-based alerts
     for (const rule of this.alertRules) {
-      const value = sensorData[rule.parameter] as number;
-      let shouldAlert = false;
+      const value = sensorData[rule.parameter];
+      if (value === undefined || value === null) continue;
 
+      let shouldAlert = false;
       if (rule.min !== undefined && value < rule.min) {
         shouldAlert = true;
       }
@@ -115,11 +121,27 @@ class AlertService {
       }
 
       if (shouldAlert) {
+        // Store alert in database (let database generate UUID)
+        const alertData = {
+          device_id: deviceId,
+          user_id: user.id,
+          parameter: rule.parameter,
+          current_value: value,
+          threshold_min: rule.min || null,
+          threshold_max: rule.max || null,
+          alert_type: 'threshold',
+          message: rule.message,
+          created_at: timestamp,
+          is_sent: false
+        };
+        
+        const alertId = await this.storeAlert(alertData);
+
         alerts.push({
           alert: {
-            id: `alert_${Date.now()}_${rule.parameter}`,
-            device_id: 'esp32_001', // Default device ID
-            user_id: 'user_001', // Default user ID
+            id: alertId,
+            device_id: deviceId,
+            user_id: user.id,
             parameter: rule.parameter,
             current_value: value,
             threshold_min: rule.min || null,
@@ -130,21 +152,60 @@ class AlertService {
           },
           device: {
             name: 'ESP32 Sensor Node',
-            location: 'Farm Location',
+            location: user.location || 'Farm Location',
             type: 'IoT Sensor',
           },
           user: {
-            name: 'Farm Manager',
-            phone: '+1234567890', // Configure this
+            name: user.name,
+            phone: user.phone || null,
+            email: user.email || null,
           },
           timestamp,
           severity: rule.severity,
-          recommendations: recommendations?.filter(rec => 
-            rec.priority === 'high' && rec.actionable
-          )
         });
       }
     }
+
+    return alerts;
+  }
+
+  // Get or create device for user
+  private async getOrCreateDevice(userId: string): Promise<string> {
+    try {
+      // First try to find existing device for this user
+      const { data: existingDevices } = await supabaseApi.getDevices(userId);
+      
+      if (existingDevices && existingDevices.length > 0) {
+        return existingDevices[0].device_id;
+      }
+
+      // If no device exists, create one
+      const deviceData = {
+        device_id: `esp32_${userId.slice(-8)}`, // Use last 8 chars of user ID
+        user_id: userId,
+        device_name: 'ESP32 Sensor Node',
+        device_type: 'ESP32_SENSOR_NODE',
+        location: 'Farm Location',
+        is_active: true,
+        last_seen: new Date().toISOString()
+      };
+
+      const newDevice = await supabaseApi.createDevice(deviceData);
+      return newDevice.device_id;
+    } catch (error) {
+      console.error('❌ Error getting/creating device:', error);
+      // Fallback to a default device ID pattern
+      return `esp32_${userId.slice(-8)}`;
+    }
+  }
+
+  // Process AI recommendations and create alerts
+  async processAIRecommendations(recommendations: AIRecommendation[], user: User): Promise<AlertPayload[]> {
+    const alerts: AlertPayload[] = [];
+    const timestamp = new Date().toISOString();
+
+    // Get or create device for this user
+    const deviceId = await this.getOrCreateDevice(user.id);
 
     // Check AI recommendation-based alerts (high priority only)
     if (recommendations) {
@@ -153,11 +214,27 @@ class AlertService {
       );
 
       for (const rec of highPriorityRecs) {
+        // Store alert in database (let database generate UUID)
+        const alertData = {
+          device_id: deviceId,
+          user_id: user.id,
+          parameter: rec.type,
+          current_value: rec.confidence,
+          threshold_min: null,
+          threshold_max: null,
+          alert_type: 'ai_recommendation',
+          message: `AI Alert: ${rec.title} - ${rec.description}`,
+          created_at: timestamp,
+          is_sent: false
+        };
+        
+        const alertId = await this.storeAlert(alertData);
+
         alerts.push({
           alert: {
-            id: `ai_alert_${Date.now()}_${rec.type}`,
-            device_id: 'esp32_001',
-            user_id: 'user_001',
+            id: alertId,
+            device_id: deviceId,
+            user_id: user.id,
             parameter: rec.type,
             current_value: rec.confidence,
             threshold_min: null,
@@ -168,12 +245,13 @@ class AlertService {
           },
           device: {
             name: 'ESP32 Sensor Node',
-            location: 'Farm Location',
+            location: user.location || 'Farm Location',
             type: 'IoT Sensor',
           },
           user: {
-            name: 'Farm Manager',
-            phone: '+1234567890',
+            name: user.name,
+            phone: user.phone || null,
+            email: user.email || null,
           },
           timestamp,
           severity: 'HIGH',
@@ -185,7 +263,30 @@ class AlertService {
     return alerts;
   }
 
-  // Send alerts to webhook (Zapier)
+  // Store alert in database
+  async storeAlert(alertData: {
+    device_id: string;
+    user_id: string;
+    parameter: string;
+    current_value: number;
+    threshold_min: number | null;
+    threshold_max: number | null;
+    alert_type: string;
+    message: string;
+    created_at: string;
+    is_sent: boolean;
+  }): Promise<string> {
+    try {
+      const alertId = await supabaseApi.createAlert(alertData);
+      console.log(`✅ Alert stored in database: ${alertId}`);
+      return alertId;
+    } catch (error) {
+      console.error(`❌ Failed to store alert:`, error);
+      throw error;
+    }
+  }
+
+  // Send alerts to webhook (Zapier) and mark as sent
   async sendAlerts(alerts: AlertPayload[]): Promise<void> {
     if (!alerts.length || !this.supabaseUrl || !this.supabaseAnonKey) {
       return;
@@ -206,6 +307,8 @@ class AlertService {
 
         if (response.ok) {
           console.log(`✅ Alert sent: ${alert.alert.id}`);
+          // Mark alert as sent in database
+          await this.markAlertAsSent(alert.alert.id);
         } else {
           console.error(`❌ Failed to send alert: ${alert.alert.id}`, await response.text());
         }
@@ -215,13 +318,32 @@ class AlertService {
     }
   }
 
-  // Process sensor data and send alerts if needed
-  async processAlerts(sensorData: SensorData, recommendations?: AIRecommendation[]): Promise<void> {
-    const alerts = this.checkAlerts(sensorData, recommendations);
+  // Mark alert as sent in database
+  async markAlertAsSent(alertId: string): Promise<void> {
+    try {
+      await supabaseApi.updateAlertStatus(alertId, true);
+      console.log(`✅ Alert marked as sent: ${alertId}`);
+    } catch (error) {
+      console.error(`❌ Failed to mark alert as sent: ${alertId}`, error);
+    }
+  }
+
+  // Main method to check alerts and send them
+  async checkAndSendAlerts(sensorData: SensorData, user: User, recommendations?: AIRecommendation[]): Promise<void> {
+    // Get threshold-based alerts
+    const thresholdAlerts = await this.processAlerts(sensorData, user);
     
-    if (alerts.length > 0) {
-      console.log(`🔍 AlertService: Found ${alerts.length} alerts to send`);
-      await this.sendAlerts(alerts);
+    // Get AI recommendation alerts if provided
+    let aiAlerts: AlertPayload[] = [];
+    if (recommendations) {
+      aiAlerts = await this.processAIRecommendations(recommendations, user);
+    }
+    
+    const allAlerts = [...thresholdAlerts, ...aiAlerts];
+    
+    if (allAlerts.length > 0) {
+      console.log(`🔍 AlertService: Found ${allAlerts.length} alerts to send`);
+      await this.sendAlerts(allAlerts);
     } else {
       console.log('✅ AlertService: No alerts triggered');
     }

@@ -131,10 +131,17 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       
       setHasLoadedOnce(true);
 
-      // Process alerts based on recommendations and sensor data
-      if (sensorData) {
-        await alertService.processAlerts(sensorData, recs);
-      }
+      // Skip alert processing for demo purposes to avoid database operations
+      // if (sensorData) {
+      //   const user = {
+      //     id: '00000000-0000-0000-0000-000000000001',
+      //     name: 'Demo User',
+      //     email: 'demo@example.com',
+      //     phone: '+1234567890',
+      //     location: 'Demo Farm'
+      //   };
+      //   await alertService.checkAndSendAlerts(sensorData, user, recs);
+      // }
     } catch (error) {
       console.error('❌ AIRecommendations: Error fetching recommendations:', error);
       setError('Failed to generate AI recommendations');
