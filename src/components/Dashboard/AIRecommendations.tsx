@@ -17,7 +17,7 @@ import {
   Cloud
 } from 'lucide-react';
 import { SensorData } from '../../types';
-import { aiApi } from '../../services/watsonxApi';
+import { aiApi } from '../../services/aiApi';
 import { sarvamApi } from '../../services/sarvamApi';
 import { alertService } from '../../services/alertService';
 
@@ -356,7 +356,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                         {source === 'cloud' ? (
                           <>
                             <Zap className="h-3 w-3 text-indigo-500" />
-                            <span className="text-xs text-indigo-600 font-medium">WatsonX AI</span>
+                            <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
                           </>
                         ) : (
                           <>

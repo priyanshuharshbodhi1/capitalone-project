@@ -1,8 +1,8 @@
 /*
-  # WatsonX AI Recommendations Edge Function
+  # AI Recommendations Edge Function
   
-  This function handles WatsonX AI API calls server-side to avoid CORS issues.
-  It generates IAM tokens and calls the WatsonX API to get farming recommendations.
+  This function handles AI API calls server-side to avoid CORS issues.
+  It generates IAM tokens and calls the AI API to get farming recommendations.
 */
 
 const corsHeaders = {
@@ -25,7 +25,7 @@ interface SensorData {
   ph: number;
 }
 
-interface WatsonXToken {
+interface AIToken {
   access_token: string;
   refresh_token: string;
   token_type: string;
@@ -34,7 +34,7 @@ interface WatsonXToken {
   scope: string;
 }
 
-interface WatsonXRecommendation {
+interface AIRecommendation {
   type: 'practice' | 'fertilizer' | 'crop' | 'insight';
   title: string;
   description: string;
@@ -44,20 +44,20 @@ interface WatsonXRecommendation {
   reasoning: string;
 }
 
-// WatsonX configuration (hardcoded to match original implementation)
-const WATSONX_API_KEY = 'ZJj1YCackRhQ6B-kAd2g2jiCY50ZT9EjRP9nnkWYR_aP';
-const WATSONX_PROJECT_ID = '376d3ee9-d461-4ec8-9fc2-eaac7675b030';
+// AI configuration
+const AI_API_KEY = 'ZJj1YCackRhQ6B-kAd2g2jiCY50ZT9EjRP9nnkWYR_aP';
+const AI_PROJECT_ID = '376d3ee9-d461-4ec8-9fc2-eaac7675b030';
 const IAM_URL = 'https://iam.cloud.ibm.com/identity/token';
-const WATSONX_URL = 'https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29';
+const AI_URL = 'https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29';
 
-// Generate IAM token for WatsonX authentication
+// Generate IAM token for AI authentication
 async function generateToken(): Promise<string> {
   try {
-    console.log('🔑 WatsonX Edge Function: Generating IAM token...');
+    console.log('🔑 AI Edge Function: Generating IAM token...');
     
     const formData = new URLSearchParams();
     formData.append('grant_type', 'urn:ibm:params:oauth:grant-type:apikey');
-    formData.append('apikey', WATSONX_API_KEY);
+    formData.append('apikey', AI_API_KEY);
 
     const response = await fetch(IAM_URL, {
       method: 'POST',
@@ -73,12 +73,12 @@ async function generateToken(): Promise<string> {
       throw new Error(`IAM token generation failed: ${response.status} - ${errorText}`);
     }
 
-    const tokenData: WatsonXToken = await response.json();
-    console.log('✅ WatsonX Edge Function: IAM token generated successfully');
+    const tokenData: AIToken = await response.json();
+    console.log('✅ AI Edge Function: IAM token generated successfully');
     
     return tokenData.access_token;
   } catch (error) {
-    console.error('❌ WatsonX Edge Function: Error generating IAM token:', error);
+    console.error('❌ AI Edge Function: Error generating IAM token:', error);
     throw error;
   }
 }
@@ -119,11 +119,11 @@ ${JSON.stringify({
 Generate the recommendations now.`;
 }
 
-// Fallback recommendations when WatsonX is unavailable
-function getFallbackRecommendations(sensorData: SensorData): WatsonXRecommendation[] {
-  console.log('🔄 WatsonX Edge Function: Using fallback recommendations');
+// Fallback recommendations when AI is unavailable
+function getFallbackRecommendations(sensorData: SensorData): AIRecommendation[] {
+  console.log('🔄 AI Edge Function: Using fallback recommendations');
   
-  const recommendations: WatsonXRecommendation[] = [];
+  const recommendations: AIRecommendation[] = [];
 
   // Soil moisture check
   if (sensorData.moisture < 40) {
@@ -193,10 +193,10 @@ function getFallbackRecommendations(sensorData: SensorData): WatsonXRecommendati
   return recommendations;
 }
 
-// Get AI recommendations from WatsonX
-async function getRecommendations(sensorData: SensorData): Promise<WatsonXRecommendation[]> {
+// Get AI recommendations
+async function getRecommendations(sensorData: SensorData): Promise<AIRecommendation[]> {
   try {
-    console.log('🤖 WatsonX Edge Function: Generating AI recommendations...');
+    console.log('🤖 AI Edge Function: Generating AI recommendations...');
     
     // Get access token
     const accessToken = await generateToken();
@@ -209,7 +209,7 @@ async function getRecommendations(sensorData: SensorData): Promise<WatsonXRecomm
           content: generateSystemPrompt(sensorData)
         }
       ],
-      project_id: WATSONX_PROJECT_ID,
+      project_id: AI_PROJECT_ID,
       model_id: 'ibm/granite-3-8b-instruct',
       frequency_penalty: 0,
       max_tokens: 2000,
@@ -220,9 +220,9 @@ async function getRecommendations(sensorData: SensorData): Promise<WatsonXRecomm
       stop: []
     };
 
-    console.log('🚀 WatsonX Edge Function: Sending request to WatsonX API...');
+    console.log('🚀 AI Edge Function: Sending request to AI API...');
     
-    const response = await fetch(WATSONX_URL, {
+    const response = await fetch(AI_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -234,30 +234,30 @@ async function getRecommendations(sensorData: SensorData): Promise<WatsonXRecomm
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`WatsonX API request failed: ${response.status} - ${errorText}`);
+      throw new Error(`AI API request failed: ${response.status} - ${errorText}`);
     }
 
     const responseData = await response.json();
-    console.log('✅ WatsonX Edge Function: Response received');
+    console.log('✅ AI Edge Function: Response received');
 
     // Extract the AI response content
     const aiResponse = responseData.choices?.[0]?.message?.content;
     
     if (!aiResponse) {
-      throw new Error('No content in WatsonX response');
+      throw new Error('No content in AI response');
     }
 
-    console.log('🔍 WatsonX Edge Function: Parsing AI response...');
+    console.log('🔍 AI Edge Function: Parsing AI response...');
     
     // Parse the JSON response from the AI
-    let recommendations: WatsonXRecommendation[];
+    let recommendations: AIRecommendation[];
     try {
       // Clean the response in case there's extra text around the JSON
       const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
       const jsonString = jsonMatch ? jsonMatch[0] : aiResponse;
       recommendations = JSON.parse(jsonString);
     } catch (parseError) {
-      console.error('❌ WatsonX Edge Function: Failed to parse AI response as JSON:', parseError);
+      console.error('❌ AI Edge Function: Failed to parse AI response as JSON:', parseError);
       console.log('Raw AI response:', aiResponse);
       
       // Return fallback recommendations if parsing fails
@@ -271,11 +271,11 @@ async function getRecommendations(sensorData: SensorData): Promise<WatsonXRecomm
       typeof rec.actionable === 'boolean' && rec.reasoning
     );
 
-    console.log(`✅ WatsonX Edge Function: Generated ${validRecommendations.length} valid recommendations`);
+    console.log(`✅ AI Edge Function: Generated ${validRecommendations.length} valid recommendations`);
     return validRecommendations;
 
   } catch (error) {
-    console.error('❌ WatsonX Edge Function: Error getting recommendations:', error);
+    console.error('❌ AI Edge Function: Error getting recommendations:', error);
     
     // Return fallback recommendations on error
     return getFallbackRecommendations(sensorData);
@@ -296,7 +296,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    console.log('🤖 WatsonX Edge Function: Request received');
+    console.log('🤖 AI Edge Function: Request received');
     
     // Parse the sensor data from request body
     const { sensorData }: { sensorData: SensorData } = await req.json();
@@ -308,7 +308,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log('📊 WatsonX Edge Function: Processing sensor data:', {
+    console.log('📊 AI Edge Function: Processing sensor data:', {
       timestamp: sensorData.timestamp,
       atmoTemp: sensorData.atmoTemp,
       moisture: sensorData.moisture,
@@ -318,14 +318,14 @@ Deno.serve(async (req: Request) => {
     // Get recommendations
     const recommendations = await getRecommendations(sensorData);
     
-    console.log(`📋 WatsonX Edge Function: Returning ${recommendations.length} recommendations`);
+    console.log(`📋 AI Edge Function: Returning ${recommendations.length} recommendations`);
 
     return new Response(
       JSON.stringify({
         success: true,
         recommendations,
         timestamp: new Date().toISOString(),
-        source: recommendations.length > 0 ? 'watsonx' : 'fallback'
+        source: recommendations.length > 0 ? 'ai' : 'fallback'
       }),
       { 
         status: 200, 
@@ -334,7 +334,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error('❌ WatsonX Edge Function: Error:', error);
+    console.error('❌ AI Edge Function: Error:', error);
     
     return new Response(
       JSON.stringify({ 
