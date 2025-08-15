@@ -25,7 +25,7 @@ Shetkari is a modern, production-ready agricultural IoT monitoring system that p
 - **Multi-device Support**: Manage multiple ESP32 sensor nodes per farm
 
 ### 🤖 **AI-Powered Recommendations**
-- **WatsonX Integration**: IBM WatsonX AI for intelligent farming insights
+- **Cloud AI via Edge Function**: Serverless function generates intelligent farming insights
 - **Smart Analysis**: Automated recommendations based on sensor data patterns
 - **Actionable Insights**: Specific guidance for irrigation, fertilization, and crop management
 - **Fallback System**: Local AI recommendations when cloud services are unavailable
@@ -71,10 +71,9 @@ Shetkari is a modern, production-ready agricultural IoT monitoring system that p
 - **Real-time Subscriptions** for live data updates
 
 ### **External Integrations**
-- **IBM WatsonX AI** for intelligent recommendations
 - **OpenWeatherMap API** for weather data
 - **Bolt IoT Cloud** for appliance control
-- **Salesforce** for SMS/Email notifications
+- **Zapier (or webhook endpoints)** for SMS/Email notifications
 
 ## 📊 Monitored Parameters
 
@@ -269,7 +268,7 @@ Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/functions/v1/esp32-data-ingestion` | POST | Receive sensor data from ESP32 devices |
-| `/functions/v1/clever-task` | POST | Get AI recommendations from WatsonX |
+| `/functions/v1/clever-task` | POST | Get AI recommendations |
 | `/functions/v1/update-alert-status` | POST | Update alert delivery status |
 | `/functions/v1/rapid-service` | POST | Process webhook notifications |
 
@@ -324,7 +323,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Supabase** - For the backend infrastructure
-- **IBM WatsonX** - For AI-powered recommendations
 - **OpenWeatherMap** - For weather data services
 - **Bolt IoT** - For appliance control capabilities
 

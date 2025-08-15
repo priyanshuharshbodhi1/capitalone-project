@@ -323,7 +323,7 @@ const Dashboard: React.FC = () => {
               <WeatherWidget />
             </div>
 
-            {/* WatsonX AI Recommendations */}
+            {/* AI Recommendations */}
             <div className="mb-6 sm:mb-8">
               <AIRecommendations sensorData={sensorData} />
             </div>

@@ -163,6 +163,7 @@ class ShetkariAPI {
     try {
       await supabaseApi.updateProfile({
         full_name: settings.name,
+        email: settings.email,
         phone: settings.phone,
         farm_name: settings.farmName,
         location: settings.location,

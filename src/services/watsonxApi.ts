@@ -1,6 +1,6 @@
 import { SensorData } from '../types';
 
-interface WatsonXRecommendation {
+interface AIRecommendation {
   type: 'practice' | 'fertilizer' | 'crop' | 'insight';
   title: string;
   description: string;
@@ -10,7 +10,7 @@ interface WatsonXRecommendation {
   reasoning: string;
 }
 
-class WatsonXAPI {
+class AIService {
   private supabaseUrl: string;
   private supabaseAnonKey: string;
   private edgeFunctionUrl: string;
@@ -21,19 +21,19 @@ class WatsonXAPI {
     this.edgeFunctionUrl = `${this.supabaseUrl}/functions/v1/clever-task`;
     
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
-      console.warn('⚠️ WatsonX: Supabase configuration missing');
+      console.warn('⚠️ AI: Supabase configuration missing');
     }
   }
 
   // Get AI recommendations via Supabase Edge Function (avoids CORS)
-  async getRecommendations(sensorData: SensorData): Promise<WatsonXRecommendation[]> {
+  async getRecommendations(sensorData: SensorData): Promise<AIRecommendation[]> {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
-      console.warn('⚠️ WatsonX: Supabase not configured, using fallback recommendations');
+      console.warn('⚠️ AI: Supabase not configured, using fallback recommendations');
       return this.getFallbackRecommendations(sensorData);
     }
 
     try {
-      console.log('🤖 WatsonX: Calling edge function for AI recommendations...');
+      console.log('🤖 AI: Calling edge function for recommendations...');
       
       const response = await fetch(this.edgeFunctionUrl, {
         method: 'POST',
@@ -55,22 +55,22 @@ class WatsonXAPI {
         throw new Error(responseData.message || 'Edge function returned error');
       }
 
-      console.log(`✅ WatsonX: Received ${responseData.recommendations.length} recommendations from ${responseData.source}`);
+      console.log(`✅ AI: Received ${responseData.recommendations.length} recommendations from ${responseData.source}`);
       return responseData.recommendations;
 
     } catch (error) {
-      console.error('❌ WatsonX: Error calling edge function:', error);
+      console.error('❌ AI: Error calling edge function:', error);
       
       // Return fallback recommendations on error
       return this.getFallbackRecommendations(sensorData);
     }
   }
 
-  // Fallback recommendations when WatsonX is unavailable
-  private getFallbackRecommendations(sensorData: SensorData): WatsonXRecommendation[] {
-    console.log('🔄 WatsonX: Using fallback recommendations');
+  // Fallback recommendations when cloud AI is unavailable
+  private getFallbackRecommendations(sensorData: SensorData): AIRecommendation[] {
+    console.log('🔄 AI: Using fallback recommendations');
     
-    const recommendations: WatsonXRecommendation[] = [];
+    const recommendations: AIRecommendation[] = [];
 
     // Soil moisture check
     if (sensorData.moisture < 40) {
@@ -153,7 +153,7 @@ class WatsonXAPI {
     return recommendations;
   }
 
-  // Check if WatsonX is properly configured
+  // Check if cloud AI is properly configured
   isConfigured(): boolean {
     return !!(this.supabaseUrl && this.supabaseAnonKey);
   }
@@ -169,4 +169,4 @@ class WatsonXAPI {
   }
 }
 
-export const watsonxApi = new WatsonXAPI();
+export const aiApi = new AIService();

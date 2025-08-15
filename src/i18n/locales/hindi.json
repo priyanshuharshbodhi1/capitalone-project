@@ -187,7 +187,7 @@
     "ph": "मिट्टी pH"
   },
   "ai": {
-    "recommendations": "WatsonX AI सिफारिशें",
+    "recommendations": "AI सिफारिशें",
     "fallbackMode": "फॉलबैक मोड",
     "fallbackSystem": "फॉलबैक सिफारिश प्रणाली",
     "clickRefresh": "नई अंतर्दृष्टि के लिए रिफ्रेश क्लिक करें",

@@ -5,8 +5,6 @@
   It generates IAM tokens and calls the WatsonX API to get farming recommendations.
 */
 
-import { createClient } from 'npm:@supabase/supabase-js@2';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -46,7 +44,7 @@ interface WatsonXRecommendation {
   reasoning: string;
 }
 
-// WatsonX configuration
+// WatsonX configuration (hardcoded to match original implementation)
 const WATSONX_API_KEY = 'ZJj1YCackRhQ6B-kAd2g2jiCY50ZT9EjRP9nnkWYR_aP';
 const WATSONX_PROJECT_ID = '376d3ee9-d461-4ec8-9fc2-eaac7675b030';
 const IAM_URL = 'https://iam.cloud.ibm.com/identity/token';

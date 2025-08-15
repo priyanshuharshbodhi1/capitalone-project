@@ -184,7 +184,7 @@
     "ph": "মাটির pH"
   },
   "ai": {
-    "recommendations": "WatsonX AI সুপারিশ",
+    "recommendations": "AI সুপারিশ",
     "fallbackMode": "ফলব্যাক মোড",
     "fallbackSystem": "ফলব্যাক সুপারিশ ব্যবস্থা",
     "clickRefresh": "নতুন ইনসাইটের জন্য রিফ্রেশ করুন",

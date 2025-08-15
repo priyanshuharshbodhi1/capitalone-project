@@ -49,6 +49,15 @@ interface AlertWebhookPayload {
 // Configuration for webhook URLs
 const WEBHOOK_CONFIGS = [
   {
+    name: 'Zapier SMS/Email',
+    url: Deno.env.get('ZAPIER_WEBHOOK_URL') || 'https://hooks.zapier.com/hooks/catch/your-webhook-id',
+    enabled: !!Deno.env.get('ZAPIER_WEBHOOK_URL'),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'EcoBolt-Alert-System',
+    }
+  },
+  {
     name: 'Primary Webhook',
     url: Deno.env.get('ALERT_WEBHOOK_URL') || 'https://webhook.site/your-webhook-id',
     enabled: true,
@@ -57,23 +66,14 @@ const WEBHOOK_CONFIGS = [
       'X-Source': 'EcoBolt-Alert-System',
     }
   },
-  // Add more webhook configurations as needed
-  // {
-  //   name: 'Slack Webhook',
-  //   url: Deno.env.get('SLACK_WEBHOOK_URL'),
-  //   enabled: !!Deno.env.get('SLACK_WEBHOOK_URL'),
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   }
-  // },
-  // {
-  //   name: 'Discord Webhook',
-  //   url: Deno.env.get('DISCORD_WEBHOOK_URL'),
-  //   enabled: !!Deno.env.get('DISCORD_WEBHOOK_URL'),
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   }
-  // }
+  {
+    name: 'Slack Webhook',
+    url: Deno.env.get('SLACK_WEBHOOK_URL'),
+    enabled: !!Deno.env.get('SLACK_WEBHOOK_URL'),
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }
 ];
 
 async function sendWebhook(config: any, payload: AlertWebhookPayload, retries = 3): Promise<boolean> {

@@ -187,7 +187,7 @@
     "ph": "माटोको pH"
   },
   "ai": {
-    "recommendations": "WatsonX AI सिफारिसहरू",
+    "recommendations": "AI सिफारिसहरू",
     "fallbackMode": "फ्यालब्याक मोड",
     "fallbackSystem": "फ्यालब्याक सिफारिस प्रणाली",
     "clickRefresh": "नयाँ अन्तर्दृष्टिका लागि रिफ्रेसमा क्लिक गर्नुहोस्",

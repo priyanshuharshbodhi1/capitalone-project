@@ -187,7 +187,7 @@
     "ph": "ମାଟିର pH"
   },
   "ai": {
-    "recommendations": "WatsonX AI ସୁପାରିଶ",
+    "recommendations": "AI ସୁପାରିଶ",
     "fallbackMode": "ଫଲବ୍ୟାକ୍ ମୋଡ୍",
     "fallbackSystem": "ଫଲବ୍ୟାକ୍ ସୁପାରିଶ ସିଷ୍ଟମ୍",
     "clickRefresh": "ନୂଆ ଅନ୍ତର୍ଦୃଷ୍ଟି ପାଇଁ ରିଫ୍ରେଶ୍ ଦବାନ୍ତୁ",

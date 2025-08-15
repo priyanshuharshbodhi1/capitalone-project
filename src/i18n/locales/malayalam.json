@@ -187,7 +187,7 @@
     "ph": "മണ്ണിന്റെ pH"
   },
   "ai": {
-    "recommendations": "WatsonX AI ശുപാർശകൾ",
+    "recommendations": "AI ശുപാർശകൾ",
     "fallbackMode": "ഫാൾബാക് മോഡ്",
     "fallbackSystem": "ഫാൾബാക് ശുപാർശ സംവിധാനം",
     "clickRefresh": "പുതിയ ഉൾക്കാഴ്ചകൾക്കായി പുതുക്കുക ക്ലിക്ക് ചെയ്യുക",

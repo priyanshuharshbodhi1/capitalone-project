@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -17,8 +17,9 @@ import {
   Cloud
 } from 'lucide-react';
 import { SensorData } from '../../types';
-import { watsonxApi } from '../../services/watsonxApi';
+import { aiApi } from '../../services/watsonxApi';
 import { sarvamApi } from '../../services/sarvamApi';
+import { alertService } from '../../services/alertService';
 
 interface AIRecommendation {
   type: 'practice' | 'fertilizer' | 'crop' | 'insight';
@@ -43,22 +44,21 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
   const [translating, setTranslating] = useState(false);
-  const [configStatus, setConfigStatus] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [source, setSource] = useState<'watsonx' | 'fallback' | null>(null);
+  const [source, setSource] = useState<'cloud' | 'fallback' | null>(null);
 
   useEffect(() => {
-    // Check WatsonX configuration on component mount
-    const configured = watsonxApi.isConfigured();
-    const status = watsonxApi.getConfigStatus();
+    // Check AI configuration on component mount
+    const configured = aiApi.isConfigured();
+    const status = aiApi.getConfigStatus();
     
     setIsConfigured(configured);
-    setConfigStatus(status);
+    // status available for debugging if needed
     
-    console.log('🤖 AIRecommendations: WatsonX configuration:', status);
+    console.log('🤖 AIRecommendations: AI configuration:', status);
   }, []);
 
-  const fetchRecommendations = async (isManualRefresh = false) => {
+  const fetchRecommendations = useCallback(async (isManualRefresh = false) => {
     if (!sensorData) {
       setLoading(false);
       return;
@@ -71,8 +71,8 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         setRefreshing(true);
       }
       
-      // Always use the edge function approach (which handles both WatsonX and fallback)
-      const recs = await watsonxApi.getRecommendations(sensorData);
+      // Always use the edge function approach (handles both cloud AI and fallback)
+      const recs = await aiApi.getRecommendations(sensorData);
       
       // 🌍 DEMO: Translate AI responses using Sarvam API
       if (currentLanguage !== 'en') {
@@ -115,14 +115,26 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         setRecommendations(recs);
       }
       
-      // Determine source based on configuration and results
-      if (isConfigured && recs.length > 0) {
-        setSource('watsonx');
-      } else {
+      // Determine source based on actual response characteristics
+      const isFallback = recs.some(rec => 
+        [75, 80, 85, 90].includes(rec.confidence) && 
+        (rec.reasoning.includes('is outside the optimal range') || 
+         rec.reasoning.includes('is below optimal range') ||
+         rec.reasoning.includes('is above optimal range'))
+      );
+      
+      if (isFallback || !isConfigured) {
         setSource('fallback');
+      } else {
+        setSource('cloud');
       }
       
       setHasLoadedOnce(true);
+
+      // Process alerts based on recommendations and sensor data
+      if (sensorData) {
+        await alertService.processAlerts(sensorData, recs);
+      }
     } catch (error) {
       console.error('❌ AIRecommendations: Error fetching recommendations:', error);
       setError('Failed to generate AI recommendations');
@@ -134,7 +146,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [sensorData, currentLanguage, isConfigured]);
 
   useEffect(() => {
     // Only fetch recommendations on first load (first login)
@@ -144,7 +156,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
     } else if (sensorData && hasLoadedOnce) {
       setLoading(false);
     }
-  }, [sensorData, hasLoadedOnce]);
+  }, [sensorData, hasLoadedOnce, fetchRecommendations]);
 
   const handleRefresh = () => {
     console.log('🔄 AIRecommendations: Manual refresh triggered');
@@ -197,7 +209,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg mr-3">
             <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900">WatsonX AI Recommendations</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
         </div>
         
         <div className="flex items-center justify-center py-8 sm:py-12">
@@ -208,7 +220,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
             </div>
             <p className="text-gray-600 font-medium text-sm sm:text-base">Analyzing sensor data...</p>
             <p className="text-gray-500 text-xs sm:text-sm mt-1">
-              {isConfigured ? 'Generating AI-powered insights with WatsonX' : 'Generating insights with fallback system'}
+              {isConfigured ? 'Generating AI-powered insights' : 'Generating insights with fallback system'}
             </p>
           </div>
         </div>
@@ -232,10 +244,10 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                   <span className="text-xs text-blue-600 font-medium">🌍 Translating via Sarvam AI...</span>
                 </>
               )}
-              {!translating && source === 'watsonx' ? (
+              {!translating && source === 'cloud' ? (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
-                  <span className="text-xs text-indigo-600 font-medium">WatsonX AI Powered</span>
+                  <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
                   {currentLanguage !== 'en' && (
                     <span className="text-xs text-green-600 font-medium">• Translated via Sarvam AI</span>
                   )}
@@ -276,7 +288,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
             <span className="text-sm font-medium text-yellow-800">Supabase Configuration Required</span>
           </div>
           <div className="text-xs text-yellow-700">
-            Configure Supabase URL and API key to enable WatsonX AI recommendations via edge function.
+            Configure Supabase URL and API key to enable AI recommendations via edge function.
           </div>
         </div>
       )}
@@ -341,7 +353,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                       </div>
                       
                       <div className="flex items-center space-x-1">
-                        {source === 'watsonx' ? (
+                        {source === 'cloud' ? (
                           <>
                             <Zap className="h-3 w-3 text-indigo-500" />
                             <span className="text-xs text-indigo-600 font-medium">WatsonX AI</span>
@@ -349,7 +361,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                         ) : (
                           <>
                             <TrendingUp className="h-3 w-3 text-yellow-500" />
-                            <span className="text-xs text-yellow-600 font-medium">Fallback AI</span>
+                            <span className="text-xs text-yellow-600 font-medium">Rule-Based</span>
                           </>
                         )}
                       </div>
@@ -365,9 +377,9 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${source === 'watsonx' ? 'bg-indigo-400 animate-pulse' : 'bg-yellow-400'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${source === 'cloud' ? 'bg-indigo-400 animate-pulse' : 'bg-yellow-400'}`}></div>
             <span>
-              {source === 'watsonx' ? 'Powered by IBM WatsonX AI' : 'Fallback recommendation system'}
+              {source === 'cloud' ? 'AI recommendation engine' : 'Fallback recommendation system'}
             </span>
           </div>
           <span>
