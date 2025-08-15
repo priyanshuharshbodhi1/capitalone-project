@@ -9,6 +9,62 @@ export class SupabaseAPI {
     }
   }
 
+  // Build Functions base URL from Supabase URL
+  private getFunctionsBaseUrl() {
+    const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string | undefined;
+    const explicit = (import.meta as any).env?.VITE_SUPABASE_FUNCTIONS_URL as string | undefined;
+    if (explicit) return explicit.replace(/\/$/, '');
+    if (!supabaseUrl) throw new Error('Missing VITE_SUPABASE_URL');
+    return supabaseUrl.replace('.supabase.co', '.functions.supabase.co');
+  }
+
+  // Post sensor data to the esp32-data-ingestion Edge Function
+  async sendSensorData(payload: {
+    device_id: string;
+    api_key: string;
+    atmo_temp?: number;
+    humidity?: number;
+    light?: number;
+    soil_temp?: number;
+    moisture?: number;
+    ec?: number;
+    ph?: number;
+    nitrogen?: number;
+    phosphorus?: number;
+    potassium?: number;
+  }) {
+    this.checkConfiguration();
+
+    // Preferred: use supabase-js functions.invoke (adds proper headers & handles auth)
+    try {
+      const { data, error } = await (supabase as any).functions.invoke('esp32-data-ingestion', {
+        body: payload,
+      });
+      if (error) throw error;
+      return data;
+    } catch (invokeErr) {
+      console.warn('⚠️ invoke() failed, falling back to direct fetch:', invokeErr);
+
+      // Fallback to direct fetch to the functions domain
+      const url = `${this.getFunctionsBaseUrl()}/esp32-data-ingestion`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Provide Supabase auth headers so the Edge Function accepts requests from the browser
+          apikey: (import.meta as any).env?.VITE_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${(import.meta as any).env?.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Ingestion failed (${res.status}): ${text}`);
+      }
+      return res.json();
+    }
+  }
+
   // Debug function to test raw Supabase client (reduced logging)
   private async debugSupabaseClient() {
     try {
@@ -295,6 +351,21 @@ export class SupabaseAPI {
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
+
+    // Enforce device limit: 1 device per user
+    const { count: deviceCount, error: countError } = await supabase
+      .from('devices')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if (countError) {
+      console.error('❌ SupabaseAPI: Error counting devices:', countError);
+      throw countError;
+    }
+
+    if ((deviceCount || 0) >= 1) {
+      throw new Error('Device limit reached. Only one device is allowed per user.');
+    }
 
     const { data, error } = await supabase
       .from('devices')

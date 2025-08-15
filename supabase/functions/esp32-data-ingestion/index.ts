@@ -43,10 +43,25 @@ Deno.serve(async (req: Request) => {
 
   try {
     // Initialize Supabase client with service role key
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Accept alternate names since the Supabase UI reserves the SUPABASE_ prefix
+    const SUPABASE_URL = Deno.env.get('PROJECT_URL') ?? Deno.env.get('SUPABASE_URL') ?? '';
+    const SERVICE_KEY = Deno.env.get('SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    if (!SUPABASE_URL || !SERVICE_KEY) {
+      console.error('Missing required env vars for Edge Function', {
+        hasUrl: !!SUPABASE_URL,
+        hasServiceKey: !!SERVICE_KEY,
+      });
+      return new Response(
+        JSON.stringify({
+          error: 'Server misconfiguration',
+          details: 'Set PROJECT_URL and SERVICE_ROLE_KEY (or SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY) for this function',
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
     // Parse request body
     const payload: SensorDataPayload = await req.json();
@@ -81,21 +96,35 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Prepare sensor data for insertion
-    const sensorData = {
+    // Prepare sensor data for insertion with sanitization
+    const coerceNum = (v: unknown) => {
+      const n = typeof v === 'string' ? Number(v) : (v as number);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const sensorDataRaw: Record<string, unknown> = {
       device_id: payload.device_id,
       user_id: device.user_id,
-      atmo_temp: payload.atmo_temp,
-      humidity: payload.humidity,
-      light: payload.light,
-      soil_temp: payload.soil_temp,
-      moisture: payload.moisture,
-      ec: payload.ec,
-      ph: payload.ph,
-      nitrogen: payload.nitrogen,
-      phosphorus: payload.phosphorus,
-      potassium: payload.potassium,
+      atmo_temp: coerceNum(payload.atmo_temp),
+      humidity: coerceNum(payload.humidity),
+      // light must be integer per schema
+      light: (() => {
+        const n = coerceNum(payload.light);
+        return n === null ? null : Math.round(n as number);
+      })(),
+      soil_temp: coerceNum(payload.soil_temp),
+      moisture: coerceNum(payload.moisture),
+      ec: coerceNum(payload.ec),
+      ph: coerceNum(payload.ph),
+      nitrogen: coerceNum(payload.nitrogen),
+      phosphorus: coerceNum(payload.phosphorus),
+      potassium: coerceNum(payload.potassium),
     };
+
+    // Drop undefined keys (keep nulls to explicitly clear if needed)
+    const sensorData = Object.fromEntries(
+      Object.entries(sensorDataRaw).filter(([, v]) => v !== undefined)
+    );
 
     // Insert sensor data
     const { data: insertedData, error: insertError } = await supabase
@@ -106,8 +135,14 @@ Deno.serve(async (req: Request) => {
 
     if (insertError) {
       console.error('Error inserting sensor data:', insertError);
+      const errObj = insertError as unknown as Record<string, unknown>;
       return new Response(
-        JSON.stringify({ error: 'Failed to store sensor data' }),
+        JSON.stringify({
+          error: 'Failed to store sensor data',
+          details: insertError.message,
+          code: typeof errObj.code === 'string' ? errObj.code : undefined,
+          hint: typeof errObj.hint === 'string' ? errObj.hint : undefined,
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -118,11 +153,12 @@ Deno.serve(async (req: Request) => {
       .update({ last_seen: new Date().toISOString() })
       .eq('device_id', payload.device_id);
 
+    const inserted = insertedData as { id?: string } | null;
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Sensor data stored successfully',
-        data_id: insertedData.id 
+        data_id: inserted?.id 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

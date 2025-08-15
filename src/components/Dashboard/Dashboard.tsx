@@ -34,10 +34,17 @@ const Dashboard: React.FC = () => {
   const [checkingDevices, setCheckingDevices] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSensorData = async () => {
+  const fetchSensorData = async (preferRealOnly = false) => {
     try {
       setError(null);
-      const data = await api.getLatestSensorData();
+      let data: SensorData | null = null;
+      if (preferRealOnly) {
+        // When devices exist, only fetch real data and do not fallback to mock
+        data = await supabaseApi.getLatestSensorData();
+      } else {
+        // When no devices exist (demo mode), allow mock fallback for a guided experience
+        data = await api.getLatestSensorData();
+      }
       setSensorData(data);
     } catch (error) {
       console.error('❌ Dashboard: Error fetching sensor data:', error);
@@ -52,14 +59,16 @@ const Dashboard: React.FC = () => {
     try {
       if (!isSupabaseConfigured()) {
         setHasDevices(false);
-        return;
+        return false;
       }
       
       const devices = await supabaseApi.getUserDevices();
       setHasDevices(devices.length > 0);
+      return devices.length > 0;
     } catch (error) {
       console.error('❌ Dashboard: Error checking devices:', error);
       setHasDevices(false);
+      return false;
     } finally {
       setCheckingDevices(false);
     }
@@ -68,11 +77,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
-        // Always fetch sensor data first (will use mock data if no real data available)
-        await fetchSensorData();
-        
-        // Check devices in parallel
-        await checkDevices();
+        // Check devices first; if devices exist, avoid mock fallback
+        const devicesPresent = await checkDevices();
+        await fetchSensorData(!!devicesPresent);
       } catch (error) {
         console.error('❌ Dashboard: Error initializing dashboard:', error);
         setError('Failed to initialize dashboard');
@@ -82,16 +89,16 @@ const Dashboard: React.FC = () => {
     };
 
     initializeDashboard();
-    
-    // Set up auto-refresh every 30 seconds
+
+    // Set up auto-refresh every 30 seconds; depends on hasDevices so we recreate when it changes
     const interval = setInterval(() => {
-      fetchSensorData();
+      fetchSensorData(hasDevices);
     }, 30000);
-    
+
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [hasDevices]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -117,6 +124,28 @@ const Dashboard: React.FC = () => {
           <p className="text-gray-600 text-sm sm:text-base">
             {checkingDevices ? t('common.checkingDevices') : t('common.fetchingData')}
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show explicit empty state if devices exist but no real sensor data yet
+  if (hasDevices && !loading && !sensorData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <AlertTriangle className="h-16 w-16 text-emerald-500 mx-auto mb-6" />
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">No sensor data yet</h2>
+          <p className="text-gray-600 text-sm sm:text-base mb-6">
+            Connect your real device or use the Mock Sensor page to send the first reading.
+          </p>
+          <Link
+            to="/mock-sensor"
+            className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 text-lg font-medium"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Open Mock Sensor
+          </Link>
         </div>
       </div>
     );
@@ -180,8 +209,9 @@ const Dashboard: React.FC = () => {
               
               <button
                 onClick={() => {
-                  setHasDevices(true);
-                  fetchSensorData();
+                  // Keep demo mode active and fetch demo data explicitly
+                  setHasDevices(false);
+                  fetchSensorData(false);
                 }}
                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 text-lg font-medium"
               >
@@ -222,6 +252,18 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Demo data banner */}
+        {!hasDevices && (
+          <div className="mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg overflow-hidden">
+              <div className="px-3 py-2">
+                <div className="animate-marquee text-xs sm:text-sm">
+                  This is a DEMO data to show how this page would look like when getting active sensor readings. Add a mock-sensor(from /mock-sensor page) or a real device from /settings page to see test it.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Enhanced Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
@@ -229,8 +271,13 @@ const Dashboard: React.FC = () => {
               <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent flex items-center">
                 {t('dashboard.title')}
+                {!hasDevices && (
+                  <span className="ml-3 text-xs sm:text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded px-2 py-0.5">
+                    DEMO DATA
+                  </span>
+                )}
               </h1>
               <p className="text-gray-600 mt-1 flex items-center text-sm sm:text-base">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-emerald-500" />

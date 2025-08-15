@@ -49,10 +49,11 @@ Deno.serve(async (req: Request) => {
     console.log('📧 Update Alert Status: Request received');
     
     // Initialize Supabase client with service role key for elevated permissions
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Accept alternate names since the Supabase UI reserves the SUPABASE_ prefix
+    const SUPABASE_URL = Deno.env.get('PROJECT_URL') ?? Deno.env.get('SUPABASE_URL') ?? '';
+    const SERVICE_KEY = Deno.env.get('SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
     // Parse request body
     const payload: UpdateAlertStatusPayload = await req.json();

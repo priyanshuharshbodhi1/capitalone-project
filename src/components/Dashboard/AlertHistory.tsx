@@ -4,7 +4,6 @@ import {
   AlertTriangle, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   RefreshCw, 
   Loader2,
   Filter,
@@ -50,6 +49,22 @@ const AlertHistory: React.FC = () => {
 
   useEffect(() => {
     fetchAlerts();
+  }, []);
+
+  // Subscribe to real-time alerts so UI updates without manual refresh
+  useEffect(() => {
+    const subscription: { unsubscribe?: () => void } = supabaseApi.subscribeToAlerts(() => {
+      console.log('🔔 AlertHistory: New alert detected via realtime, refreshing list');
+      fetchAlerts();
+    });
+
+    return () => {
+      try {
+        subscription?.unsubscribe?.();
+      } catch (e) {
+        console.warn('⚠️ AlertHistory: Error during unsubscribe', e);
+      }
+    };
   }, []);
 
   const handleRefresh = () => {

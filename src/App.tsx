@@ -10,6 +10,7 @@ import Analytics from './components/Analytics/Analytics';
 import Settings from './components/Settings/Settings';
 import Chatbot from './components/Chatbot/Chatbot';
 import Layout from './components/Layout/Layout';
+import MockSensor from './components/MockSensor/MockSensor';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -105,6 +106,7 @@ const App: React.FC = () => {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="mock-sensor" element={<MockSensor />} />
             </Route>
           </Routes>
         </Router>

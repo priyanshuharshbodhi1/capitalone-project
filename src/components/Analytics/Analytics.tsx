@@ -10,18 +10,32 @@ import { useTranslation } from 'react-i18next';
 import SensorChart from '../Dashboard/SensorChart';
 import { SensorData } from '../../types';
 import { api } from '../../services/api';
+import { supabaseApi } from '../../services/supabaseApi';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 const Analytics: React.FC = () => {
   const { t } = useTranslation();
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
 
   const fetchSensorData = async () => {
     try {
-      const data = await api.getLatestSensorData();
-      setSensorData(data);
+      // Prefer real data if Supabase is configured; fall back to demo
+      let data: SensorData | null = null;
+      if (isSupabaseConfigured()) {
+        data = await supabaseApi.getLatestSensorData();
+      }
+      if (data) {
+        setIsDemo(false);
+        setSensorData(data);
+      } else {
+        const demo = await api.getLatestSensorData();
+        setIsDemo(true);
+        setSensorData(demo);
+      }
     } catch (error) {
       console.error('Error fetching sensor data:', error);
     } finally {
@@ -66,6 +80,18 @@ const Analytics: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Demo data banner */}
+        {isDemo && (
+          <div className="mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg overflow-hidden">
+              <div className="px-3 py-2">
+                <div className="animate-marquee text-xs sm:text-sm">
+                  This is DEMO data. Add a mock sensor (from /mock-sensor) or a real device (from /settings) to send real readings.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
@@ -74,7 +100,14 @@ const Analytics: React.FC = () => {
                 <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('analytics.title')}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                  {t('analytics.title')}
+                  {isDemo && (
+                    <span className="ml-3 text-xs sm:text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded px-2 py-0.5">
+                      DEMO DATA
+                    </span>
+                  )}
+                </h1>
                 <p className="text-gray-600 mt-1 text-sm sm:text-base">{t('analytics.subtitle')}</p>
               </div>
             </div>

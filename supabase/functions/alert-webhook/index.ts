@@ -190,11 +190,11 @@ Deno.serve(async (req: Request) => {
   try {
     console.log('🔔 Alert webhook triggered');
     
-    // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Initialize Supabase client (allow alt names since SUPABASE_ prefix is restricted in UI)
+    const SUPABASE_URL = Deno.env.get('PROJECT_URL') ?? Deno.env.get('SUPABASE_URL') ?? '';
+    const SERVICE_KEY = Deno.env.get('SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
     // Parse the alert payload
     const payload: AlertWebhookPayload = await req.json();

@@ -222,12 +222,6 @@ const Settings: React.FC = () => {
         });
         setThresholdsSuccess('Device updated successfully');
       } else {
-        // Check if user already has a device
-        if (devices.length >= 1) {
-          setError('You can only add one device per account');
-          return;
-        }
-
         // Add new device
         const newDevice = await supabaseApi.addDevice(
           deviceFormData.device_id,
@@ -450,8 +444,8 @@ const Settings: React.FC = () => {
     }
   };
 
-  // Check if user can add more devices (limit: 1)
-  const canAddDevice = devices.length < 1;
+  // Allow adding multiple devices (no limit)
+  const canAddDevice = true;
 
   // Priority languages to show first
   const priorityLanguages = ['english', 'hindi', 'marathi', 'tamil', 'telugu'];
@@ -663,17 +657,7 @@ const Settings: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Device Limit Notice */}
-                {!canAddDevice && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <AlertTriangle className="h-5 w-5 text-blue-500 mr-2" />
-                      <p className="text-blue-700 font-medium">
-                        {t('common.deviceLimit')}: {t('common.deviceLimitMessage')}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                {/* Device Limit Notice removed: multiple devices now supported */}
 
                 {/* Add/Edit Device Form */}
                 {showAddForm && (
