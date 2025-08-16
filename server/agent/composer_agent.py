@@ -210,10 +210,19 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
         
         data = policy_output.get("data", {})
         schemes_info = data.get("schemes_info", "")
-        sources = data.get("sources", [])
+        sources = policy_output.get("sources") or data.get("sources", [])
+        structured = data.get("schemes_structured", [])
         
         lines = []
-        if schemes_info:
+        # Prefer strict JSON format if available as requested by frontend/judges
+        if structured:
+            import json as _json
+            lines.append("Here are the most relevant government schemes (max 5):")
+            lines.append("\n```json")
+            # Ensure max 5
+            lines.append(_json.dumps(structured[:5], ensure_ascii=False, indent=2))
+            lines.append("```")
+        elif schemes_info:
             lines.append(schemes_info)
         
         # Add source citations for transparency

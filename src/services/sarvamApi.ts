@@ -83,7 +83,8 @@ class SarvamAPI {
 
       console.log('🌍 SarvamAPI: Translating text to', targetLangCode);
       
-      const response = await fetch(`${this.baseUrl}/translate`, {
+      const url = `${this.baseUrl}/translate`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -93,14 +94,36 @@ class SarvamAPI {
       });
 
       if (!response.ok) {
-        throw new Error(`Translation API error: ${response.status}`);
+        const errorBody = await response.text().catch(() => '');
+        console.warn('SarvamAPI: Primary request failed', { status: response.status, body: errorBody });
+
+        // Retry with alternate header style if unauthorized/forbidden
+        if (response.status === 401 || response.status === 403) {
+          console.log('SarvamAPI: Retrying with x-api-key header');
+          const retryResp = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'x-api-key': `${this.apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+          });
+          if (!retryResp.ok) {
+            const retryBody = await retryResp.text().catch(() => '');
+            throw new Error(`Translation API error after retry: ${retryResp.status} ${retryBody}`);
+          }
+          const retryData: SarvamTranslateResponse = await retryResp.json();
+          console.log('✅ SarvamAPI: Translation completed via retry');
+          return retryData.translated_text;
+        }
+        throw new Error(`Translation API error: ${response.status} ${errorBody}`);
       }
 
       const data: SarvamTranslateResponse = await response.json();
       
       console.log('✅ SarvamAPI: Translation completed');
       return data.translated_text;
-      
+
     } catch (error) {
       console.error('❌ SarvamAPI: Translation failed:', error);
       // Fallback to original text if translation fails

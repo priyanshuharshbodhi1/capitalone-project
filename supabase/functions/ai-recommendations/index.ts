@@ -44,7 +44,7 @@ interface AIRecommendation {
   reasoning: string;
 }
 
-// AI configuration
+// AI configuration (hardcoded per request)
 const AI_API_KEY = 'ZJj1YCackRhQ6B-kAd2g2jiCY50ZT9EjRP9nnkWYR_aP';
 const AI_PROJECT_ID = '376d3ee9-d461-4ec8-9fc2-eaac7675b030';
 const IAM_URL = 'https://iam.cloud.ibm.com/identity/token';
@@ -194,7 +194,7 @@ function getFallbackRecommendations(sensorData: SensorData): AIRecommendation[] 
 }
 
 // Get AI recommendations
-async function getRecommendations(sensorData: SensorData): Promise<AIRecommendation[]> {
+async function getRecommendations(sensorData: SensorData): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback' }> {
   try {
     console.log('🤖 AI Edge Function: Generating AI recommendations...');
     
@@ -261,7 +261,7 @@ async function getRecommendations(sensorData: SensorData): Promise<AIRecommendat
       console.log('Raw AI response:', aiResponse);
       
       // Return fallback recommendations if parsing fails
-      return getFallbackRecommendations(sensorData);
+      return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
     }
 
     // Validate the recommendations structure
@@ -272,13 +272,13 @@ async function getRecommendations(sensorData: SensorData): Promise<AIRecommendat
     );
 
     console.log(`✅ AI Edge Function: Generated ${validRecommendations.length} valid recommendations`);
-    return validRecommendations;
+    return { recommendations: validRecommendations, source: 'ai' };
 
   } catch (error) {
     console.error('❌ AI Edge Function: Error getting recommendations:', error);
     
     // Return fallback recommendations on error
-    return getFallbackRecommendations(sensorData);
+    return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
   }
 }
 
@@ -316,16 +316,16 @@ Deno.serve(async (req: Request) => {
     });
 
     // Get recommendations
-    const recommendations = await getRecommendations(sensorData);
+    const { recommendations, source } = await getRecommendations(sensorData);
     
-    console.log(`📋 AI Edge Function: Returning ${recommendations.length} recommendations`);
+    console.log(`📋 AI Edge Function: Returning ${recommendations.length} recommendations (source: ${source})`);
 
     return new Response(
       JSON.stringify({
         success: true,
         recommendations,
         timestamp: new Date().toISOString(),
-        source: recommendations.length > 0 ? 'ai' : 'fallback'
+        source
       }),
       { 
         status: 200, 

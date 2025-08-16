@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLanguage } from '../../context/LanguageContext';
+// Language-specific translation removed
 import { 
   Brain, 
   Sparkles, 
@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { SensorData } from '../../types';
 import { aiApi } from '../../services/aiApi';
-import { sarvamApi } from '../../services/sarvamApi';
 import { alertService } from '../../services/alertService';
 
 interface AIRecommendation {
@@ -37,13 +36,13 @@ interface AIRecommendationsProps {
 
 const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => {
   const { t } = useTranslation();
-  const { currentLanguage } = useLanguage();
+  // currentLanguage removed
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
-  const [translating, setTranslating] = useState(false);
+  // Translation removed
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<'cloud' | 'fallback' | null>(null);
 
@@ -72,62 +71,9 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       }
       
       // Always use the edge function approach (handles both cloud AI and fallback)
-      const recs = await aiApi.getRecommendations(sensorData);
-      
-      // 🌍 DEMO: Translate AI responses using Sarvam API
-      if (currentLanguage !== 'en') {
-        console.log(`🌍 AIRecommendations: Translating ${recs.length} recommendations to ${currentLanguage}`);
-        setTranslating(true);
-        
-        try {
-          // Transform recommendations to match Sarvam API format
-          const recsForTranslation = recs.map(rec => ({
-            id: rec.type + Math.random().toString(36).substr(2, 9),
-            text: rec.description,
-            confidence: rec.confidence,
-            reasoning: rec.reasoning,
-            priority: rec.priority,
-          }));
-          
-          // Translate using Sarvam API
-          const translatedRecs = await sarvamApi.translateRecommendations(
-            recsForTranslation, 
-            currentLanguage
-          );
-          
-          // Transform back to original format
-          const finalRecs = recs.map((rec, index) => ({
-            ...rec,
-            description: translatedRecs[index]?.text || rec.description,
-            reasoning: translatedRecs[index]?.reasoning || rec.reasoning,
-          }));
-          
-          console.log('✅ AIRecommendations: Translation completed via Sarvam API');
-          setRecommendations(finalRecs);
-          
-        } catch (translationError) {
-          console.warn('⚠️ AIRecommendations: Translation failed, using original text:', translationError);
-          setRecommendations(recs); // Fallback to original if translation fails
-        } finally {
-          setTranslating(false);
-        }
-      } else {
-        setRecommendations(recs);
-      }
-      
-      // Determine source based on actual response characteristics
-      const isFallback = recs.some(rec => 
-        [75, 80, 85, 90].includes(rec.confidence) && 
-        (rec.reasoning.includes('is outside the optimal range') || 
-         rec.reasoning.includes('is below optimal range') ||
-         rec.reasoning.includes('is above optimal range'))
-      );
-      
-      if (isFallback || !isConfigured) {
-        setSource('fallback');
-      } else {
-        setSource('cloud');
-      }
+      const { recommendations: recs, source } = await aiApi.getRecommendations(sensorData);
+      setRecommendations(recs);
+      setSource(source === 'ai' ? 'cloud' : 'fallback');
       
       setHasLoadedOnce(true);
 
@@ -153,7 +99,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       setLoading(false);
       setRefreshing(false);
     }
-  }, [sensorData, currentLanguage, isConfigured]);
+  }, [sensorData]);
 
   useEffect(() => {
     // Only fetch recommendations on first load (first login)
@@ -245,27 +191,15 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
           <div>
             <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
             <div className="flex items-center space-x-2 mt-1">
-              {translating && (
-                <>
-                  <Loader2 className="h-3 w-3 text-blue-500 animate-spin" />
-                  <span className="text-xs text-blue-600 font-medium">🌍 Translating via Sarvam AI...</span>
-                </>
-              )}
-              {!translating && source === 'cloud' ? (
+              {source === 'cloud' ? (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
                   <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
-                  {currentLanguage !== 'en' && (
-                    <span className="text-xs text-green-600 font-medium">• Translated via Sarvam AI</span>
-                  )}
                 </>
-              ) : !translating && source === 'fallback' ? (
+              ) : source === 'fallback' ? (
                 <>
                   <Cloud className="h-3 w-3 text-yellow-500" />
-                  <span className="text-xs text-yellow-600 font-medium">{t('ai.fallbackMode')}</span>
-                  {currentLanguage !== 'en' && (
-                    <span className="text-xs text-green-600 font-medium">• Translated via Sarvam AI</span>
-                  )}
+                  <span className="text-xs text-yellow-600 font-medium">Rule based</span>
                 </>
               ) : (
                 <>

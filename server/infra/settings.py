@@ -4,8 +4,15 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent.parent / ".env")
+    # Attempt to load from both repo root and server/.env
+    _this = Path(__file__).resolve()
+    _server_dir = _this.parent.parent
+    _repo_root = _server_dir.parent
+    # Load root .env first (preferred), then server/.env as optional override
+    load_dotenv(_repo_root / ".env")
+    load_dotenv(_server_dir / ".env")
 except ImportError:
+    # python-dotenv not installed; rely on actual environment
     pass
 
 
