@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, 
+  PieChart, 
   RefreshCw, 
   Loader2,
   Calendar,
@@ -97,7 +97,7 @@ const Analytics: React.FC = () => {
           <div>
             <div className="flex items-center space-x-3">
               <div className="bg-blue-500 p-2 rounded-lg">
-                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <PieChart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
@@ -141,49 +141,34 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Analytics Overview */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
-          <div className="flex items-center mb-4">
-            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 mr-2" />
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('analytics.statisticalAnalysis')}</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex items-center mb-3">
+            <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 mr-2" />
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">{t('analytics.statisticalAnalysis')}</h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="text-center p-3 sm:p-4 bg-emerald-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-emerald-600">10</div>
-              <div className="text-xs sm:text-sm text-emerald-700">{t('analytics.activeSensors')}</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="text-center p-2 sm:p-3 bg-emerald-50 rounded-lg">
+              <div className="text-lg sm:text-xl font-bold text-emerald-600">10</div>
+              <div className="text-xs text-emerald-700">{t('analytics.activeSensors')}</div>
             </div>
-            <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-blue-600">{t(`common.${timeRange}`)}</div>
-              <div className="text-xs sm:text-sm text-blue-700">{t('analytics.timeRange')}</div>
+            <div className="text-center p-2 sm:p-3 bg-blue-50 rounded-lg">
+              <div className="text-lg sm:text-xl font-bold text-blue-600">{t(`common.${timeRange}`)}</div>
+              <div className="text-xs text-blue-700">{t('analytics.timeRange')}</div>
             </div>
-            <div className="text-center p-3 sm:p-4 bg-purple-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-purple-600">{t('analytics.realTimeUpdates')}</div>
-              <div className="text-xs sm:text-sm text-purple-700">{t('analytics.dataUpdates')}</div>
+            <div className="text-center p-2 sm:p-3 bg-purple-50 rounded-lg">
+              <div className="text-lg sm:text-xl font-bold text-purple-600">{t('analytics.realTimeUpdates')}</div>
+              <div className="text-xs text-purple-700">{t('analytics.dataUpdates')}</div>
             </div>
-            <div className="text-center p-3 sm:p-4 bg-orange-50 rounded-lg">
-              <div className="text-xl sm:text-2xl font-bold text-orange-600">{t('analytics.minMaxAvg')}</div>
-              <div className="text-xs sm:text-sm text-orange-700">{t('analytics.statistics')}</div>
+            <div className="text-center p-2 sm:p-3 bg-orange-50 rounded-lg">
+              <div className="text-lg sm:text-xl font-bold text-orange-600">{t('analytics.minMaxAvg')}</div>
+              <div className="text-xs text-orange-700">{t('analytics.statistics')}</div>
             </div>
           </div>
         </div>
 
-        {/* Charts Grid - All 10 Parameters with Statistics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {sensorParameters.map((param) => (
-            <SensorChart
-              key={param.key}
-              parameter={param.key as keyof Omit<SensorData, 'timestamp'>}
-              title={param.title}
-              unit={param.unit}
-              color={param.color}
-              timeRange={timeRange}
-              showStats={true}
-            />
-          ))}
-        </div>
-
-        {/* Data Summary */}
+        {/* Current Readings Summary */}
         {sensorData && (
-          <div className="mt-6 sm:mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.currentReadings')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 text-sm">
               {sensorParameters.map((param) => (
@@ -201,6 +186,22 @@ const Analytics: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Charts Grid - All 10 Parameters with Statistics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {sensorParameters.map((param) => (
+            <SensorChart
+              key={param.key}
+              parameter={param.key as keyof Omit<SensorData, 'timestamp'>}
+              title={param.title}
+              unit={param.unit}
+              color={param.color}
+              timeRange={timeRange}
+              showStats={true}
+            />
+          ))}
+        </div>
+
       </div>
     </div>
   );

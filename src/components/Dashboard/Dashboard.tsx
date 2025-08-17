@@ -4,15 +4,18 @@ import {
   Thermometer, 
   Droplets, 
   Sun, 
-  Zap, 
   Leaf,
   Activity,
   RefreshCw,
   Loader2,
-  BarChart3,
+  LayoutDashboard,
+  PieChart,
   Sparkles,
   Plus,
-  AlertTriangle
+  AlertTriangle,
+  Gauge,
+  Beaker,
+  TestTube
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SensorCard from './SensorCard';
@@ -215,7 +218,7 @@ const Dashboard: React.FC = () => {
                 }}
                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 text-lg font-medium"
               >
-                <BarChart3 className="h-5 w-5 mr-2" />
+                <PieChart className="h-5 w-5 mr-2" />
                 {t('dashboard.viewDemoData')}
               </button>
             </div>
@@ -268,7 +271,7 @@ const Dashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg">
-              <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              <LayoutDashboard className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent flex items-center">
@@ -290,7 +293,7 @@ const Dashboard: React.FC = () => {
               to="/analytics"
               className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg sm:rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
             >
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <PieChart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Analytics
             </Link>
             <button
@@ -367,7 +370,7 @@ const Dashboard: React.FC = () => {
                   title={t('sensors.soilEC')}
                   value={sensorData.ec}
                   unit="dS/m"
-                  icon={Zap}
+                  icon={Gauge}
                   color="bg-purple-500"
                   trend="down"
                 />
@@ -402,7 +405,7 @@ const Dashboard: React.FC = () => {
                   title={t('sensors.nitrogen')}
                   value={sensorData.n}
                   unit="ppm"
-                  icon={Leaf}
+                  icon={TestTube}
                   color="bg-green-500"
                   trend="stable"
                 />
@@ -410,7 +413,7 @@ const Dashboard: React.FC = () => {
                   title={t('sensors.phosphorus')}
                   value={sensorData.p}
                   unit="ppm"
-                  icon={Leaf}
+                  icon={Beaker}
                   color="bg-teal-500"
                   trend="down"
                 />
@@ -418,7 +421,7 @@ const Dashboard: React.FC = () => {
                   title={t('sensors.potassium')}
                   value={sensorData.k}
                   unit="ppm"
-                  icon={Leaf}
+                  icon={TestTube}
                   color="bg-emerald-500"
                   trend="stable"
                 />

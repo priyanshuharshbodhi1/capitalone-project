@@ -157,21 +157,21 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-        <div className="flex items-center mb-4 sm:mb-6">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg mr-3">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 lg:p-6">
+        <div className="flex items-center mb-3 sm:mb-4 lg:mb-6">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
             <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
+          <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
         </div>
         
-        <div className="flex items-center justify-center py-8 sm:py-12">
+        <div className="flex items-center justify-center py-6 sm:py-8 lg:py-12">
           <div className="text-center">
             <div className="relative">
-              <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-              <div className="absolute inset-0 h-10 w-10 sm:h-12 sm:w-12 border-4 border-indigo-200 rounded-full mx-auto animate-pulse"></div>
+              <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 animate-spin text-indigo-600 mx-auto mb-3 sm:mb-4" />
+              <div className="absolute inset-0 h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 border-4 border-indigo-200 rounded-full mx-auto animate-pulse"></div>
             </div>
-            <p className="text-gray-600 font-medium text-sm sm:text-base">Analyzing sensor data...</p>
+            <p className="text-gray-600 font-medium text-xs sm:text-sm lg:text-base">Analyzing sensor data...</p>
             <p className="text-gray-500 text-xs sm:text-sm mt-1">
               {isConfigured ? 'Generating AI-powered insights' : 'Generating insights with fallback system'}
             </p>
@@ -182,15 +182,15 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+    <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 lg:p-6">
+      <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 lg:mb-6">
         <div className="flex items-center">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg mr-3">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
             <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
-            <div className="flex items-center space-x-2 mt-1">
+            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
+            <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
               {source === 'cloud' ? (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
@@ -214,21 +214,21 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm"
+          className="flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-xs sm:text-sm min-h-[44px]"
         >
           <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Analyzing...' : 'Refresh'}
+          <span className="font-medium">{refreshing ? 'Analyzing...' : 'Refresh'}</span>
         </button>
       </div>
 
       {/* Configuration Warning */}
       {!isConfigured && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center mb-2">
-            <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
-            <span className="text-sm font-medium text-yellow-800">Supabase Configuration Required</span>
+        <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center mb-1 sm:mb-2">
+            <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-600 mr-1 sm:mr-2 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-yellow-800">Supabase Configuration Required</span>
           </div>
-          <div className="text-xs text-yellow-700">
+          <div className="text-xs text-yellow-700 leading-relaxed">
             Configure Supabase URL and API key to enable AI recommendations via edge function.
           </div>
         </div>
@@ -236,54 +236,54 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-xs sm:text-sm">{error}</p>
         </div>
       )}
 
       {recommendations.length === 0 ? (
-        <div className="text-center py-6 sm:py-8">
-          <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600 font-medium text-sm sm:text-base">All conditions optimal!</p>
+        <div className="text-center py-4 sm:py-6 lg:py-8">
+          <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-gray-400 mx-auto mb-2 sm:mb-3" />
+          <p className="text-gray-600 font-medium text-xs sm:text-sm lg:text-base">All conditions optimal!</p>
           <p className="text-gray-500 text-xs sm:text-sm">No immediate recommendations at this time.</p>
         </div>
       ) : (
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-2 sm:space-y-3 lg:space-y-4">
           {recommendations.map((rec, index) => {
             const TypeIcon = getTypeIcon(rec.type);
             return (
               <div
                 key={`${rec.type}-${index}`}
-                className={`border-2 rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md ${getPriorityColor(rec.priority)}`}
+                className={`border-2 rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 transition-all duration-200 hover:shadow-md ${getPriorityColor(rec.priority)}`}
               >
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className={`${getTypeColor(rec.type)} p-2 rounded-lg flex-shrink-0`}>
-                    <TypeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <div className="flex items-start space-x-2 sm:space-x-3 lg:space-x-4">
+                  <div className={`${getTypeColor(rec.type)} p-1.5 sm:p-2 rounded-lg flex-shrink-0`}>
+                    <TypeIcon className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-1 sm:space-y-0">
-                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{rec.title}</h3>
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${getPriorityTextColor(rec.priority)} bg-white/50`}>
+                    <div className="flex flex-col space-y-2 sm:space-y-1 sm:flex-row sm:items-start sm:justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 text-xs sm:text-sm lg:text-base pr-2">{rec.title}</h3>
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 flex-shrink-0">
+                        <span className={`text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${getPriorityTextColor(rec.priority)} bg-white/50`}>
                           {rec.priority.toUpperCase()}
                         </span>
-                        <span className="text-xs text-gray-600 bg-white/50 px-2 py-1 rounded-full">
-                          {rec.confidence}% confidence
+                        <span className="text-xs text-gray-600 bg-white/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                          {rec.confidence}%
                         </span>
                       </div>
                     </div>
                     
                     <p className="text-gray-700 text-xs sm:text-sm mb-2 leading-relaxed">{rec.description}</p>
                     
-                    <div className="bg-white/70 rounded-lg p-2 sm:p-3 mb-3">
-                      <p className="text-xs text-gray-600">
+                    <div className="bg-white/70 rounded-lg p-2 sm:p-3 mb-2 sm:mb-3">
+                      <p className="text-xs text-gray-600 leading-relaxed">
                         <strong>AI Reasoning:</strong> {rec.reasoning}
                       </p>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                    <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
                         <span className="text-xs text-gray-500 capitalize">{rec.type} recommendation</span>
                         {rec.actionable && (
                           <div className="flex items-center space-x-1">
@@ -315,15 +315,15 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         </div>
       )}
 
-      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${source === 'cloud' ? 'bg-indigo-400 animate-pulse' : 'bg-yellow-400'}`}></div>
-            <span>
+      <div className="mt-3 sm:mt-4 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-gray-200">
+        <div className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${source === 'cloud' ? 'bg-indigo-400 animate-pulse' : 'bg-yellow-400'}`}></div>
+            <span className="text-xs">
               {source === 'cloud' ? 'AI recommendation engine' : 'Fallback recommendation system'}
             </span>
           </div>
-          <span>
+          <span className="text-xs text-right sm:text-left">
             {hasLoadedOnce ? 'Click refresh for new insights' : 'Auto-generated on first load'}
           </span>
         </div>

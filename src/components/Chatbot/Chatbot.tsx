@@ -8,6 +8,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { completeAgent, type ChatMessage } from '../../services/agentApi';
 
 interface Message {
@@ -22,6 +24,7 @@ const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [thinkingText, setThinkingText] = useState('Thinking');
   const agentUrl = import.meta.env.VITE_AGENT_API_URL as string | undefined;
   const agentEnabled = Boolean(agentUrl);
   const [isMobile, setIsMobile] = useState(false);
@@ -110,6 +113,21 @@ const Chatbot: React.FC = () => {
     inputRef.current?.focus();
   }, []);
 
+  // Rotate thinking text while loading
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const thinkingStates = ['Thinking', 'Planning', 'Analysing', 'Processing'];
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % thinkingStates.length;
+      setThinkingText(thinkingStates[currentIndex]);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   const generateResponse = async (): Promise<string> => {
     // Fallback local mock if backend agent is not configured
     if (!agentEnabled) {
@@ -147,31 +165,21 @@ const Chatbot: React.FC = () => {
           // Create a placeholder assistant message to stream into
           let streamed = '';
           const placeholderId = (Date.now() + 2).toString();
-          setMessages(prev => [...prev, { id: placeholderId, text: '', sender: 'bot', timestamp: new Date() }]);
-
-          // Show "Thinking..." while waiting for response
-          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: t('common.thinking') } : m));
           
           // Get complete response
           const response = await completeAgent<{ text: string }>(`${agentUrl}/agent/complete`, payload);
           streamed = response?.text || 'No response received';
           
-          // Update with final response
-          setMessages(prev => prev.map(m => m.id === placeholderId ? { ...m, text: streamed } : m));
+          // Add final response
+          setMessages(prev => [...prev, { id: placeholderId, text: streamed, sender: 'bot', timestamp: new Date() }]);
 
           setIsLoading(false);
           resolve(streamed || '');
         } catch (err) {
           setIsLoading(false);
           const friendly = 'Sorry, I could not fetch a response. Please try again.';
-          setMessages(prev => {
-            const idx = prev.findIndex(m => m.sender === 'bot' && m.text === '');
-            if (idx === -1) {
-              // If placeholder wasn't created, append an error message
-              return [...prev, { id: (Date.now()).toString(), text: friendly, sender: 'bot' as const, timestamp: new Date() }];
-            }
-            return prev.map(m => m.id === prev[idx].id ? { ...m, text: friendly } : m);
-          });
+          // Add error message
+          setMessages(prev => [...prev, { id: (Date.now()).toString(), text: friendly, sender: 'bot' as const, timestamp: new Date() }]);
           reject(err);
         }
       })();
@@ -280,7 +288,32 @@ const Chatbot: React.FC = () => {
                         {formatTime(message.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm sm:text-base whitespace-pre-wrap">{message.text}</p>
+                    {message.sender === 'bot' ? (
+                      <div className="text-sm sm:text-base prose prose-sm max-w-none prose-gray">
+                        <ReactMarkdown 
+                          components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                            strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                            em: ({ children }) => <em className="italic">{children}</em>,
+                            ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                            li: ({ children }) => <li className="text-sm">{children}</li>,
+                            h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-base font-semibold mb-2">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-sm font-medium mb-1">{children}</h3>,
+                            code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                            blockquote: ({ children }) => <blockquote className="border-l-4 border-gray-300 pl-3 italic">{children}</blockquote>,
+                            br: () => <br />
+                          }}
+                          remarkPlugins={[remarkBreaks]}
+                          rehypePlugins={[]}
+                        >
+                          {message.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm sm:text-base whitespace-pre-wrap">{message.text}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -292,7 +325,7 @@ const Chatbot: React.FC = () => {
                   <div className="flex items-center">
                     <Bot className="h-5 w-5 text-emerald-600 mr-2" />
                     <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-                    <span className="ml-2 text-sm text-gray-500">{t('common.thinking')}</span>
+                    <span className="ml-2 text-sm text-gray-500">{thinkingText}...</span>
                   </div>
                 </div>
               </div>
@@ -336,22 +369,31 @@ const Chatbot: React.FC = () => {
             </div>
           )}
           
-          {/* Input Area */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center space-x-2">
-              <input
+          {/* Input Area - Fixed to bottom */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+            <div className="flex items-end space-x-2">
+              <textarea
                 ref={inputRef}
-                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('assistant.typeMessage')}
-                className="flex-1 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                rows={1}
+                className="flex-1 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none overflow-hidden min-h-[48px] max-h-32"
+                style={{
+                  height: 'auto',
+                  minHeight: '48px'
+                }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                }}
               />
               <button
                 onClick={handleSend}
                 disabled={input.trim() === '' || isLoading}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors self-end"
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
               </button>

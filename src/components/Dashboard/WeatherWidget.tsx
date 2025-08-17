@@ -191,56 +191,56 @@ const WeatherWidget: React.FC = () => {
           </div>
         </div>
 
-        {/* Weather Details Grid */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/20">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="bg-blue-500/30 rounded-lg p-1.5 sm:p-2">
-                <Droplets className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200" />
+        {/* Weather Metrics in One Line */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+              <div className="bg-blue-500/30 rounded-lg p-1 sm:p-1.5 lg:p-2">
+                <Droplets className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-blue-200" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.humidity}%</div>
-                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.humidity')}</div>
+                <div className="text-white font-semibold text-xs sm:text-sm lg:text-lg">{weatherData.humidity}%</div>
+                <div className="text-blue-200 text-xs">{t('weather.humidity')}</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/20">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="bg-indigo-500/30 rounded-lg p-1.5 sm:p-2">
-                <Gauge className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-200" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+              <div className="bg-indigo-500/30 rounded-lg p-1 sm:p-1.5 lg:p-2">
+                <Gauge className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-indigo-200" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.pressure}</div>
-                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.hPa')}</div>
+                <div className="text-white font-semibold text-xs sm:text-sm lg:text-lg">{weatherData.pressure}</div>
+                <div className="text-blue-200 text-xs">{t('weather.hPa')}</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/20">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="bg-cyan-500/30 rounded-lg p-1.5 sm:p-2">
-                <Wind className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-200" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+              <div className="bg-cyan-500/30 rounded-lg p-1 sm:p-1.5 lg:p-2">
+                <Wind className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-cyan-200" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm sm:text-lg">
+                <div className="text-white font-semibold text-xs sm:text-sm lg:text-lg">
                   {weatherData.windSpeed} m/s
                 </div>
-                <div className="text-blue-200 text-xs sm:text-sm">
+                <div className="text-blue-200 text-xs">
                   {getWindDirection(weatherData.windDirection)} {t('weather.wind')}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/20">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="bg-purple-500/30 rounded-lg p-1.5 sm:p-2">
-                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-purple-200" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+              <div className="bg-purple-500/30 rounded-lg p-1 sm:p-1.5 lg:p-2">
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-purple-200" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm sm:text-lg">{weatherData.visibility} km</div>
-                <div className="text-blue-200 text-xs sm:text-sm">{t('weather.visibility')}</div>
+                <div className="text-white font-semibold text-xs sm:text-sm lg:text-lg">{weatherData.visibility} km</div>
+                <div className="text-blue-200 text-xs">{t('weather.visibility')}</div>
               </div>
             </div>
           </div>

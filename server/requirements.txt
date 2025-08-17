@@ -6,6 +6,8 @@ requests==2.32.3
 sse-starlette==2.1.3
 redis==5.0.7
 google-generativeai==0.7.2
+groq==0.8.0
+httpx==0.25.2
 langgraph>=0.0.40
 
 # Lightweight RAG System Dependencies
