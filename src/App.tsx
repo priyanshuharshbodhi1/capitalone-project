@@ -11,6 +11,7 @@ import Settings from './components/Settings/Settings';
 import Chatbot from './components/Chatbot/Chatbot';
 import Layout from './components/Layout/Layout';
 import MockSensor from './components/MockSensor/MockSensor';
+import PlantDoc from './components/PlantDoc/PlantDoc';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -103,6 +104,7 @@ const App: React.FC = () => {
               }
             >
               <Route index element={<Chatbot />} />
+              <Route path="plantdoc" element={<PlantDoc />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<Settings />} />

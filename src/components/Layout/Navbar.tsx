@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { Tractor, LayoutDashboard, Settings, LogOut, User, PieChart, Menu, X, MessageSquare, ChevronDown } from 'lucide-react';
+import { Tractor, LayoutDashboard, Settings, LogOut, User, PieChart, Menu, X, MessageSquare, ChevronDown, Leaf } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -14,6 +14,7 @@ const Navbar: React.FC = () => {
 
   const navigation = [
     { name: t('navigation.assistant'), href: '/', icon: MessageSquare },
+    { name: 'PlantDoc', href: '/plantdoc', icon: Leaf },
     { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('navigation.analytics'), href: '/analytics', icon: PieChart },
   ];
