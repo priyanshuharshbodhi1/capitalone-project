@@ -1,11 +1,8 @@
-"""Government Policy Agent for Indian Agricultural Schemes
+"""Government Scheme Agent for Indian Agricultural Schemes
 
-Core approach: Retrieval-Augmented Generation (RAG).
-We index official government sources and answer from those retrieved materials.
-
-Additionally, a Perplexity client is integrated as a live web lookup helper to
-surface up-to-date scheme details and official links. If Perplexity is not
-available or fails, the system falls back to the RAG pipeline.
+Core approach: OpenAI web search with RAG fallback.
+We use OpenAI's web search capabilities to find current government schemes.
+RAG system is available as a backup when needed.
 """
 
 import logging
@@ -13,14 +10,13 @@ from typing import Dict, Any, Optional
 from ..rag.lightweight_rag_agent import LightweightRAGAgent
 from pathlib import Path
 from ...infra.settings import settings
-from .perplexity_client import PerplexityClient
+from ...infra.openai_service import openai_web_client
 
-class GovtPolicyAgent:
-    """Government Policy Agent using RAG system for accurate scheme information.
+class GovtSchemeAgent:
+    """Government Scheme Agent using OpenAI web search for government scheme information.
 
-    Note: RAG remains the primary design. Perplexity augments with live web
-    results and the agent will continue with RAG when the web lookup isn't
-    available.
+    Primary approach: OpenAI web search for current, accurate scheme details.
+    RAG system available as fallback when needed.
     """
     
     def __init__(self, 
@@ -29,10 +25,10 @@ class GovtPolicyAgent:
         
         # Initialize lightweight RAG system
         self.rag_agent = LightweightRAGAgent(db_path=db_path)
-        # Initialize Perplexity client (primary source if key provided)
-        self.perplexity = PerplexityClient(settings.perplexity_api_key)
+        # OpenAI web search is the primary method
+        self.openai_client = openai_web_client
         
-        self.logger.info("Government Policy Agent initialized with lightweight RAG system")
+        self.logger.info("Government Scheme Agent initialized with lightweight RAG system")
     
     def search_schemes(self, query: str, state: Optional[str] = None, farmer_type: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -55,76 +51,31 @@ class GovtPolicyAgent:
             if farmer_type:
                 context['farmer_type'] = farmer_type
             
-            # 1) Try Perplexity first (live, authoritative sources)
-            if self.perplexity.available:
-                pp = self.perplexity.search_schemes(query, state, farmer_type)
-                if pp.get("success") and pp.get("schemes"):
-                    schemes = pp.get("schemes", [])
-                    structured = self._to_structured_schemes(schemes)
-                    sources = self._collect_sources(schemes)
-                    formatted_schemes = self._format_schemes_response(schemes, pp)
+            # Use OpenAI web search for government schemes
+            if self.openai_client.available:
+                oa_result = self.openai_client.search_schemes(query, state, farmer_type)
+                if oa_result.get("success"):
                     return {
                         "success": True,
                         "data": {
-                            "schemes_info": formatted_schemes,
-                            "schemes_structured": structured,
-                            "total_schemes_found": pp.get('total_found', len(schemes)),
-                            "confidence": pp.get('confidence', 0.0),
+                            "schemes_info": oa_result.get("schemes_info", ""),
+                            "total_schemes_found": oa_result.get('total_found', 3),
+                            "confidence": oa_result.get('confidence', 0.95),
                             "query": query,
-                            "search_context": {"state": state, "farmer_type": farmer_type},
-                            "farmer_recommendations": pp.get('farmer_recommendations', []),
-                            "schemes_list": schemes,
-                            "sources": sources
+                            "search_context": {"state": state, "farmer_type": farmer_type}
                         },
-                        "source": "Perplexity Sonar (Live Web)",
+                        "source": "OpenAI Web Search",
                         "agricultural_use": "Government scheme discovery, eligibility, application guidance"
                     }
 
-            # 2) Fallback: Process query through existing RAG system
-            rag_response = self.rag_agent.process_query(query, context)
-            
-            if not rag_response.get('success'):
-                # Graceful message if both the web helper and RAG fail
-                return {
-                    "success": False,
-                    "error": (
-                        "Unable to fetch government scheme details right now. "
-                        "Please try again in a moment or refine your query with a state or crop context."
-                    ),
-                    "query": query
-                }
-            
-            # Format response for compatibility with existing system
-            schemes = rag_response.get('schemes', [])
-            structured = self._to_structured_schemes(schemes)
-            sources = self._collect_sources(schemes)
-            
-            if not schemes:
-                return {
-                    "success": False,
-                    "error": "No relevant government schemes found for your query. Try using more specific terms or contact your local agricultural extension office.",
-                    "query": query,
-                    "suggestions": rag_response.get('suggestions', [])
-                }
-            
-            # Format schemes information
-            formatted_schemes = self._format_schemes_response(schemes, rag_response)
-            
+            # Fallback error message if OpenAI is not available
             return {
-                "success": True,
-                "data": {
-                    "schemes_info": formatted_schemes,
-                    "schemes_structured": structured,
-                    "total_schemes_found": rag_response.get('total_found', len(schemes)),
-                    "confidence": rag_response.get('confidence', 0.0),
-                    "query": query,
-                    "search_context": {"state": state, "farmer_type": farmer_type},
-                    "farmer_recommendations": rag_response.get('farmer_recommendations', []),
-                    "schemes_list": schemes,
-                    "sources": sources
-                },
-                "source": "Lightweight RAG System (Government Websites + SQLite)",
-                "agricultural_use": "Government scheme discovery, eligibility checking, application guidance"
+                "success": False,
+                "error": (
+                    "Unable to fetch government scheme details right now. "
+                    "Please try again in a moment or refine your query with more details."
+                ),
+                "query": query
             }
             
         except Exception as e:
@@ -149,7 +100,7 @@ class GovtPolicyAgent:
         response_parts.append(f"Found {len(schemes)} relevant government schemes (Total: {total_found}, Confidence: {confidence:.1%}):\n")
         
         # Add each scheme details
-        for i, scheme in enumerate(schemes[:5], 1):  # Limit to top 5 schemes
+        for i, scheme in enumerate(schemes[:3], 1):  # Limit to top 3 schemes
             scheme_text = f"{i}. **{scheme.get('name', 'Government Scheme')}**\n"
             
             # Description
@@ -228,7 +179,7 @@ class GovtPolicyAgent:
         }
         """
         out = []
-        for s in (schemes or [])[:5]:
+        for s in (schemes or [])[:3]:
             name = s.get('name') or s.get('scheme_name') or 'Government Scheme'
             desc = s.get('description') or ''
             elig = s.get('eligibility') or []
@@ -321,8 +272,8 @@ class GovtPolicyAgent:
     def shutdown(self):
         """Shutdown the agent"""
         self.rag_agent.close()
-        self.logger.info("Government Policy Agent shutdown complete")
+        self.logger.info("Government Scheme Agent shutdown complete")
 
 
 # Global instance
-govt_policy_agent = GovtPolicyAgent()
+govt_scheme_agent = GovtSchemeAgent()
