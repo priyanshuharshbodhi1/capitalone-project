@@ -27,6 +27,7 @@ def _get(name: str, default: str | None = None, required: bool = False) -> str |
 class Settings:
     gemini_api_key: str | None = _get("GEMINI_API_KEY", None, required=False)
     groq_api_key: str | None = _get("GROQ_API_KEY", None, required=False)
+    openai_api_key: str | None = _get("OPENAI_API_KEY", None, required=False)
     datagovin_api_key: str | None = _get("DATA_GOV_IN_API_KEY")
     openweather_api_key: str | None = _get("OPENWEATHER_API_KEY")
     perplexity_api_key: str | None = _get("PERPLEXITY_API_KEY")
