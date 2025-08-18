@@ -10,6 +10,7 @@ from .agents.weather_agent import weather_agent
 from .agents.market_agent import fetch_market
 from .agents.govt_scheme_agent import govt_scheme_agent
 from .memory.checkpointer import RedisCheckpointer
+from .memory.memory_agent import get_memory_service
 from ..infra.settings import settings
 
 # Groq tool calling setup
@@ -312,6 +313,51 @@ class AppGraph:
         # Build state
         state = AgentState(messages=[TurnMessage(**m) for m in messages], context=context)
         user_text = state.last_user() or ""
+        
+        # Get memory service
+        memory_service = get_memory_service()
+        session_id = context.get("session_id", "default")
+        
+        # Step 1: Retrieve relevant memories before processing
+        if memory_service.is_available() and user_text:
+            try:
+                print(f"🧠 Retrieving memories for session: {session_id}")
+                relevant_memories = memory_service.get_relevant_memories(session_id, user_text, limit=3)
+                print(f"🧠 Retrieved {len(relevant_memories)} memories, types: {[type(m) for m in relevant_memories]}")
+                
+                state.memory_context = relevant_memories
+                
+                # Extract user preferences from memories
+                for i, memory in enumerate(relevant_memories):
+                    try:
+                        if isinstance(memory, dict) and memory.get("metadata", {}).get("type") == "farming_context":
+                            state.user_preferences.update(memory.get("metadata", {}))
+                    except Exception as mem_error:
+                        print(f"❌ Error processing memory {i}: {mem_error}")
+                        continue
+                
+                # Add memory context to enhance the query
+                if relevant_memories:
+                    try:
+                        memory_context_text = "\n".join([
+                            f"- {memory.get('memory', '') if isinstance(memory, dict) else str(memory)}" 
+                            for memory in relevant_memories
+                        ])
+                        print(f"🧠 Found {len(relevant_memories)} relevant memories")
+                        context["memory_context"] = memory_context_text
+                    except Exception as context_error:
+                        print(f"❌ Error building memory context: {context_error}")
+                
+                # Store farming context if this is the first time we see location/context
+                if context.get("lat") and context.get("lon"):
+                    memory_service.add_farming_context(session_id, context)
+                    
+            except Exception as memory_error:
+                print(f"❌ Memory processing error: {memory_error}")
+                # Continue without memory if there's an error
+                state.memory_context = []
+        
+        # Step 2: Route intent with enhanced context
         intents = route_intent(user_text, context)
 
         # Weather intent path using Gemini tool calling
@@ -348,10 +394,17 @@ class AppGraph:
                 return
             
             # Second message: Composed answer after tool execution
-            composed = compose_answer(tools_used, intent="weather", locale=context.get("locale"))
+            memory_context = getattr(state, 'memory_context', []) if state else []
+            composed = compose_answer(tools_used, intent="weather", locale=context.get("locale"), memory_context=memory_context)
+            final_response = composed.get("text", "")
+            
+            # Store conversation in memory if relevant
+            if memory_service.is_available():
+                memory_service.add_conversation_memory(session_id, user_text, final_response, "weather")
+            
             yield {
                 "type": "final",
-                "text": composed.get("text", ""),
+                "text": final_response,
                 "intents": intents,
                 "citations": composed.get("citations", []),
             }
@@ -381,10 +434,17 @@ class AppGraph:
             }]
             
             # Compose final response
-            composed = compose_answer(tools_used, intent="govt_scheme", locale=context.get("locale"))
+            memory_context = getattr(state, 'memory_context', []) if state else []
+            composed = compose_answer(tools_used, intent="govt_scheme", locale=context.get("locale"), memory_context=memory_context)
+            final_response = composed.get("text", "")
+            
+            # Store conversation in memory if relevant
+            if memory_service.is_available():
+                memory_service.add_conversation_memory(session_id, user_text, final_response, "govt_scheme")
+            
             yield {
                 "type": "final",
-                "text": composed.get("text", ""),
+                "text": final_response,
                 "intents": intents,
                 "citations": composed.get("citations", [])
             }
@@ -392,9 +452,13 @@ class AppGraph:
 
         # Handle general/unclear queries with helpful guidance
         if "general" in intents:
+            general_response = "I'd be happy to help you with farming-related information! Here's what I can assist you with:\n\n🌤️ **Weather Information**: Current conditions, forecasts, historical patterns, and weather alerts\n🏛️ **Government Schemes**: Agricultural schemes, subsidies, and regulations\n📈 **Market Data**: Crop prices and market information\n🌱 **Agricultural Advice**: Crop selection, farming techniques, and pest management\n📱 **IoT Information**: Smart farming technology and sensors\n\nPlease be more specific about what you need, such as:\n- \"What's the current weather for irrigation?\"\n- \"Show me weather forecast for next week\"\n- \"Government subsidies for drip irrigation\"\n- \"Current tomato prices in my area\""
+            
+            # Note: We don't store general guidance in memory as it's not user-specific
+            
             yield {
                 "type": "final",
-                "text": "I'd be happy to help you with farming-related information! Here's what I can assist you with:\n\n🌤️ **Weather Information**: Current conditions, forecasts, historical patterns, and weather alerts\n🏛️ **Government Schemes**: Agricultural schemes, subsidies, and regulations\n📈 **Market Data**: Crop prices and market information\n🌱 **Agricultural Advice**: Crop selection, farming techniques, and pest management\n📱 **IoT Information**: Smart farming technology and sensors\n\nPlease be more specific about what you need, such as:\n- \"What's the current weather for irrigation?\"\n- \"Show me weather forecast for next week\"\n- \"Government subsidies for drip irrigation\"\n- \"Current tomato prices in my area\"",
+                "text": general_response,
                 "intents": intents,
                 "citations": []
             }

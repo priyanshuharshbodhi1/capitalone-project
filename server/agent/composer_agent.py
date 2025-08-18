@@ -25,8 +25,8 @@ def _gemini_client():
     return genai.GenerativeModel("gemini-1.5-flash")
 
 
-def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | None = None) -> Dict[str, Any]:
-    """Compose final answer. Falls back to deterministic template if no LLM key.
+def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | None = None, memory_context: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Compose final answer with memory context. Falls back to deterministic template if no LLM key.
 
     Returns dict with {text, citations}
     """
@@ -37,24 +37,33 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
     client = _gemini_client()
     if client:
         tool_summaries = json.dumps({t["name"]: t.get("output", {}) for t in tools_used})
+        
+        # Add memory context to the prompt if available
+        memory_context_text = ""
+        if memory_context:
+            relevant_memories = [mem.get("memory", "") for mem in memory_context[:3]]  # Top 3 memories
+            if relevant_memories:
+                memory_context_text = f"\n\nRelevant context from previous conversations:\n{chr(10).join(f'- {mem}' for mem in relevant_memories)}"
+        
         prompt = GEMINI_COMPOSER_PROMPT_TEMPLATE.format(
             system_prompt=SHETKARI_COMPOSER_SYSTEM_PROMPT,
             intent=intent,
             locale=locale or 'en-IN',
             tool_summaries=tool_summaries
-        )
+        ) + memory_context_text
+        
         try:
             resp = client.generate_content(prompt)
             text = resp.text or ""
         except Exception as e:  # fallback
-            text = _fallback_text(tools_used, intent)
+            text = _fallback_text(tools_used, intent, memory_context)
     else:
-        text = _fallback_text(tools_used, intent)
+        text = _fallback_text(tools_used, intent, memory_context)
 
     return {"text": text, "citations": citations}
 
 
-def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
+def _fallback_text(tools_used: List[Dict[str, Any]], intent: str, memory_context: List[Dict[str, Any]] = None) -> str:
     # User-friendly deterministic text without exposing internal details
     if intent == "general":
         return (

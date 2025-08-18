@@ -74,6 +74,7 @@
   },
   "navigation": {
     "assistant": "ਸਹਾਇਕ",
+    "plantdoc": "ਪੌਧੇ ਡਾਕਟਰ",
     "dashboard": "ਡੈਸ਼ਬੋਰਡ",
     "analytics": "ਐਨਾਲਿਟਿਕਸ",
     "settings": "ਸੈਟਿੰਗਜ਼"
@@ -285,7 +286,7 @@
     "uploadTitle": "ਪੌਧੇ ਦੀ ਤਸਵੀਰ ਅਪਲੋਡ ਕਰੋ",
     "previewAlt": "ਪੌਧੇ ਦਾ ਪਪੀਵਿਊੂ",
     "uploadHint": "ਅਪਲੋਡ ਕਰਨ ਲਈ ਕਲਿਕ ਕਰੋ ਜਾਂ ਪੌਧੇ ਦੀ ਤਸਵੀਰ ਨੂੰ ਡਰੈਗ ਅਤੇ ਡਰਾਪ ਕਰੋ",
-    "uploadTypes": "PNG, JPG, JPEG 10MB ਤਕ"
+    "uploadTypes": "PNG, JPG, JPEG 10MB ਤਕ",
     "plantNameTitle": "Plant Name",
     "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
     "detailsTitle": "Additional Details",

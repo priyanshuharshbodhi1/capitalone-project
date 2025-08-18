@@ -24,6 +24,9 @@ class AgentState(BaseModel):
     tools_used: List[ToolResult] = Field(default_factory=list)
     answer: Optional[str] = None
     citations: List[Dict[str, Any]] = Field(default_factory=list)
+    # Memory context from mem0
+    memory_context: List[Dict[str, Any]] = Field(default_factory=list)
+    user_preferences: Dict[str, Any] = Field(default_factory=dict)
 
     def last_user(self) -> Optional[str]:
         for m in reversed(self.messages):
