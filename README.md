@@ -125,11 +125,6 @@ Shetkari monitors key farm parameters, analyzes trends, and provides actionable,
 
 ## Architecture
 
-- Frontend app: `src/` (Vite)
-- FastAPI: `server`
-- Edge Functions: `supabase/functions/ai-recommendations/`
-- DB & migrations: `supabase/`, `supabase/migrations/`
-- Infrastructure helpers: `server/infra/`
 
 ## Monitored Parameters(IoT)
 
@@ -223,36 +218,10 @@ OS-specific notes:
 ## **Key Screens**
 
 ### 1. **Dashboard**: Real-time sensor data, weather, and AI recommendations
-- Live sensor readings with visual indicators
-- Weather integration and forecasts
-- AI-generated farming recommendations
-- Device status and connectivity monitoring
-
 ### 2. **Assistant**: Multi-agent AI system for comprehensive agricultural support
-- **Sub-Agents**: Agronomist, Weather, Market, and Government Policy agents
-- **Memory-Enabled**: Remembers your farm context and previous conversations
-- **Contextual Responses**: Provides personalized advice based on your farming history
-- **Natural Language**: Ask questions in plain language about farming, weather, schemes, etc.
-- **Real-time API Integration**: Live data from weather services, government databases, and market sources
-- **Streaming Responses**: Real-time token streaming for responsive user experience
-- **Tool-calling LLMs**: Advanced function calling for precise data retrieval and analysis
-
 ### 3. **PlantDoc**: AI-powered plant disease diagnosis
-- Upload plant photos for instant disease identification
-- Detailed treatment recommendations and preventive measures
-- Crop-specific diagnosis for major Indian agricultural crops
-- Integrated with assistant for follow-up farming advice
-
 ### 4. **Analytics**: Historical data visualization with statistical analysis
-- Trend analysis and pattern recognition
-- Comparative charts and growth metrics
-- Export capabilities for record keeping
-
 ### 5. **Settings**: Device management, thresholds, language selection and user preferences
-- Device configuration and API key management
-- Customizable alert thresholds
-- Multi-language interface settings
-- User profile and farming preferences
 
 ## 🔧 ESP32 Integration
 
@@ -305,86 +274,10 @@ Usage:
 - Submit to publish synthetic readings to the app state/flows.
 - Use Dashboard and Analytics to verify ingestion, banners, and AI recommendations.
 
-### Testing Memory Features in Assistant
-
-The memory system is **session-based** and **user-specific**. Here's how to test it:
-
-#### **Prerequisites for Memory Testing:**
-```bash
-# 1. Install mem0 dependency
-pip install mem0ai
-
-# 2. Set OpenAI API key (required for mem0)
-export OPENAI_API_KEY="your_openai_api_key"
-
-# 3. Test memory integration
-python test_memory.py
-```
-
-#### **Manual Testing Steps:**
-
-1. **Navigate to Assistant Page** (`http://localhost:5173/assistant`)
-
-2. **Start a Conversation with Farm Context:**
-   ```
-   User: "I have a 5-acre wheat farm in Punjab"
-   Bot: [Responds with farming advice]
-   ```
-
-3. **Ask Related Questions to Test Memory:**
-   ```
-   User: "What's the current weather for my farm?"
-   Bot: [Should remember your location and farm details]
-   
-   User: "Should I irrigate my wheat today?"
-   Bot: [Should provide context-aware advice for wheat in Punjab]
-   ```
-
-4. **Test Memory Persistence:**
-   - Refresh the page (new session)
-   - Previous session's memory won't carry over (session-based)
-   - Start new conversation to build new memory context
-
-#### **What Gets Remembered:**
-✅ **Stored in Memory:**
-- Farm location and coordinates
-- Crop types and farm size
-- Soil conditions and farming preferences
-- Successful weather/farming queries
-- Government scheme inquiries
-- Agricultural advice exchanges
-
-❌ **Not Stored:**
-- Generic greetings ("hello", "thanks")
-- Error responses or failed queries
-- Non-agricultural conversations
-- Short, low-value messages
-
-#### **Memory Features to Test:**
-- **Contextual Responses**: Ask follow-up questions without repeating context
-- **Personalized Advice**: Notice how responses become more tailored to your farm
-- **Cross-Intent Memory**: Weather advice considering your crop type
-- **Farming Context**: Location-based recommendations
 
 ### Testing Multi-Agent System
 
 #### **Agent Collaboration Examples:**
-
-**🌾 Weather + Agronomist Collaboration:**
-```
-User: "Should I plant tomatoes next week?"
-→ Weather Agent: Checks forecast conditions
-→ Agronomist Agent: Considers soil temperature and planting season
-→ Combined Response: Weather-aware planting recommendation
-```
-
-**🏛️ Schemes + Market Integration:**
-```
-User: "I want to start organic farming"
-→ Govt Schemes Agent: Finds organic farming subsidies
-→ Market Agent: Provides organic crop price premiums
-→ Combined Response: Financial viability analysis with subsidy options
-```
 
 **🌡️ Weather + Memory Context:**
 ```
@@ -398,39 +291,10 @@ User: "Will it rain tomorrow?"
 #### **Testing Different Agent Types:**
 
 **🌤️ Weather Agent Examples:**
-- "What's the current weather for my farm?"
-- "Should I irrigate my wheat today?"
-- "7-day weather forecast for crop planning"
-- "Historical rainfall patterns for this season"
-- "Are there any weather alerts for my area?"
-
-**🏛️ Government Schemes Examples:**
 - "Subsidies available for drip irrigation"
-- "PM-KISAN scheme eligibility and benefits"
-- "Organic farming certification support"
-- "Crop insurance schemes in Maharashtra"
-- "Solar pump subsidy application process"
-
-**📈 Market Agent Examples:**
 - "Current wheat prices in Punjab markets"
-- "Best time to sell my tomato crop"
-- "Price trends for organic vegetables"
-- "Market demand for millets this season"
-- "Transportation costs to nearest mandi"
-
-**🌾 Agronomist Agent Examples:**
-- "How to improve soil fertility naturally?"
 - "Pest control for cotton bollworm"
-- "Crop rotation for sustainable farming"
-- "Water management during drought"
-- "Organic fertilizer recommendations"
 
-**🔄 Cross-Agent Collaborative Queries:**
-- "Weather-based fertilizer application timing"
-- "Market trends for monsoon-dependent crops"
-- "Government schemes for climate-resilient farming"
-- "Drought management with available subsidies"
-- "Organic farming: weather, market, and policy guide"
 
 #### **Advanced Assistant Features:**
 
@@ -442,21 +306,6 @@ Query: "My tomato plants are wilting, it's been dry"
 → Agronomist: Analyzes wilting causes and solutions
 → Response: Weather-informed irrigation recommendations
 ```
-
-**💾 Context Persistence:**
-```
-Session History:
-1. "I have 2 acres of rice in Bihar"
-2. "What's the weather forecast?"
-→ Agent remembers: crop=rice, location=Bihar, area=2-acres
-→ Provides: Bihar-specific weather for rice farming
-```
-
-**🔧 Tool Integration:**
-- **Weather APIs**: OpenWeatherMap for real-time conditions
-- **Government APIs**: Direct integration with scheme databases  
-- **Market APIs**: Live pricing from agricultural commodity exchanges
-- **Knowledge Bases**: Comprehensive agricultural best practices database
 
 #### **Agent Implementation Architecture:**
 
@@ -479,48 +328,10 @@ server/agent/
     └── response_composition.py
 ```
 
-**⚡ Performance Features:**
-- **Streaming Responses**: Real-time token delivery for better UX
-- **Parallel Tool Execution**: Multiple API calls processed simultaneously
-- **Smart Caching**: Memory layer reduces redundant API calls
-- **Fallback Systems**: Graceful degradation when external services fail
-- **Error Recovery**: Automatic retry logic with exponential backoff
-
-**🔄 Request/Response Flow:**
-```
-POST /agent/complete
-{
-  "messages": [...],
-  "context": {
-    "session_id": "unique_id",
-    "lat": 28.6139,
-    "lon": 77.2090,
-    "locale": "en-IN"
-  }
-}
-
-Response:
-{
-  "text": "Based on your wheat farm in Punjab...",
-  "intent": "weather",
-  "citations": []
-}
-```
-
 
 ## Mobile UX Guidelines
 
-- Responsive layout and touch-friendly controls
-- Clear cards with primary actions visible
-- Accessible colors/contrast; large tap targets
 
-
-## Contributing
-
-- Conventional commits, TypeScript best practices
-- Keep components modular and under ~300 lines where feasible
-- Avoid introducing new patterns before iterating on existing ones
-- Update docs and tests for changes
 
 ## License
 
