@@ -285,70 +285,70 @@
     "typeMessage": "तुमचा संदेश इथे टाइप करा..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "रोप डॉक्टर",
+    "subtitle": "AI-संचालित पिक रोग निदान आणि उपचार शिफारसी",
+    "uploadTitle": "रोपाचा फोटो अपलोड करा",
+    "previewAlt": "रोपाचे पूर्वावलोकन",
+    "uploadHint": "अपलोड करण्यासाठी क्लिक करा किंवा रोपाचा फोटो ड्रॅग आणि ड्रॉप करा",
+    "uploadTypes": "PNG, JPG, JPEG 10MB पर्यंत",
+    "plantNameTitle": "रोपाचे नाव",
+    "plantNamePlaceholder": "रोपाचे नाव प्रविष्ट करा (उदा., टोमॅटो, गहू, तांदूळ...)",
+    "detailsTitle": "अतिरिक्त तपशील",
+    "detailsPlaceholder": "आपण कोणतीही लक्षणे पाहिली आहेत, ती कधी सुरू झाली, किंवा कोणते उपचार प्रयत्न केले याचे वर्णन करा...",
     "location": {
-      "title": "Location",
-      "captured": "Location captured",
-      "capturedSuccess": "Location captured successfully",
-      "unknownPlace": "Unknown Place",
-      "unknownState": "Unknown State",
-      "state": "State",
-      "locationFound": "Location found",
-      "getting": "Getting location...",
-      "getCurrent": "Get current location"
+      "title": "स्थान",
+      "captured": "स्थान कॅप्चर केले",
+      "capturedSuccess": "स्थान यशस्वीरित्या कॅप्चर केले",
+      "unknownPlace": "अज्ञात स्थान",
+      "unknownState": "अज्ञात राज्य",
+      "state": "राज्य",
+      "locationFound": "स्थान सापडले",
+      "getting": "स्थान मिळवत आहे...",
+      "getCurrent": "सध्याचे स्थान मिळवा"
     },
-    "analyzing": "Analyzing...",
-    "diagnose": "Diagnose Plant",
-    "clearAll": "Clear All",
+    "analyzing": "विश्लेषण करत आहे...",
+    "diagnose": "रोपाचे निदान करा",
+    "clearAll": "सर्व साफ करा",
     "success": {
-      "completed": "Diagnosis completed successfully!"
+      "completed": "निदान यशस्वीरित्या पूर्ण झाले!"
     },
     "errors": {
-      "invalidImageFile": "Please select a valid image file",
-      "geolocationNotSupported": "Geolocation not supported",
-      "locationAccess": "Unable to get location. Please ensure location access is enabled.",
-      "diagnosisFailed": "Diagnosis failed",
-      "diagnosisFailedTryAgain": "Diagnosis failed. Please try again.",
-      "unableToProcess": "Unable to Process Image",
-      "invalidImageNotPlant": "Please upload a plant image - current image cannot be processed",
-      "nameMismatch": "The plant in the image does not match the plant name provided",
-      "technicalError": "Technical error occurred - please try again with a clearer image"
+      "invalidImageFile": "कृपया वैध इमेज फाइल निवडा",
+      "geolocationNotSupported": "भौगोलिक स्थान समर्थित नाही",
+      "locationAccess": "स्थान मिळवण्यात अक्षम. कृपया खात्री करा की स्थान प्रवेश सक्षम आहे.",
+      "diagnosisFailed": "निदान अयशस्वी",
+      "diagnosisFailedTryAgain": "निदान अयशस्वी. कृपया पुन्हा प्रयत्न करा.",
+      "unableToProcess": "इमेज प्रक्रिया करण्यात अक्षम",
+      "invalidImageNotPlant": "कृपया रोपाचा फोटो अपलोड करा - सध्याचा फोटो प्रक्रिया करता येत नाही",
+      "nameMismatch": "फोटोमधील रोप दिलेल्या रोपाच्या नावाशी जुळत नाही",
+      "technicalError": "तांत्रिक त्रुटी झाली - कृपया स्पष्ट फोटोसह पुन्हा प्रयत्न करा"
     },
     "healthy": {
-      "title": "Healthy Plant Detected",
-      "message": "Great news! Your plant appears healthy with no visible disease symptoms.",
-      "keepHealthy": "🛡️ Keep Your Plant Healthy"
+      "title": "निरोगी रोप आढळला",
+      "message": "चांगली बातमी! आपला रोप निरोगी दिसत आहे, कोणतीही दृश्यमान रोगाची लक्षणे नाहीत.",
+      "keepHealthy": "🛡️ आपला रोप निरोगी ठेवा"
     },
     "results": {
-      "title": "Comprehensive Diagnosis Results",
-      "identifiedDisease": "Identified Disease",
-      "severity": "Severity",
-      "confidence": "Confidence",
-      "stage": "Stage",
-      "affected": "Affected",
-      "understanding": "Understanding the Disease",
-      "economicImpact": "Economic Impact",
-      "immediateAction": "Immediate Action Required",
-      "symptoms": "🔍 Detailed Symptoms Analysis",
-      "treatment": "💊 Scientific Treatment Recommendations",
-      "treatmentTiming": "⏰ Optimal Treatment Timing",
-      "localRemedies": "🌿 Traditional & Affordable Remedies",
-      "prevention": "🛡️ Prevention Strategies",
-      "followUp": "📋 Long-term Care & Monitoring"
+      "title": "सविस्तर निदान परिणाम",
+      "identifiedDisease": "ओळखला गेलेला रोग",
+      "severity": "गंभीरता",
+      "confidence": "विश्वसनीयता",
+      "stage": "टप्पा",
+      "affected": "प्रभावित",
+      "understanding": "रोगाची समज",
+      "economicImpact": "आर्थिक परिणाम",
+      "immediateAction": "तात्काळ कृती आवश्यक",
+      "symptoms": "🔍 तपशीलवार लक्षण विश्लेषण",
+      "treatment": "💊 वैज्ञानिक उपचार शिफारसी",
+      "treatmentTiming": "⏰ इष्टतम उपचार वेळ",
+      "localRemedies": "🌿 पारंपरिक आणि परवडणारे उपचार",
+      "prevention": "🛡️ प्रतिबंध धोरणे",
+      "followUp": "📋 दीर्घकालीन काळजी आणि निरीक्षण"
     },
     "validation": {
-      "selectImage": "Please select an image first",
-      "enterPlantName": "Please enter the plant name",
-      "captureLocation": "Please capture your location first"
+      "selectImage": "कृपया प्रथम एक इमेज निवडा",
+      "enterPlantName": "कृपया रोपाचे नाव प्रविष्ट करा",
+      "captureLocation": "कृपया प्रथम आपले स्थान कॅप्चर करा"
     }
   }
 }

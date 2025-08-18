@@ -282,70 +282,70 @@
     "typeMessage": "உங்கள் செய்தியை இங்கு தட்டச்சு செய்யவும்..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "தாவர மருத்துவர்",
+    "subtitle": "AI சக்தியால் இயங்கும் பயிர் நோய் கண்டறிதல் மற்றும் சிகிச்சை பரிந்துரைகள்",
+    "uploadTitle": "தாவர படத்தை பதிவேற்றவும்",
+    "previewAlt": "தாவர முன்னோட்டம்",
+    "uploadHint": "பதிவேற்ற கிளிக் செய்யவும் அல்லது தாவர படத்தை இழுத்து விடவும்",
+    "uploadTypes": "PNG, JPG, JPEG 10MB வரை",
+    "plantNameTitle": "தாவரத்தின் பெயர்",
+    "plantNamePlaceholder": "தாவரத்தின் பெயரை உள்ளிடவும் (எ.கா., தக்காளி, கோதுமை, அரிசி...)",
+    "detailsTitle": "கூடுதல் விவரங்கள்",
+    "detailsPlaceholder": "நீங்கள் கவனித்த அறிகுறிகள், எப்போது தொடங்கியது, அல்லது முயற்சித்த சிகிச்சைகளை விவரிக்கவும்...",
     "location": {
-      "title": "Location",
-      "captured": "Location captured",
-      "capturedSuccess": "Location captured successfully",
-      "unknownPlace": "Unknown Place",
-      "unknownState": "Unknown State",
-      "state": "State",
-      "locationFound": "Location found",
-      "getting": "Getting location...",
-      "getCurrent": "Get current location"
+      "title": "இருப்பிடம்",
+      "captured": "இருப்பிடம் பிடிக்கப்பட்டது",
+      "capturedSuccess": "இருப்பிடம் வெற்றிகரமாக பிடிக்கப்பட்டது",
+      "unknownPlace": "அறியப்படாத இடம்",
+      "unknownState": "அறியப்படாத மாநிலம்",
+      "state": "மாநிலம்",
+      "locationFound": "இருப்பிடம் கண்டுபிடிக்கப்பட்டது",
+      "getting": "இருப்பிடம் பெறப்படுகிறது...",
+      "getCurrent": "தற்போதைய இருப்பிடத்தைப் பெறவும்"
     },
-    "analyzing": "Analyzing...",
-    "diagnose": "Diagnose Plant",
-    "clearAll": "Clear All",
+    "analyzing": "பகுப்பாய்வு செய்கிறது...",
+    "diagnose": "தாவர நோய் கண்டறிதல்",
+    "clearAll": "அனைத்தையும் அழிக்கவும்",
     "success": {
-      "completed": "Diagnosis completed successfully!"
+      "completed": "நோய் கண்டறிதல் வெற்றிகரமாக நிறைவேற்றப்பட்டது!"
     },
     "errors": {
-      "invalidImageFile": "Please select a valid image file",
-      "geolocationNotSupported": "Geolocation not supported",
-      "locationAccess": "Unable to get location. Please ensure location access is enabled.",
-      "diagnosisFailed": "Diagnosis failed",
-      "diagnosisFailedTryAgain": "Diagnosis failed. Please try again.",
-      "unableToProcess": "Unable to Process Image",
-      "invalidImageNotPlant": "Please upload a plant image - current image cannot be processed",
-      "nameMismatch": "The plant in the image does not match the plant name provided",
-      "technicalError": "Technical error occurred - please try again with a clearer image"
+      "invalidImageFile": "தயவுசெய்து சரியான படக் கோப்பைத் தேர்ந்தெடுக்கவும்",
+      "geolocationNotSupported": "புவியியல் இருப்பிடம் ஆதரிக்கப்படவில்லை",
+      "locationAccess": "இருப்பிடத்தைப் பெற முடியவில்லை. இருப்பிட அணுகல் இயக்கப்பட்டுள்ளதா என்பதை உறுதிப்படுத்தவும்.",
+      "diagnosisFailed": "நோய் கண்டறிதல் தோல்வியடைந்தது",
+      "diagnosisFailedTryAgain": "நோய் கண்டறிதல் தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+      "unableToProcess": "படத்தைச் செயலாக்க முடியவில்லை",
+      "invalidImageNotPlant": "தயவுசெய்து தாவர படத்தைப் பதிவேற்றவும் - தற்போதைய படம் செயலாக்கப்பட முடியாது",
+      "nameMismatch": "படத்தில் உள்ள தாவரம் வழங்கப்பட்ட தாவரத்தின் பெயருடன் பொருந்தவில்லை",
+      "technicalError": "தொழில்நுட்ப பிழை ஏற்பட்டது - தெளிவான படத்துடன் மீண்டும் முயற்சிக்கவும்"
     },
     "healthy": {
-      "title": "Healthy Plant Detected",
-      "message": "Great news! Your plant appears healthy with no visible disease symptoms.",
-      "keepHealthy": "Keep Your Plant Healthy"
+      "title": "ஆரோக்கியமான தாவரம் கண்டறியப்பட்டது",
+      "message": "அருமையான செய்தி! உங்கள் தாவரம் ஆரோக்கியமாக தெரிகிறது, எந்த நோய் அறிகுறிகளும் இல்லை.",
+      "keepHealthy": "🛡️ உங்கள் தாவரத்தை ஆரோக்கியமாக வைத்திருக்கவும்"
     },
     "results": {
-      "title": "Comprehensive Diagnosis Results",
-      "identifiedDisease": "Identified Disease",
-      "severity": "Severity",
-      "confidence": "Confidence",
-      "stage": "Stage",
-      "affected": "Affected",
-      "understanding": "Understanding the Disease",
-      "economicImpact": "Economic Impact",
-      "immediateAction": "Immediate Action Required",
-      "symptoms": "Detailed Symptoms Analysis",
-      "treatment": "Scientific Treatment Recommendations",
-      "treatmentTiming": "Optimal Treatment Timing",
-      "localRemedies": "Traditional & Affordable Remedies",
-      "prevention": "Prevention Strategies",
-      "followUp": "Long-term Care & Monitoring"
+      "title": "விரிவான நோய் கண்டறிதல் முடிவுகள்",
+      "identifiedDisease": "கண்டறியப்பட்ட நோய்",
+      "severity": "தீவிரம்",
+      "confidence": "நம்பகத்தன்மை",
+      "stage": "நிலை",
+      "affected": "பாதிக்கப்பட்டது",
+      "understanding": "நோயைப் புரிந்துகொள்ளுதல்",
+      "economicImpact": "பொருளாதார தாக்கம்",
+      "immediateAction": "உடனடி நடவடிக்கை தேவை",
+      "symptoms": "🔍 விரிவான அறிகுறிகள் பகுப்பாய்வு",
+      "treatment": "💊 அறிவியல் சிகிச்சை பரிந்துரைகள்",
+      "treatmentTiming": "⏰ சிறந்த சிகிச்சை நேரம்",
+      "localRemedies": "🌿 பாரம்பரிய மற்றும் மலிவான தீர்வுகள்",
+      "prevention": "🛡️ தடுப்பு உத்திகள்",
+      "followUp": "📋 நீண்டகால பராமரிப்பு மற்றும் கண்காணிப்பு"
     },
     "validation": {
-      "selectImage": "Please select an image first",
-      "enterPlantName": "Please enter the plant name",
-      "captureLocation": "Please capture your location first"
+      "selectImage": "தயவுசெய்து முதலில் ஒரு படத்தைத் தேர்ந்தெடுக்கவும்",
+      "enterPlantName": "தயவுசெய்து தாவரத்தின் பெயரை உள்ளிடவும்",
+      "captureLocation": "தயவுசெய்து முதலில் உங்கள் இருப்பிடத்தைப் பிடிக்கவும்"
     }
   }
 }

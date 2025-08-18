@@ -285,16 +285,16 @@
     "typeMessage": "यहाँ तपाईंको सन्देश टाइप गर्नुहोस्..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "बिरुवा डाक्टर",
+    "subtitle": "AI संचालित बाली रोग निदान र उपचार सिफारिशहरू",
+    "uploadTitle": "बिरुवाको फोटो अपलोड गर्नुहोस्",
+    "previewAlt": "बिरुवाको पूर्वावलोकन",
+    "uploadHint": "अपलोड गर्न क्लिक गर्नुहोस् वा बिरुवाको फोटो ड्र्याग र ड्रप गर्नुहोस्",
+    "uploadTypes": "PNG, JPG, JPEG 10MB सम्म",
+    "plantNameTitle": "बिरुवाको नाम",
+    "plantNamePlaceholder": "बिरुवाको नाम प्रविष्ट गर्नुहोस् (जस्तै, टमाटर, गहुँ, धान...)",
+    "detailsTitle": "थप विवरणहरू",
+    "detailsPlaceholder": "तपाईंले देख्नुभएका कुनै लक्षणहरू, तिनीहरू कहिले सुरु भएका, वा कुनै उपचारहरू प्रयास गर्नुभएको छ भने वर्णन गर्नुहोस्..."
     "location": {
       "title": "Location",
       "captured": "Location captured",

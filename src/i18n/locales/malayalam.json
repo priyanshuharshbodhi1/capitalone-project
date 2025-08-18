@@ -285,16 +285,16 @@
     "typeMessage": "നിങ്ങളുടെ സന്ദേശം ഇവിടെ ടൈപ്പ് ചെയ്യുക..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "സസ്യ വൈദ്യൻ",
+    "subtitle": "AI ശക്തിയാൽ പ്രവർത്തിക്കുന്ന വിള രോഗ നിർണയവും ചികിത്സാ ശുപാർശകളും",
+    "uploadTitle": "സസ്യത്തിന്റെ ചിത്രം അപ്‌ലോഡ് ചെയ്യുക",
+    "previewAlt": "സസ്യത്തിന്റെ പ്രിവ്യൂ",
+    "uploadHint": "അപ്‌ലോഡ് ചെയ്യാൻ ക്ലിക്ക് ചെയ്യുക അല്ലെങ്കിൽ സസ്യ ചിത്രം ഡ്രാഗ് ആൻഡ് ഡ്രോപ് ചെയ്യുക",
+    "uploadTypes": "PNG, JPG, JPEG 10MB വരെ",
+    "plantNameTitle": "സസ്യത്തിന്റെ പേര്",
+    "plantNamePlaceholder": "സസ്യത്തിന്റെ പേര് നൽകുക (ഉദാ., തക്കാളി, ഗോതമ്പ്, അരി...)",
+    "detailsTitle": "അധിക വിശദാംശങ്ങൾ",
+    "detailsPlaceholder": "നിങ്ങൾ ശ്രദ്ധിച്ച ഏതെങ്കിലും ലക്ഷണങ്ങൾ, അവ എപ്പോൾ ആരംഭിച്ചു, അല്ലെങ്കിൽ എന്തെങ്കിലും ചികിത്സകൾ പരീക്ഷിച്ചിട്ടുണ്ഡോ എന്ന് വിവരിക്കുക..."
     "location": {
       "title": "Location",
       "captured": "Location captured",

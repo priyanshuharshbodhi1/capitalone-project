@@ -285,70 +285,70 @@
     "typeMessage": "ನಿಮ್ಮ ಕೃಷಿ ಸಹಾಯಕ. ನಾನು ನಿಮಗೆ ಇಂದು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?"
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "ಸಸ್ಯ ವೈದ್ಯ",
+    "subtitle": "AI ಚಾಲಿತ ಬೆಳೆ ರೋಗ ನಿರ್ಣಯ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಶಿಫಾರಸುಗಳು",
+    "uploadTitle": "ಸಸ್ಯದ ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    "previewAlt": "ಸಸ್ಯದ ಪೂರ್ವವೀಕ್ಷಣೆ",
+    "uploadHint": "ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ ಅಥವಾ ಸಸ್ಯದ ಚಿತ್ರವನ್ನು ಡ್ರ್ಯಾಗ್ ಮತ್ತು ಡ್ರಾಪ್ ಮಾಡಿ",
+    "uploadTypes": "PNG, JPG, JPEG 10MB ವರೆಗೆ",
+    "plantNameTitle": "ಸಸ್ಯದ ಹೆಸರು",
+    "plantNamePlaceholder": "ಸಸ್ಯದ ಹೆಸರನ್ನು ನಮೂದಿಸಿ (ಉದಾ., ಟೊಮೇಟೊ, ಗೋಧಿ, ಅರಿಶಿನ...)",
+    "detailsTitle": "ಹೆಚ್ಚುವರಿ ವಿವರಗಳು",
+    "detailsPlaceholder": "ನೀವು ಗಮನಿಸಿದ ಯಾವುದೇ ಲಕ್ಷಣಗಳು, ಅವು ಯಾವಾಗ ಪ್ರಾರಂಭವಾದವು, ಅಥವಾ ಯಾವುದೇ ಚಿಕಿತ್ಸೆಯನ್ನು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಾ ಎಂಬುದನ್ನು ವಿವರಿಸಿ...",
     "location": {
-      "title": "Location",
-      "captured": "Location captured",
-      "capturedSuccess": "Location captured successfully",
-      "unknownPlace": "Unknown Place",
-      "unknownState": "Unknown State",
-      "state": "State",
-      "locationFound": "Location found",
-      "getting": "Getting location...",
-      "getCurrent": "Get current location"
+      "title": "ಸ್ಥಳ",
+      "captured": "ಸ್ಥಳ ಪಡೆದುಕೊಂಡಿದೆ",
+      "capturedSuccess": "ಸ್ಥಳವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಪಡೆದುಕೊಂಡಿದೆ",
+      "unknownPlace": "ಅಜ್ಞಾತ ಸ್ಥಳ",
+      "unknownState": "ಅಜ್ಞಾತ ರಾಜ್ಯ",
+      "state": "ರಾಜ್ಯ",
+      "locationFound": "ಸ್ಥಳ ಸಿಕ್ಕಿದೆ",
+      "getting": "ಸ್ಥಳವನ್ನು ಸಂಪಾದಿಸುತ್ತಿದೆ...",
+      "getCurrent": "ಸದ್ಯದ ಸ್ಥಳವನ್ನು ಸಂಪಾದಿಸಿ"
     },
-    "analyzing": "Analyzing...",
-    "diagnose": "Diagnose Plant",
-    "clearAll": "Clear All",
+    "analyzing": "ವಿಶ್ಲೇಷಣೆ ಮಾಡುತ್ತಿದೆ...",
+    "diagnose": "ಸಸ್ಯದ ರೋಗ ನಿರ್ಣಯ",
+    "clearAll": "ಎಲ್ಲವನ್ನು ಅಳಿಸಿ",
     "success": {
-      "completed": "Diagnosis completed successfully!"
+      "completed": "ರೋಗ ನಿರ್ಣಯ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!"
     },
     "errors": {
-      "invalidImageFile": "Please select a valid image file",
-      "geolocationNotSupported": "Geolocation not supported",
-      "locationAccess": "Unable to get location. Please ensure location access is enabled.",
-      "diagnosisFailed": "Diagnosis failed",
-      "diagnosisFailedTryAgain": "Diagnosis failed. Please try again.",
-      "unableToProcess": "Unable to Process Image",
-      "invalidImageNotPlant": "Please upload a plant image - current image cannot be processed",
-      "nameMismatch": "The plant in the image does not match the plant name provided",
-      "technicalError": "Technical error occurred - please try again with a clearer image"
+      "invalidImageFile": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಚಿತ್ರ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
+      "geolocationNotSupported": "ಭೌಗೋಳಿಕ ಸ್ಥಳ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ",
+      "locationAccess": "ಸ್ಥಳ ಪಡೆಯಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಸ್ಥಳ ಪ್ರವೇಶ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.",
+      "diagnosisFailed": "ರೋಗ ನಿರ್ಣಯ ವಿಫಲವಾಗಿದೆ",
+      "diagnosisFailedTryAgain": "ರೋಗ ನಿರ್ಣಯ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "unableToProcess": "ಚಿತ್ರವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+      "invalidImageNotPlant": "ದಯವಿಟ್ಟು ಸಸ್ಯದ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ - ಪ್ರಸ್ತುತ ಚಿತ್ರವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ",
+      "nameMismatch": "ಚಿತ್ರದಲ್ಲಿರುವ ಸಸ್ಯವು ಒದಗಿಸಿದ ಸಸ್ಯದ ಹೆಸರಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ",
+      "technicalError": "ತಾಂತ್ರಿಕ ದೋಷ ಸಂಭವಿಸಿದೆ - ದಯವಿಟ್ಟು ಸ್ಪಷ್ಟವಾದ ಚಿತ್ರದೊಂದಿಗೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"
     },
     "healthy": {
-      "title": "Healthy Plant Detected",
-      "message": "Great news! Your plant appears healthy with no visible disease symptoms.",
-      "keepHealthy": "Keep Your Plant Healthy"
+      "title": "ಆರೋಗ್ಯಕರ ಸಸ್ಯ ಪತ್ತೆಯಾಗಿದೆ",
+      "message": "ಉತ್ತಮ ಸುದ್ದಿ! ನಿಮ್ಮ ಸಸ್ಯವು ಆರೋಗ್ಯಕರವಾಗಿ ಕಂಡುಬರುತ್ತದೆ, ಯಾವುದೇ ಗೋಚರ ರೋಗದ ಲಕ್ಷಣಗಳಿಲ್ಲ.",
+      "keepHealthy": "🛡️ ನಿಮ್ಮ ಸಸ್ಯವನ್ನು ಆರೋಗ್ಯಕರವಾಗಿ ಇರಿಸಿ"
     },
     "results": {
-      "title": "Comprehensive Diagnosis Results",
-      "identifiedDisease": "Identified Disease",
-      "severity": "Severity",
-      "confidence": "Confidence",
-      "stage": "Stage",
-      "affected": "Affected",
-      "understanding": "Understanding the Disease",
-      "economicImpact": "Economic Impact",
-      "immediateAction": "Immediate Action Required",
-      "symptoms": "Detailed Symptoms Analysis",
-      "treatment": "Scientific Treatment Recommendations",
-      "treatmentTiming": "Optimal Treatment Timing",
-      "localRemedies": "Traditional & Affordable Remedies",
-      "prevention": "Prevention Strategies",
-      "followUp": "Long-term Care & Monitoring"
+      "title": "ಸಮಗ್ರ ರೋಗ ನಿರ್ಣಯ ಫಲಿತಾಂಶಗಳು",
+      "identifiedDisease": "ಗುರುತಿಸಲಾದ ರೋಗ",
+      "severity": "ತೀವ್ರತೆ",
+      "confidence": "ವಿಶ್ವಾಸಾರ್ಹತೆ",
+      "stage": "ಹಂತ",
+      "affected": "ಪೀಡಿತ",
+      "understanding": "ರೋಗದ ತಿಳುವಳಿಕೆ",
+      "economicImpact": "ಆರ್ಥಿಕ ಪರಿಣಾಮ",
+      "immediateAction": "ತಕ್ಷಣದ ಕ್ರಮ ಅಗತ್ಯ",
+      "symptoms": "🔍 ವಿವರವಾದ ಲಕ್ಷಣಗಳ ವಿಶ್ಲೇಷಣೆ",
+      "treatment": "💊 ವೈಜ್ಞಾನಿಕ ಚಿಕಿತ್ಸಾ ಶಿಫಾರಸುಗಳು",
+      "treatmentTiming": "⏰ ಸೂಕ್ತ ಚಿಕಿತ್ಸಾ ಸಮಯ",
+      "localRemedies": "🌿 ಸಾಂಪ್ರದಾಯಿಕ ಮತ್ತು ಕೈಗೆಟುಕುವ ಪರಿಹಾರಗಳು",
+      "prevention": "🛡️ ತಡೆಗಟ್ಟುವ ತಂತ್ರಗಳು",
+      "followUp": "📋 ದೀರ್ಘಕಾಲೀನ ಆರೈಕೆ ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆ"
     },
     "validation": {
-      "selectImage": "Please select an image first",
-      "enterPlantName": "Please enter the plant name",
-      "captureLocation": "Please capture your location first"
+      "selectImage": "ದಯವಿಟ್ಟು ಮೊದಲು ಒಂದು ಚಿತ್ರವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
+      "enterPlantName": "ದಯವಿಟ್ಟು ಸಸ್ಯದ ಹೆಸರನ್ನು ನಮೂದಿಸಿ",
+      "captureLocation": "ದಯವಿಟ್ಟು ಮೊದಲು ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"
     }
   }
 }

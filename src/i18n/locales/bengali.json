@@ -282,70 +282,70 @@
     "typeMessage": "আপনার বার্তা এখানে টাইপ করুন..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "উদ্ভিদ চিকিৎসক",
+    "subtitle": "AI-চালিত ফসল রোগ নির্ণয় এবং চিকিৎসা পরামর্শ",
+    "uploadTitle": "উদ্ভিদের ছবি আপলোড করুন",
+    "previewAlt": "উদ্ভিদের পূর্বরূপ",
+    "uploadHint": "আপলোড করতে ক্লিক করুন বা উদ্ভিদের ছবি ড্রাগ এবং ড্রপ করুন",
+    "uploadTypes": "PNG, JPG, JPEG ১০MB পর্যন্ত",
+    "plantNameTitle": "উদ্ভিদের নাম",
+    "plantNamePlaceholder": "উদ্ভিদের নাম লিখুন (যেমন, টমেটো, গম, চাল...)",
+    "detailsTitle": "অতিরিক্ত বিবরণ",
+    "detailsPlaceholder": "আপনি যে কোনো লক্ষণ দেখেছেন, কখন শুরু হয়েছিল, বা কোনো চিকিৎসা চেষ্টা করেছেন তার বর্ণনা দিন...",
     "location": {
-      "title": "Location",
-      "captured": "Location captured",
-      "capturedSuccess": "Location captured successfully",
-      "unknownPlace": "Unknown Place",
-      "unknownState": "Unknown State",
-      "state": "State",
-      "locationFound": "Location found",
-      "getting": "Getting location...",
-      "getCurrent": "Get current location"
+      "title": "অবস্থান",
+      "captured": "অবস্থান ক্যাপচার করা হয়েছে",
+      "capturedSuccess": "অবস্থান সফলভাবে ক্যাপচার করা হয়েছে",
+      "unknownPlace": "অজানা স্থান",
+      "unknownState": "অজানা রাজ্য",
+      "state": "রাজ্য",
+      "locationFound": "অবস্থান পাওয়া গেছে",
+      "getting": "অবস্থান পাচ্ছি...",
+      "getCurrent": "বর্তমান অবস্থান পান"
     },
-    "analyzing": "Analyzing...",
-    "diagnose": "Diagnose Plant",
-    "clearAll": "Clear All",
+    "analyzing": "বিশ্লেষণ করছি...",
+    "diagnose": "উদ্ভিদের নির্ণয় করুন",
+    "clearAll": "সব পরিষ্কার করুন",
     "success": {
-      "completed": "Diagnosis completed successfully!"
+      "completed": "নির্ণয় সফলভাবে সম্পন্ন হয়েছে!"
     },
     "errors": {
-      "invalidImageFile": "Please select a valid image file",
-      "geolocationNotSupported": "Geolocation not supported",
-      "locationAccess": "Unable to get location. Please ensure location access is enabled.",
-      "diagnosisFailed": "Diagnosis failed",
-      "diagnosisFailedTryAgain": "Diagnosis failed. Please try again.",
-      "unableToProcess": "Unable to Process Image",
-      "invalidImageNotPlant": "Please upload a plant image - current image cannot be processed",
-      "nameMismatch": "The plant in the image does not match the plant name provided",
-      "technicalError": "Technical error occurred - please try again with a clearer image"
+      "invalidImageFile": "অনুগ্রহ করে একটি বৈধ ছবি ফাইল নির্বাচন করুন",
+      "geolocationNotSupported": "ভৌগোলিক অবস্থান সমর্থিত নয়",
+      "locationAccess": "অবস্থান পেতে অক্ষম। অনুগ্রহ করে নিশ্চিত করুন যে অবস্থান অ্যাক্সেস সক্ষম আছে।",
+      "diagnosisFailed": "নির্ণয় ব্যর্থ",
+      "diagnosisFailedTryAgain": "নির্ণয় ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+      "unableToProcess": "ছবি প্রক্রিয়া করতে অক্ষম",
+      "invalidImageNotPlant": "অনুগ্রহ করে উদ্ভিদের ছবি আপলোড করুন - বর্তমান ছবি প্রক্রিয়া করা যায় না",
+      "nameMismatch": "ছবিতে থাকা উদ্ভিদ প্রদত্ত উদ্ভিদের নামের সাথে মিলছে না",
+      "technicalError": "প্রযুক্তিগত ত্রুটি ঘটেছে - অনুগ্রহ করে স্পষ্ট ছবি দিয়ে আবার চেষ্টা করুন"
     },
     "healthy": {
-      "title": "Healthy Plant Detected",
-      "message": "Great news! Your plant appears healthy with no visible disease symptoms.",
-      "keepHealthy": "🛡️ Keep Your Plant Healthy"
+      "title": "সুস্থ উদ্ভিদ শনাক্ত",
+      "message": "দুর্দান্ত খবর! আপনার উদ্ভিদ সুস্থ দেখাচ্ছে, কোনো দৃশ্যমান রোগের লক্ষণ নেই।",
+      "keepHealthy": "🛡️ আপনার উদ্ভিদ সুস্থ রাখুন"
     },
     "results": {
-      "title": "Comprehensive Diagnosis Results",
-      "identifiedDisease": "Identified Disease",
-      "severity": "Severity",
-      "confidence": "Confidence",
-      "stage": "Stage",
-      "affected": "Affected",
-      "understanding": "Understanding the Disease",
-      "economicImpact": "Economic Impact",
-      "immediateAction": "Immediate Action Required",
-      "symptoms": "🔍 Detailed Symptoms Analysis",
-      "treatment": "💊 Scientific Treatment Recommendations",
-      "treatmentTiming": "⏰ Optimal Treatment Timing",
-      "localRemedies": "🌿 Traditional & Affordable Remedies",
-      "prevention": "🛡️ Prevention Strategies",
-      "followUp": "📋 Long-term Care & Monitoring"
+      "title": "বিস্তারিত নির্ণয় ফলাফল",
+      "identifiedDisease": "চিহ্নিত রোগ",
+      "severity": "গুরুত্ব",
+      "confidence": "নির্ভরযোগ্যতা",
+      "stage": "পর্যায়",
+      "affected": "আক্রান্ত",
+      "understanding": "রোগের বুঝাপড়া",
+      "economicImpact": "অর্থনৈতিক প্রভাব",
+      "immediateAction": "তাৎক্ষণিক পদক্ষেপ প্রয়োজন",
+      "symptoms": "🔍 বিস্তারিত লক্ষণ বিশ্লেষণ",
+      "treatment": "💊 বৈজ্ঞানিক চিকিৎসা পরামর্শ",
+      "treatmentTiming": "⏰ সর্বোত্তম চিকিৎসার সময়",
+      "localRemedies": "🌿 ঐতিহ্যবাহী এবং সাশ্রয়ী প্রতিকার",
+      "prevention": "🛡️ প্রতিরোধ কৌশল",
+      "followUp": "📋 দীর্ঘমেয়াদী যত্ন এবং পর্যবেক্ষণ"
     },
     "validation": {
-      "selectImage": "Please select an image first",
-      "enterPlantName": "Please enter the plant name",
-      "captureLocation": "Please capture your location first"
+      "selectImage": "অনুগ্রহ করে প্রথমে একটি ছবি নির্বাচন করুন",
+      "enterPlantName": "অনুগ্রহ করে উদ্ভিদের নাম লিখুন",
+      "captureLocation": "অনুগ্রহ করে প্রথমে আপনার অবস্থান ক্যাপচার করুন"
     }
   }
 }

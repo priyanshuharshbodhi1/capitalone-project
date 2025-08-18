@@ -285,16 +285,16 @@
     "typeMessage": "మీ సందేశాన్ని ఇక్కడ టైప్ చేయండి..."
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
-    "plantNameTitle": "Plant Name",
-    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
-    "detailsTitle": "Additional Details",
-    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "title": "వనస్పతి వైద్యుడు",
+    "subtitle": "AI శక్తితో పంట రోగ నిర్ణయం మరియు చికిత్స పరామర్శలు",
+    "uploadTitle": "వనస్పతి చిత్రం అప్‌లోడ్ చేయండి",
+    "previewAlt": "వనస్పతి ప్రీవ్యూ",
+    "uploadHint": "అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి లేదా వనస్పతి చిత్రాన్ని డ్రాగ్ ఆండ్ డ్రాప్ చేయండి",
+    "uploadTypes": "PNG, JPG, JPEG 10MB వరకు",
+    "plantNameTitle": "వనస్పతి పేరు",
+    "plantNamePlaceholder": "వనస్పతి పేరు ప్రవేశపెట్టండి (ఉదా., టొమాటో, గోధుమలు, వంటి...)",
+    "detailsTitle": "అతిరిక్త వివరాలు",
+    "detailsPlaceholder": "మీరు చూసిన ఏవైనా లక్షణాలు, అవి ఎప్పుడు ప్రారంభమైయాయి, లేదా ఏవైనా చికిత్సలను ప్రయత్నించారు వివరించండి..."
     "location": {
       "title": "Location",
       "captured": "Location captured",

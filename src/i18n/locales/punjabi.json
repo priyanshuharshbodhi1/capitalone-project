@@ -280,12 +280,12 @@
     "updatedAt": "ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ"
   },
   "plantdoc": {
-    "title": "PlantDoc",
-    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
-    "uploadTitle": "Upload Plant Image",
-    "previewAlt": "Plant preview",
-    "uploadHint": "Click to upload or drag and drop a plant image",
-    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
+    "title": "ਪੌਧੇ ਡਾਕਟਰ",
+    "subtitle": "AI ਦੀ ਸਾਮਰਥ ਨਾਲ ਦੇ ਵਿਕਾਰ ਦੀ ਖੋਜ ਅਤੇ ਇਲਾਜ ਦੀਆਂ ਸਲਾਹਾਂ",
+    "uploadTitle": "ਪੌਧੇ ਦੀ ਤਸਵੀਰ ਅਪਲੋਡ ਕਰੋ",
+    "previewAlt": "ਪੌਧੇ ਦਾ ਪਪੀਵਿਊੂ",
+    "uploadHint": "ਅਪਲੋਡ ਕਰਨ ਲਈ ਕਲਿਕ ਕਰੋ ਜਾਂ ਪੌਧੇ ਦੀ ਤਸਵੀਰ ਨੂੰ ਡਰੈਗ ਅਤੇ ਡਰਾਪ ਕਰੋ",
+    "uploadTypes": "PNG, JPG, JPEG 10MB ਤਕ"
     "plantNameTitle": "Plant Name",
     "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
     "detailsTitle": "Additional Details",
