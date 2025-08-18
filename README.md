@@ -253,9 +253,13 @@ Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 ```
 
 ### **Arduino Code Example**
-![IoT Setup](assets/IoT_Setup.png)
-![Ardino IDE](assets/screenshot.png)
+<!-- ![IoT Setup](assets/IoT_Setup.png)
+![Ardino IDE](assets/ardino_ide.png) -->
 
+<p float="left">
+  <img src="assets/IoT_Setup.png" width="200" /> 
+  <img src="assets/ardino_ide.png" width="200" />
+</p>
 
 ## Testing the Application
 
@@ -325,8 +329,8 @@ server/agent/
 ```
 
 
-## Mobile UX Guidelines
-
+## Mobile View
+![Demo](assets/mobiel_view.mp4)
 
 
 ## License
