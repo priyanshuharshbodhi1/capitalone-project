@@ -200,7 +200,7 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
         
         return "\n".join(lines)
 
-    if intent == "govt_policy":
+    if intent == "govt_scheme":
         # Handle government policy agent responses
         policy_tool = next((t for t in tools_used if t.get("name") == "search_schemes"), {})
         policy_output = policy_tool.get("output", {})
@@ -235,8 +235,6 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
                     title = source.get("title", source.get("url", "Government Source"))
                     url = source.get("url", "")
                     lines.append(f"{i}. {title}" + (f" - {url}" if url else ""))
-        
-        lines.append("\n**Note:** Please verify scheme details and deadlines with local agricultural offices before applying.")
         
         return "\n".join(lines)
 
