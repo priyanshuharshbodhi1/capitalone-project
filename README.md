@@ -256,11 +256,8 @@ Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 <!-- ![IoT Setup](assets/IoT_Setup.png)
 ![Ardino IDE](assets/ardino_ide.png) -->
 
-<p float="left">
-  <img src="assets/Iot_Setup.png" width="200" /> 
-  <img src="assets/ardino_ide.png" width="200" />
-</p>
-
+![IoT](assets/Iot_Setup.png)
+![IoT](assets/ardino_ide.png)
 
 ## Testing the Application
 
@@ -331,7 +328,7 @@ server/agent/
 
 
 ## Mobile View
-![Demo](assets/mobiel_view.gif)
+<img src="assets/mobiel_view.gif" alt="Demo" height="400" width="auto"/>
 
 
 ## License
