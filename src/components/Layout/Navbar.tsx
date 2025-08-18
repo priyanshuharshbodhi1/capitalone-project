@@ -14,7 +14,7 @@ const Navbar: React.FC = () => {
 
   const navigation = [
     { name: t('navigation.assistant'), href: '/', icon: MessageSquare },
-    { name: 'PlantDoc', href: '/plantdoc', icon: Leaf },
+    { name: t('navigation.plantdoc'), href: '/plantdoc', icon: Leaf },
     { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('navigation.analytics'), href: '/analytics', icon: PieChart },
   ];

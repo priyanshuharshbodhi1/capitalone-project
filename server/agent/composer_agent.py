@@ -7,22 +7,163 @@ from ..infra.settings import settings
 from .prompts.response_composition import (
     SHETKARI_COMPOSER_SYSTEM_PROMPT,
     GEMINI_COMPOSER_PROMPT_TEMPLATE,
+    ENHANCED_COMPOSER_SYSTEM_PROMPT,
+    ENHANCED_COMPOSER_PROMPT_TEMPLATE,
     FALLBACK_RESPONSES
 )
 
-# Gemini LLM (optional)
+# Groq LLM (using same as delegation agent)
 try:
-    import google.generativeai as genai  # type: ignore
-    _GEMINI_AVAILABLE = True
+    from groq import Groq
+    _GROQ_AVAILABLE = True
 except Exception:  # pragma: no cover
-    _GEMINI_AVAILABLE = False
+    _GROQ_AVAILABLE = False
 
 
-def _gemini_client():
-    if not settings.gemini_api_key or not _GEMINI_AVAILABLE:
+def _groq_client():
+    if not settings.groq_api_key or not _GROQ_AVAILABLE:
         return None
-    genai.configure(api_key=settings.gemini_api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+    try:
+        return Groq(api_key=settings.groq_api_key)
+    except Exception as e:
+        print(f"Failed to create Groq client: {e}")
+        return None
+
+
+def _handle_govt_scheme_response(agent_responses: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Handle government scheme responses by returning raw data without additional formatting"""
+    citations: List[Dict[str, Any]] = []
+    
+    # Find the government scheme response
+    scheme_response = None
+    for resp in agent_responses:
+        if resp.get("name") == "search_schemes" and resp.get("ok", False):
+            scheme_response = resp.get("output", {})
+            break
+    
+    if not scheme_response:
+        return {
+            "text": "No government scheme information available at the moment.",
+            "citations": citations
+        }
+    
+    # Extract the raw schemes information
+    data = scheme_response.get("data", {})
+    schemes_info = data.get("schemes_info", "")
+    structured = data.get("schemes_structured", [])
+    
+    # Return structured JSON if available, otherwise return the raw text
+    if structured:
+        import json as _json
+        text = "Here are the most relevant government schemes (max 5):\n\n```json\n"
+        text += _json.dumps(structured[:5], ensure_ascii=False, indent=2)
+        text += "\n```"
+    elif schemes_info:
+        text = schemes_info
+    else:
+        text = "Government scheme information is not available in the expected format."
+    
+    return {"text": text, "citations": citations}
+
+
+def compose_enhanced_answer(
+    original_query: str,
+    chat_history: List[Dict[str, Any]],
+    agent_responses: List[Dict[str, Any]],
+    intent: str,
+    context: Dict[str, Any],
+    memory_context: List[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """
+    Enhanced composer that considers original query, chat history, and all agent responses.
+    Uses Groq LLM (llama-3.1-8b-instant) for comprehensive context-aware responses.
+    """
+    citations: List[Dict[str, Any]] = []
+    
+    # Get Groq client
+    client = _groq_client()
+    if not client:
+        # Fallback to basic composition if no LLM available
+        return _fallback_enhanced_response(original_query, agent_responses, intent, context, memory_context)
+    
+    try:
+        # Format chat history
+        chat_history_text = ""
+        if chat_history:
+            for msg in chat_history[-5:]:  # Last 5 messages for context
+                role = msg.get("role", "")
+                content = msg.get("content", "")
+                if role and content:
+                    chat_history_text += f"{role.capitalize()}: {content}\n"
+        else:
+            chat_history_text = "No previous conversation"
+        
+        # Format agent responses
+        agent_responses_text = ""
+        if agent_responses:
+            for resp in agent_responses:
+                name = resp.get("name", "unknown")
+                output = resp.get("output", {})
+                success = resp.get("ok", False)
+                
+                if success and output:
+                    agent_responses_text += f"\n**{name.upper()} RESPONSE:**\n"
+                    agent_responses_text += json.dumps(output, indent=2) + "\n"
+                else:
+                    error = resp.get("error", "Unknown error")
+                    agent_responses_text += f"\n**{name.upper()} ERROR:** {error}\n"
+        else:
+            agent_responses_text = "No agent responses available"
+        
+        # Format memory context
+        memory_context_text = ""
+        if memory_context:
+            relevant_memories = [mem.get("memory", "") for mem in memory_context[:3]]
+            if relevant_memories:
+                memory_context_text = "\n".join(f"- {mem}" for mem in relevant_memories)
+        if not memory_context_text:
+            memory_context_text = "No relevant previous conversations"
+        
+        # Format location info
+        location_info = "Location not specified"
+        if context.get("lat") and context.get("lon"):
+            location_info = f"Latitude: {context.get('lat')}, Longitude: {context.get('lon')}"
+            if context.get("state"):
+                location_info += f", State: {context.get('state')}"
+        
+        # Special handling for government schemes - return raw response
+        if intent == "govt_scheme":
+            return _handle_govt_scheme_response(agent_responses)
+        
+        # Create the simplified prompt for other intents
+        prompt = ENHANCED_COMPOSER_PROMPT_TEMPLATE.format(
+            original_query=original_query,
+            intent=intent,
+            agent_responses=agent_responses_text
+        )
+        
+        # Make Groq API call
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",  # Same as delegation agent
+            messages=[
+                {"role": "system", "content": ENHANCED_COMPOSER_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,  # Lower temperature for more concise responses
+            max_tokens=500,   # Reduced tokens to encourage concise responses
+            timeout=30
+        )
+        
+        text = response.choices[0].message.content.strip()
+        
+        if not text or len(text) < 20:
+            return _fallback_enhanced_response(original_query, agent_responses, intent, context, memory_context)
+        
+        return {"text": text, "citations": citations}
+        
+    except Exception as e:
+        print(f"Enhanced composer error: {e}")
+        return _fallback_enhanced_response(original_query, agent_responses, intent, context, memory_context)
 
 
 def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | None = None, memory_context: List[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -33,8 +174,8 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
     # Remove citations processing as requested by user
     citations: List[Dict[str, Any]] = []
 
-    # If Gemini is available, use it to craft natural text constrained to tools
-    client = _gemini_client()
+    # If Groq is available, use it to craft natural text constrained to tools
+    client = _groq_client()
     if client:
         tool_summaries = json.dumps({t["name"]: t.get("output", {}) for t in tools_used})
         
@@ -53,8 +194,18 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
         ) + memory_context_text
         
         try:
-            resp = client.generate_content(prompt)
-            text = resp.text or ""
+            # Use Groq chat completion instead of Gemini
+            resp = client.chat.completions.create(
+                model="llama-3.1-8b-instant",  # Same as delegation agent
+                messages=[
+                    {"role": "system", "content": SHETKARI_COMPOSER_SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=1000,
+                timeout=30
+            )
+            text = resp.choices[0].message.content.strip() or ""
         except Exception as e:  # fallback
             text = _fallback_text(tools_used, intent, memory_context)
     else:
@@ -63,14 +214,63 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
     return {"text": text, "citations": citations}
 
 
+def _fallback_enhanced_response(
+    original_query: str,
+    agent_responses: List[Dict[str, Any]],
+    intent: str,
+    context: Dict[str, Any],
+    memory_context: List[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Fallback response when LLM is not available for enhanced composer"""
+    citations: List[Dict[str, Any]] = []
+    
+    # Try to provide a helpful response based on available agent responses
+    if not agent_responses:
+        return {
+            "text": "I apologize, but I couldn't process your request at the moment. Please try rephrasing your question or contact support if the issue persists.",
+            "citations": citations
+        }
+    
+    # Check if any agent provided useful information
+    useful_responses = [resp for resp in agent_responses if resp.get("ok", False)]
+    
+    if not useful_responses:
+        # All agents failed
+        return {
+            "text": "I encountered some issues while gathering information for your query. Please check your location settings and try again with a more specific question.",
+            "citations": citations
+        }
+    
+    # Try to provide a basic response based on intent and successful agent responses
+    if intent == "weather":
+        return {
+            "text": "Weather information retrieved. Check conditions for your farming activities.",
+            "citations": citations
+        }
+    elif intent == "govt_scheme":
+        # For govt schemes, try to extract raw data
+        return _handle_govt_scheme_response(agent_responses)
+    elif intent == "agronomist":
+        return {
+            "text": "Agricultural advice available. Consider local conditions for best results.",
+            "citations": citations
+        }
+    elif intent == "market":
+        return {
+            "text": "Market information found. Verify current prices with local markets.",
+            "citations": citations
+        }
+    else:
+        return {
+            "text": "Information processed. Please ask specific questions for detailed guidance.",
+            "citations": citations
+        }
+
+
 def _fallback_text(tools_used: List[Dict[str, Any]], intent: str, memory_context: List[Dict[str, Any]] = None) -> str:
     # User-friendly deterministic text without exposing internal details
     if intent == "general":
-        return (
-            "I can help with farm weather and market prices.\n"
-            "- Ask things like: 'Weather for the next 3 days in my area' or 'Tomato prices near Pune'.\n"
-            "- You can also ask about irrigation, fertilizer timing, or disease prevention and I'll use available data."
-        )
+        return "I can help with weather, market prices, government schemes, and farming advice. Please ask specific questions."
 
     if intent == "weather":
         # Handle new weather tool format with 4 specialized tools
@@ -87,161 +287,88 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str, memory_context
         # Handle current weather tool
         if tool_name == "get_current_weather":
             temp = data.get("temperature_celsius")
-            humidity = data.get("humidity_percent") 
-            soil_temp = data.get("soil_temperature_celsius")
-            soil_moisture = data.get("soil_moisture_percent")
             precip = data.get("precipitation_mm", 0)
             
-            conditions = []
             if temp is not None:
-                conditions.append(f"{temp:.1f}°C")
-            if humidity is not None:
-                conditions.append(f"{humidity:.0f}% humidity")
+                lines.append(f"Current: {temp:.1f}°C")
             if precip > 0:
-                conditions.append(f"{precip:.1f}mm rain")
-                
-            lines.append(f"Current conditions: {', '.join(conditions)}.")
-            
-            if soil_temp is not None and soil_moisture is not None:
-                lines.append(f"Soil: {soil_temp:.1f}°C, {soil_moisture:.1f}% moisture.")
-            
-            # Agricultural advice based on current conditions
-            advice = []
-            if precip > 5:
-                advice.append("Avoid spraying pesticides due to rain")
-            elif soil_moisture and soil_moisture < 30:
-                advice.append("Consider irrigation - soil moisture is low")
-            elif humidity and humidity > 80:
-                advice.append("High humidity - monitor for fungal diseases")
-                
-            if advice:
-                lines.append(f"Advice: {'. '.join(advice)}.")
+                lines.append(f"Rain: {precip:.1f}mm")
         
         # Handle future weather tool  
         elif tool_name == "get_future_weather":
             forecast = data.get("daily_forecast", [])
-            if forecast:
-                days_shown = min(3, len(forecast))
-                for i, day in enumerate(forecast[:days_shown]):
-                    date = day.get("date", "")
-                    tmax = day.get("max_temp_celsius")
-                    tmin = day.get("min_temp_celsius")
-                    rain = day.get("precipitation_mm", 0)
-                    
-                    day_parts = []
-                    if tmax is not None and tmin is not None:
-                        day_parts.append(f"{tmin:.0f}-{tmax:.0f}°C")
-                    if rain > 0:
-                        day_parts.append(f"{rain:.1f}mm rain")
-                    else:
-                        day_parts.append("no rain")
-                        
-                    day_name = "Today" if i == 0 else ("Tomorrow" if i == 1 else date.split('-')[2] if '-' in date else date)
-                    lines.append(f"{day_name}: {', '.join(day_parts)}")
+            if forecast and len(forecast) > 0:
+                day = forecast[0]  # Tomorrow's forecast
+                tmax = day.get("max_temp_celsius")
+                tmin = day.get("min_temp_celsius")
+                rain = day.get("precipitation_mm", 0)
                 
-                # Planning advice
-                total_rain = sum(day.get("precipitation_mm", 0) for day in forecast[:7])
-                if total_rain > 50:
-                    lines.append("Heavy rain expected - delay harvest and protect crops.")
-                elif total_rain < 5:
-                    lines.append("Dry period ahead - plan irrigation schedule.")
-                else:
-                    lines.append("Moderate conditions - good for most farm activities.")
+                if tmax is not None and tmin is not None:
+                    lines.append(f"Tomorrow: {tmin:.0f}-{tmax:.0f}°C")
+                if rain > 0:
+                    lines.append(f"Rain expected: {rain:.1f}mm")
         
         # Handle historical weather tool
         elif tool_name == "get_historical_weather":
             summary = data.get("summary", {})
-            period = data.get("period", {})
-            
             if summary:
                 temp_summary = summary.get("temperature", {})
-                rain_summary = summary.get("precipitation", {})
-                
                 if temp_summary:
                     avg_temp = temp_summary.get("avg_max_celsius")
                     if avg_temp is not None:
-                        lines.append(f"Historical average: {avg_temp:.1f}°C max temperature.")
-                
-                if rain_summary:
-                    total_rain = rain_summary.get("total_mm")
-                    if total_rain is not None:
-                        lines.append(f"Total rainfall in period: {total_rain:.0f}mm.")
-                
-                lines.append(f"Data period: {period.get('start', '')} to {period.get('end', '')}.")
-                lines.append("Use this pattern to select suitable crop varieties for similar conditions.")
+                        lines.append(f"Historical average: {avg_temp:.1f}°C")
         
         # Handle weather alerts tool
         elif tool_name == "get_weather_alerts":
-            alerts = data.get("alerts", [])
             alert_count = data.get("alert_count", 0)
             
             if alert_count == 0:
-                lines.append("No active weather alerts in your area.")
-                lines.append("Conditions are favorable for normal farm activities.")
+                lines.append("No weather alerts.")
             else:
-                lines.append(f"⚠️ {alert_count} active weather alert(s):")
-                for alert in alerts[:3]:  # Show max 3 alerts
-                    event = alert.get("event", "Weather Alert")
-                    severity = alert.get("severity", "medium")
-                    severity_icon = "🚨" if severity == "high" else "⚠️"
-                    lines.append(f"{severity_icon} {event}")
-                
-                if data.get("has_severe_alerts"):
-                    lines.append("URGENT: Take immediate action to protect crops and livestock!")
-                else:
-                    lines.append("Monitor conditions and prepare protective measures.")
+                alerts = data.get("alerts", [])
+                if alerts:
+                    event = alerts[0].get("event", "Weather Alert")
+                    lines.append(f"⚠️ Alert: {event}")
         
         # Default fallback
         if not lines:
-            lines.append("Weather data retrieved successfully. Use for agricultural planning.")
+            lines.append("Weather data available.")
         
         return "\n".join(lines)
 
     if intent == "govt_scheme":
-        # Handle government policy agent responses
+        # Handle government policy agent responses - return raw data
         policy_tool = next((t for t in tools_used if t.get("name") == "search_schemes"), {})
         policy_output = policy_tool.get("output", {})
         
         if not policy_output.get("success", False):
-            return f"Government scheme information unavailable: {policy_output.get('error', 'Unknown error')}"
+            return "Government scheme information unavailable."
         
         data = policy_output.get("data", {})
         schemes_info = data.get("schemes_info", "")
-        sources = policy_output.get("sources") or data.get("sources", [])
         structured = data.get("schemes_structured", [])
         
-        lines = []
-        # Prefer strict JSON format if available as requested by frontend/judges
+        # Return raw schemes data without additional formatting
         if structured:
             import json as _json
-            lines.append("Here are the most relevant government schemes (max 5):")
-            lines.append("\n```json")
-            # Ensure max 5
-            lines.append(_json.dumps(structured[:5], ensure_ascii=False, indent=2))
-            lines.append("```")
+            return "Here are the most relevant government schemes (max 5):\n\n```json\n" + _json.dumps(structured[:5], ensure_ascii=False, indent=2) + "\n```"
         elif schemes_info:
-            lines.append(schemes_info)
-        
-        # Citations removed as requested by user
-        
-        return "\n".join(lines)
+            return schemes_info
+        else:
+            return "No government schemes found."
 
     if intent == "market":
         market = next((t.get("output", {}) for t in tools_used if t.get("name") == "market"), {})
         price = market.get("price") or market.get("modal_price") or market.get("average")
         loc = market.get("market") or market.get("district") or market.get("state")
-        lines: List[str] = []
-        if price is not None and loc:
-            lines.append(f"Latest price near {loc}: {price}.")
-        elif price is not None:
-            lines.append(f"Latest price: {price}.")
+        
+        if price is not None:
+            if loc:
+                return f"Price near {loc}: {price}"
+            else:
+                return f"Latest price: {price}"
         else:
-            lines.append("Here are the latest market trends available.")
-        trend = market.get("trend")
-        if trend:
-            lines.append(f"Trend: {trend}.")
-        lines.append("\nAdvice: If prices are rising, consider phased sales; if falling, explore nearby markets or collective selling.")
-        return "\n".join(lines)
+            return "Market information available."
 
     # Safe default
-    return "I generated guidance based on available data. Ask about weather or market to get specific recommendations."
+    return "Information available. Please ask specific questions for detailed guidance."

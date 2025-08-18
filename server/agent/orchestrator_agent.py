@@ -5,10 +5,11 @@ from typing import Any, AsyncGenerator, Dict, List, Tuple
 
 from .state import AgentState, TurnMessage
 from .delegating_agent import route_intent
-from .composer_agent import compose_answer
+from .composer_agent import compose_answer, compose_enhanced_answer
 from .agents.weather_agent import weather_agent
 from .agents.market_agent import fetch_market
 from .agents.govt_scheme_agent import govt_scheme_agent
+from .agents.agronomist_agent import agronomist_agent
 from .memory.checkpointer import RedisCheckpointer
 from .memory.memory_agent import get_memory_service
 from ..infra.settings import settings
@@ -393,9 +394,20 @@ class AppGraph:
                 }
                 return
             
-            # Second message: Composed answer after tool execution
+            # Second message: Enhanced composed answer after tool execution
             memory_context = getattr(state, 'memory_context', []) if state else []
-            composed = compose_answer(tools_used, intent="weather", locale=context.get("locale"), memory_context=memory_context)
+            
+            # Convert messages to format expected by enhanced composer
+            chat_history = [{"role": msg.role, "content": msg.content} for msg in state.messages] if state else []
+            
+            composed = compose_enhanced_answer(
+                original_query=user_text,
+                chat_history=chat_history,
+                agent_responses=tools_used,
+                intent="weather",
+                context=context,
+                memory_context=memory_context
+            )
             final_response = composed.get("text", "")
             
             # Store conversation in memory if relevant
@@ -433,9 +445,20 @@ class AppGraph:
                 "error": scheme_result.get("error") if not scheme_result.get("success", False) else None
             }]
             
-            # Compose final response
+            # Compose enhanced final response
             memory_context = getattr(state, 'memory_context', []) if state else []
-            composed = compose_answer(tools_used, intent="govt_scheme", locale=context.get("locale"), memory_context=memory_context)
+            
+            # Convert messages to format expected by enhanced composer
+            chat_history = [{"role": msg.role, "content": msg.content} for msg in state.messages] if state else []
+            
+            composed = compose_enhanced_answer(
+                original_query=user_text,
+                chat_history=chat_history,
+                agent_responses=tools_used,
+                intent="govt_scheme",
+                context=context,
+                memory_context=memory_context
+            )
             final_response = composed.get("text", "")
             
             # Store conversation in memory if relevant
@@ -450,17 +473,118 @@ class AppGraph:
             }
             return
 
+        # Agronomist intent path using GPT-4o
+        if "agronomist" in intents:
+            yield {
+                "type": "intents",
+                "text": f"Detected intents: {', '.join(intents)}",
+                "intents": intents
+            }
+            
+            # Extract context for agronomic advice
+            location_context = None
+            if context.get("state"):
+                location_context = f"State: {context.get('state')}"
+                if context.get("district"):
+                    location_context += f", District: {context.get('district')}"
+            
+            season = context.get("season")
+            farmer_type = context.get("farmer_type")
+            farm_size = context.get("farm_size")
+            
+            # Get agronomic advice
+            agronomic_result = agronomist_agent.get_agronomic_advice(
+                query=user_text,
+                location_context=location_context,
+                season=season,
+                farmer_type=farmer_type,
+                farm_size=farm_size,
+                additional_context=context.get("additional_context")
+            )
+            
+            tools_used = [{
+                "name": "get_agronomic_advice",
+                "input": {
+                    "query": user_text,
+                    "location_context": location_context,
+                    "season": season,
+                    "farmer_type": farmer_type,
+                    "farm_size": farm_size
+                },
+                "output": agronomic_result,
+                "ok": agronomic_result.get("success", False),
+                "error": agronomic_result.get("error") if not agronomic_result.get("success", False) else None
+            }]
+            
+            # Compose enhanced final response
+            memory_context = getattr(state, 'memory_context', []) if state else []
+            
+            # Convert messages to format expected by enhanced composer
+            chat_history = [{"role": msg.role, "content": msg.content} for msg in state.messages] if state else []
+            
+            composed = compose_enhanced_answer(
+                original_query=user_text,
+                chat_history=chat_history,
+                agent_responses=tools_used,
+                intent="agronomist",
+                context=context,
+                memory_context=memory_context
+            )
+            final_response = composed.get("text", "")
+            
+            # Store conversation in memory if relevant
+            if memory_service.is_available():
+                memory_service.add_conversation_memory(session_id, user_text, final_response, "agronomist")
+            
+            yield {
+                "type": "final",
+                "text": final_response,
+                "intents": intents,
+                "citations": composed.get("citations", [])
+            }
+            return
+
         # Handle general/unclear queries with helpful guidance
         if "general" in intents:
-            general_response = "I'd be happy to help you with farming-related information! Here's what I can assist you with:\n\n🌤️ **Weather Information**: Current conditions, forecasts, historical patterns, and weather alerts\n🏛️ **Government Schemes**: Agricultural schemes, subsidies, and regulations\n📈 **Market Data**: Crop prices and market information\n🌱 **Agricultural Advice**: Crop selection, farming techniques, and pest management\n📱 **IoT Information**: Smart farming technology and sensors\n\nPlease be more specific about what you need, such as:\n- \"What's the current weather for irrigation?\"\n- \"Show me weather forecast for next week\"\n- \"Government subsidies for drip irrigation\"\n- \"Current tomato prices in my area\""
+            # Use enhanced composer for consistent handling
+            memory_context = getattr(state, 'memory_context', []) if state else []
+            chat_history = [{"role": msg.role, "content": msg.content} for msg in state.messages] if state else []
+            
+            # Create empty agent responses for general case
+            tools_used = [{
+                "name": "general_guidance",
+                "input": {"query": user_text},
+                "output": {
+                    "success": True,
+                    "message": "Providing general agricultural assistance guidance",
+                    "available_services": [
+                        "Weather Information (current, forecast, historical, alerts)",
+                        "Government Schemes (subsidies, regulations)",
+                        "Market Data (crop prices)",
+                        "Agricultural Advice (crop selection, farming techniques)",
+                        "IoT Information (smart farming technology)"
+                    ]
+                },
+                "ok": True,
+                "error": None
+            }]
+            
+            composed = compose_enhanced_answer(
+                original_query=user_text,
+                chat_history=chat_history,
+                agent_responses=tools_used,
+                intent="general",
+                context=context,
+                memory_context=memory_context
+            )
             
             # Note: We don't store general guidance in memory as it's not user-specific
             
             yield {
                 "type": "final",
-                "text": general_response,
+                "text": composed.get("text", "I can help you with various farming-related questions. Please provide more specific details about what you need."),
                 "intents": intents,
-                "citations": []
+                "citations": composed.get("citations", [])
             }
             return
 

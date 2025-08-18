@@ -1,28 +1,34 @@
-# Shetkari - Agricultural IoT Monitoring System
+# Shetkari – Agricultural IoT Monitoring System
 
-<div align="center">  
-  
-  ![Shetkari Logo](https://img.shields.io/badge/Shetkari-Smart%20Agriculture-blue?style=for-the-badge&logo=car&logoColor=white)
-  
-  **A comprehensive IoT monitoring system for agricultural environments**
-  [![React](https://img.shields.io/badge/React-18.3.1-blue)](https://reactjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue)](https://www.typescriptlang.org/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.1-blue)](https://tailwindcss.com/)
+Every year, farmers face unpredictable crop losses due to poor visibility into real-time farm conditions.
+From erratic weather and poor irrigation to delayed responses to soil imbalances, traditional farming lacks intelligent 24/7 monitoring systems that can provide timely alerts or guidance.
 
-</div>
+Introducing Shetkari, India's everything app for farmers. It's a smart agricultural IoT platform designed for precision farming and sustainable agriculture. It's a helpfull AI powered asistant with multiple agents. It's a plant docter for getting quick and actionable advice. and much more...
 
-## 🌱 Overview
+- Frontend: React + TypeScript
+- Backend: FastAPI + Python + LangGraph 
+- Memory Layer: mem0
+- Translations: 
+- Data: Supabase (Postgres + RLS, auth, edge functions)
+- AI: OpenAI, groq(llama-8.1)
+- Integrations: OpenWeatherMap, Bolt IoT, Webhooks/Zapier
 
-Shetkari is a modern, production-ready agricultural IoT monitoring system that provides real-time insights into farm environmental conditions. Built with React, TypeScript, and Supabase, it offers comprehensive monitoring, AI-powered recommendations, and automated alerting for optimal crop management.
+## Overview
 
-## ✨ Key Features
+Shetkari monitors key farm parameters, analyzes trends, and provides actionable, localized recommendations. It supports both real devices (ESP32) and a mock-sensor page for demos/testing.
 
-### 📊 **Real-time Sensor Monitoring**
-- **10 Environmental Parameters**: Track atmospheric temperature, humidity, light intensity, soil conditions, and nutrient levels
-- **Live Data Streaming**: Real-time updates with WebSocket connections
-- **Historical Analytics**: Comprehensive data visualization with Chart.js
-- **Multi-device Support**: Manage multiple ESP32 sensor nodes per farm
+## Key Features
+
+- Real-time sensor monitoring (10+ parameters)
+- Historical analytics and charts
+- AI-powered, localized recommendations based on recorded data
+- Contextual conversation memory using mem0 for personalized farming advice
+- AI-powered plant doctor for instant disease identification and treatment
+- Robust fallback recommendations when AI is unavailable
+- Advanced alerting via webhooks(SMS, Whatsapp, Emails)
+- Device management and API key auth for sensors
+- Mobile-first UI, touch-friendly interactions
+- Multi-language support (English, Marathi, Hindi, etc. - 13 to be accurate currently)
 
 ### 🤖 **AI-Powered Recommendations**
 - **Cloud AI via Edge Function**: Serverless function generates intelligent farming insights
@@ -30,22 +36,8 @@ Shetkari is a modern, production-ready agricultural IoT monitoring system that p
 - **Actionable Insights**: Specific guidance for irrigation, fertilization, and crop management
 - **Fallback System**: Local AI recommendations when cloud services are unavailable
 
-### 🌤️ **Weather Integration**
-- **Real-time Weather Data**: OpenWeatherMap API integration with geolocation
-- **UV Index Monitoring**: Solar radiation tracking for crop protection
-- **Weather Forecasting**: 5-day forecast for planning agricultural activities
-- **Location-based Data**: Automatic location detection with reverse geocoding
-
-### 🚨 **Advanced Alert System**
-- **Threshold-based Monitoring**: Customizable min/max thresholds for each parameter
-- **Multi-channel Notifications**: Email and SMS alerts via Salesforce integration
-- **Webhook Automation**: Automatic HTTP notifications to external systems
-- **Alert History**: Complete audit trail of all triggered alerts
-- **Real-time Status Updates**: Live tracking of alert delivery status
-
 ### 🎛️ **Device Management**
 - **ESP32 Integration**: Native support for ESP32 microcontrollers
-- **API Key Authentication**: Secure device-to-cloud communication
 - **Device Status Monitoring**: Last seen timestamps and connectivity status
 - **Bulk Configuration**: Manage multiple devices from a single dashboard
 
@@ -55,145 +47,212 @@ Shetkari is a modern, production-ready agricultural IoT monitoring system that p
 - **Safety Features**: Device status validation and error handling
 - **Remote Management**: Control farm equipment from anywhere
 
-## 🏗️ Architecture
+### 🚨 **Advanced Alert System**
+- **Threshold-based Monitoring**: Customizable min/max thresholds for each parameter
+- **Multi-channel Notifications**: Email and SMS alerts via Salesforce integration
+- **Webhook Automation**: Automatic HTTP notifications to external systems
+- **Alert History**: Complete audit trail of all triggered alerts
 
-### **Frontend Stack**
-- **React 18** with TypeScript for type-safe development
-- **Tailwind CSS** for responsive, modern UI design
-- **Vite** for fast development and optimized builds
-- **Chart.js** for interactive data visualizations
-- **Lucide React** for consistent iconography
+### 🧠 **Intelligent Memory System**
+- **Contextual Conversations**: Remembers user's farm details, crop types, and farming preferences. Only stores valuable agricultural information, filters out generic conversations
+- **Personalized Recommendations**: Uses conversation history to provide tailored farming advice. Remembers location, farm size, soil type, and previous queries
+- **Session-based Memory**: Individual memory context for each user session
+- **Limitations**: New session (refresh page): Memory resets (starts fresh) -- Can be fixed.
 
-### **Backend Infrastructure**
-- **Supabase** for database, authentication, and real-time features
-- **PostgreSQL** with Row Level Security (RLS) for data protection
-- **Edge Functions** for serverless API endpoints
-- **Real-time Subscriptions** for live data updates
+### 🤝 **Multi-Agent Assistant System(Assistant)**
+- **Orchestrated Intelligence**: Multiple specialized AI agents work together seamlessly
+- **Intent Classification**: Automatically routes queries to the most appropriate agent
+- **Agent Collaboration**: Agents can share context and collaborate on complex farming scenarios
+- **Unified Interface**: Single chat interface powered by multiple domain experts
+- **LangGraph Framework**: Advanced agent orchestration with memory and state management
 
-### **External Integrations**
-- **OpenWeatherMap API** for weather data
-- **Bolt IoT Cloud** for appliance control
-- **Zapier (or webhook endpoints)** for SMS/Email notifications
+#### **🎯 Agent Specializations:**
 
-## 📊 Monitored Parameters
+**🌤️ Weather Agent:**
+- Real-time weather conditions and soil parameters
+- Weather forecasts for crop planning and harvest timing  
+- Historical weather analysis for seasonal planning
+- Weather alerts and warnings for crop protection
+- Integration with OpenWeatherMap API for accurate data
 
-| Parameter | Unit | Description | Optimal Range |
-|-----------|------|-------------|---------------|
-| **Atmospheric Temperature** | °C | Air temperature around crops | 15-35°C |
-| **Atmospheric Humidity** | % | Relative humidity in air | 40-80% |
-| **Light Intensity** | lux | Photosynthetically active radiation | 400-800 lux |
-| **Soil Temperature** | °C | Temperature at root zone | 18-30°C |
-| **Soil Moisture** | % | Volumetric water content | 30-70% |
-| **Electrical Conductivity (EC)** | dS/m | Soil salinity and nutrient levels | 0.5-2.0 dS/m |
-| **Soil pH** | - | Soil acidity/alkalinity | 6.0-7.5 |
-| **Nitrogen (N)** | ppm | Available nitrogen content | 20-50 ppm |
-| **Phosphorus (P)** | ppm | Available phosphorus content | 10-30 ppm |
-| **Potassium (K)** | ppm | Available potassium content | 15-40 ppm |
+**🏛️ Government Schemes Agent:**
+- Agricultural subsidies and government schemes search
+- Policy information and eligibility criteria
+- Application guidance for farming benefits
+- State-specific scheme recommendations
+- Integration with government databases and APIs
 
-## 🔔 Alert & Notification System
+**🌾 Agronomist Agent:**
+- General farming advice and best practices
+- Crop selection and rotation recommendations
+- Soil management and fertilization guidance
+- Pest and disease prevention strategies
+- Irrigation and water management advice
 
-### **Automated Webhook System**
-The system includes a sophisticated webhook notification system that automatically triggers when alerts are created:
+**📈 Market Agent(Not Implemented):**
+- Current crop prices and market trends
+- Price forecasting and market analysis
+- Best selling locations and market intelligence
+- Commodity trading insights
+- Integration with agricultural market data sources
 
-1. **Database Trigger**: PostgreSQL trigger fires on new alert insertion
-2. **Edge Function Processing**: Supabase Edge Function processes alert data
-3. **Multi-channel Delivery**: Sends notifications to configured endpoints
-4. **Status Tracking**: Updates alert status based on delivery confirmation
+**Finance Agent(Not Implemented)**
+- Based on user data, memories and conversation histor provide best finantial advice like Loan, insurance etc
 
-### **Webhook Payload Structure**
-```json
-{
-  "alert": {
-    "id": "alert-uuid",
-    "device_id": "ESP32_001",
-    "parameter": "soil_moisture",
-    "current_value": 25.5,
-    "threshold_min": 30.0,
-    "threshold_max": 70.0,
-    "message": "Soil moisture is below minimum threshold",
-    "created_at": "2025-01-14T10:30:00Z"
-  },
-  "device": {
-    "name": "Greenhouse Sensor",
-    "location": "Greenhouse A",
-    "type": "ESP32_SENSOR_NODE"
-  },
-  "user": {
-    "name": "John Doe",
-    "email": "john@farm.com",
-    "phone": "+1-555-0123"
-  },
-  "severity": "LOW",
-  "timestamp": "2025-01-14T10:30:00Z"
-}
+**🔄 Agent Orchestration Flow:**
+1. **Query Reception**: User message received by the orchestrator
+2. **Memory Retrieval**: Previous context and farm details loaded from mem0
+3. **Intent Classification**: AI determines which agent(s) should handle the query
+4. **Agent Selection**: Appropriate specialist agent(s) activated
+5. **Tool Execution**: Agents use external APIs and data sources
+6. **Response Composition**: Results combined into coherent, actionable advice
+7. **Memory Storage**: Important agricultural information saved for future context
+
+**🏗️ Technical Architecture:**
+- **LangGraph Framework**: State machine for complex agent workflows
+- **Groq LLM**: Fast intent classification and tool selection
+- **OpenAI Integration**: Memory operations and response composition
+- **FastAPI Backend**: RESTful API with streaming responses
+- **Modular Design**: Each agent is independently deployable and testable
+
+### 🌱 **Plant Disease Diagnosis (PlantDoc)**
+- **Image-based Diagnosis**: Upload plant photos for instant disease identification
+- **AI-Powered Analysis**: Advanced computer vision models for accurate plant health assessment
+- **Treatment Recommendations**: Specific treatment plans and preventive measures
+- **Multi-crop Support**: Supports diagnosis for various crop types and plant species
+- **Localized Solutions**: Treatment suggestions adapted to Indian agricultural practices
+- **Assistant Integration**: Diagnosed diseases can be discussed with agricultural agents for comprehensive treatment plans
+
+## Architecture
+
+- Frontend app: `src/` (Vite)
+- FastAPI: `server`
+- Edge Functions: `supabase/functions/ai-recommendations/`
+- DB & migrations: `supabase/`, `supabase/migrations/`
+- Infrastructure helpers: `server/infra/`
+
+## Monitored Parameters(IoT)
+
+- Atmospheric temperature (°C)
+- Atmospheric humidity (%)
+- Light intensity (lux)
+- Soil temperature (°C)
+- Soil moisture (%)
+- Electrical Conductivity (dS/m)
+- Soil pH
+- Nitrogen (ppm)
+- Phosphorus (ppm)
+- Potassium (ppm)
+
+
+## Local Setup
+
+Prerequisites:
+- Node.js 18+
+- Python 3.11+
+- Supabase CLI (for Edge Functions) optional but recommended
+- OpenAI-compatible API key if testing AI
+- Git, make, curl recommended
+
+Setup:(Linux Environment prefered and tested)
+
+1. Clone and install frontend
+```bash
+npm install
 ```
 
-### **Notification Features**
-- **Automatic Retry Logic**: Failed webhooks retry up to 3 times with exponential backoff
-- **Multiple Endpoints**: Support for Slack, Discord, and custom webhook URLs
-- **Platform-specific Formatting**: Optimized message formats for different platforms
-- **Non-blocking Operations**: Alert creation never fails due to notification issues
-- **Comprehensive Logging**: All webhook attempts logged for debugging
+2. Configure env
+```bash
+cp .env.example .env
+# fill values for VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, etc.
+```
+For quick evaluation for judges, I have have provided .env file in the repo itself.
 
-## 🚀 Quick Start
+3. Start frontend
+```bash
+npm run dev
+```
 
-### **Prerequisites**
-- Node.js 18+ and npm
-- Supabase account and project
-- OpenWeatherMap API key (optional)
-- Bolt IoT account (optional for appliance control)
+Backend (FastAPI):
 
-### **Installation**
+1. Create venv and install
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r server/requirements.txt
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone 
-   cd ecobolt-agricultural-iot
-   ```
+2. Run API
+```bash
+uvicorn server.api.main:app --reload --port 8000
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+Supabase Edge Function (AI Recommendations):
 
-3. **Environment Configuration**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Configure your `.env` file:
-   ```env
-   # Supabase Configuration (Required)
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   
-   # OpenWeatherMap API (Optional)
-   VITE_OPENWEATHER_API_KEY=your_openweather_api_key
-   
-   # Bolt IoT Configuration (Optional)
-   VITE_BOLT_IOT_API_KEY=your_bolt_iot_api_key
-   VITE_BOLT_IOT_DEVICE_NAME=your_bolt_iot_device_name
-   ```
+- Directory: `supabase/functions/ai-recommendations/`
+- Local serve (CLI):
+```bash
+supabase functions serve ai-recommendations
+```
+- Ensure environment variables for the function are supplied (AI_API_KEY, AI_CHAT_URL, AI_MODEL).
+- Deploy to Supabase:
+```bash
+supabase functions deploy ai-recommendations
+```
 
-4. **Database Setup**
-   
-   Run the Supabase migrations to set up the database schema:
-   ```bash
-   # Using Supabase CLI
-   supabase db push
-   
-   # Or manually run the migration files in your Supabase dashboard
-   ```
+Database:
 
-5. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
+- Run migrations with Supabase CLI:
+```bash
+supabase db push
+```
+- Ensure RLS policies are applied; see `supabase/migrations/` and `database-migrations/`.
 
-6. **Build for Production**
-   ```bash
-   npm run build
-   ```
+OS-specific notes:
+
+- macOS:
+  - Use Homebrew for node/python
+  - Gatekeeper may block binaries; allow in System Settings
+- Linux:
+  - Use system package manager for python3.11 and node
+  - Ensure libssl and build-essential are installed
+- Windows:
+  - Use WSL2 (recommended) or native Python and Node
+  - Activate venv with `.venv\Scripts\activate`
+
+## **Key Screens**
+
+### 1. **Dashboard**: Real-time sensor data, weather, and AI recommendations
+- Live sensor readings with visual indicators
+- Weather integration and forecasts
+- AI-generated farming recommendations
+- Device status and connectivity monitoring
+
+### 2. **Assistant**: Multi-agent AI system for comprehensive agricultural support
+- **Sub-Agents**: Agronomist, Weather, Market, and Government Policy agents
+- **Memory-Enabled**: Remembers your farm context and previous conversations
+- **Contextual Responses**: Provides personalized advice based on your farming history
+- **Natural Language**: Ask questions in plain language about farming, weather, schemes, etc.
+- **Real-time API Integration**: Live data from weather services, government databases, and market sources
+- **Streaming Responses**: Real-time token streaming for responsive user experience
+- **Tool-calling LLMs**: Advanced function calling for precise data retrieval and analysis
+
+### 3. **PlantDoc**: AI-powered plant disease diagnosis
+- Upload plant photos for instant disease identification
+- Detailed treatment recommendations and preventive measures
+- Crop-specific diagnosis for major Indian agricultural crops
+- Integrated with assistant for follow-up farming advice
+
+### 4. **Analytics**: Historical data visualization with statistical analysis
+- Trend analysis and pattern recognition
+- Comparative charts and growth metrics
+- Export capabilities for record keeping
+
+### 5. **Settings**: Device management, thresholds, language selection and user preferences
+- Device configuration and API key management
+- Customizable alert thresholds
+- Multi-language interface settings
+- User profile and farming preferences
 
 ## 🔧 ESP32 Integration
 
@@ -233,106 +292,236 @@ Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 ### **Arduino Code Example**
 
 
+## Testing the Application
 
-## 🔐 Security Features
+### Mock Sensor Page (http://localhost:5173/mock-sensor) 
 
-### **Authentication & Authorization**
-- **Supabase Auth**: Secure user authentication with email/password
-- **Row Level Security (RLS)**: Database-level access control
-- **API Key Authentication**: Secure device-to-cloud communication
-- **JWT Tokens**: Stateless authentication for API endpoints
+Purpose: Simulate IoT sensor payloads for demos and testing without hardware.
 
-### **Data Protection**
-- **Encrypted Connections**: All data transmitted over HTTPS/WSS
-- **User Data Isolation**: Each user can only access their own data
-- **Device Validation**: API key verification for all sensor data
-- **Input Sanitization**: Protection against injection attacks
+Usage:
+- Open the app at `http://localhost:5173/mock-sensor`.
+- Create a device
+- Click "Generate Random" button and then "Send Button" OR Toggle  Auto-Send Mode to send random data every 15 seconds OR Enter parameters (temperature, humidity, soil metrics, etc.) in fields directly.
+- Submit to publish synthetic readings to the app state/flows.
+- Use Dashboard and Analytics to verify ingestion, banners, and AI recommendations.
 
-## 📱 User Interface
+### Testing Memory Features in Assistant
 
-### **Responsive Design**
-- **Mobile-first Approach**: Optimized for smartphones and tablets
-- **Desktop Experience**: Full-featured dashboard for larger screens
-- **Touch-friendly**: Intuitive touch interactions for mobile devices
-- **Accessibility**: WCAG compliant with proper contrast and navigation
+The memory system is **session-based** and **user-specific**. Here's how to test it:
 
-### **Key Screens**
-1. **Dashboard**: Real-time sensor data, weather, and AI recommendations
-2. **Analytics**: Historical data visualization with statistical analysis
-3. **Settings**: Device management, thresholds, and user preferences
-4. **Alert History**: Complete log of all triggered alerts and notifications
+#### **Prerequisites for Memory Testing:**
+```bash
+# 1. Install mem0 dependency
+pip install mem0ai
 
-## 🔌 API Endpoints
+# 2. Set OpenAI API key (required for mem0)
+export OPENAI_API_KEY="your_openai_api_key"
 
-### **Edge Functions**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/functions/v1/esp32-data-ingestion` | POST | Receive sensor data from ESP32 devices |
-| `/functions/v1/clever-task` | POST | Get AI recommendations |
-| `/functions/v1/update-alert-status` | POST | Update alert delivery status |
-| `/functions/v1/rapid-service` | POST | Process webhook notifications |
-
-### **Database Tables**
-- **user_profiles**: Extended user information
-- **devices**: Registered IoT devices
-- **sensor_data**: Real-time sensor readings
-- **thresholds**: Alert threshold configurations
-- **alerts**: Triggered alerts and notifications
-
-## 🌍 Deployment
-
-### **Netlify Deployment**
-The application is optimized for Netlify deployment with:
-- Automatic builds from Git repositories
-- Environment variable management
-- Custom domain support
-- CDN distribution for global performance
-
-### **Environment Variables for Production**
-```env
-# Required for production
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_production_anon_key
-
-# Optional but recommended
-VITE_OPENWEATHER_API_KEY=your_api_key
-VITE_BOLT_IOT_API_KEY=your_bolt_api_key
-VITE_BOLT_IOT_DEVICE_NAME=your_device_name
+# 3. Test memory integration
+python test_memory.py
 ```
 
-## 🤝 Contributing
+#### **Manual Testing Steps:**
 
-We welcome contributions to EcoBolt! Please follow these guidelines:
+1. **Navigate to Assistant Page** (`http://localhost:5173/assistant`)
 
-1. **Fork the repository** and create a feature branch
-2. **Follow TypeScript best practices** and maintain type safety
-3. **Write comprehensive tests** for new features
-4. **Update documentation** for any API changes
-5. **Submit a pull request** with a clear description
+2. **Start a Conversation with Farm Context:**
+   ```
+   User: "I have a 5-acre wheat farm in Punjab"
+   Bot: [Responds with farming advice]
+   ```
 
-### **Development Guidelines**
-- Use conventional commit messages
-- Maintain consistent code formatting with Prettier
-- Follow React best practices and hooks patterns
-- Ensure responsive design for all new components
+3. **Ask Related Questions to Test Memory:**
+   ```
+   User: "What's the current weather for my farm?"
+   Bot: [Should remember your location and farm details]
+   
+   User: "Should I irrigate my wheat today?"
+   Bot: [Should provide context-aware advice for wheat in Punjab]
+   ```
 
-## 📄 License
+4. **Test Memory Persistence:**
+   - Refresh the page (new session)
+   - Previous session's memory won't carry over (session-based)
+   - Start new conversation to build new memory context
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+#### **What Gets Remembered:**
+✅ **Stored in Memory:**
+- Farm location and coordinates
+- Crop types and farm size
+- Soil conditions and farming preferences
+- Successful weather/farming queries
+- Government scheme inquiries
+- Agricultural advice exchanges
 
-## 🙏 Acknowledgments
+❌ **Not Stored:**
+- Generic greetings ("hello", "thanks")
+- Error responses or failed queries
+- Non-agricultural conversations
+- Short, low-value messages
 
-- **Supabase** - For the backend infrastructure
-- **OpenWeatherMap** - For weather data services
-- **Bolt IoT** - For appliance control capabilities
+#### **Memory Features to Test:**
+- **Contextual Responses**: Ask follow-up questions without repeating context
+- **Personalized Advice**: Notice how responses become more tailored to your farm
+- **Cross-Intent Memory**: Weather advice considering your crop type
+- **Farming Context**: Location-based recommendations
+
+### Testing Multi-Agent System
+
+#### **Agent Collaboration Examples:**
+
+**🌾 Weather + Agronomist Collaboration:**
+```
+User: "Should I plant tomatoes next week?"
+→ Weather Agent: Checks forecast conditions
+→ Agronomist Agent: Considers soil temperature and planting season
+→ Combined Response: Weather-aware planting recommendation
+```
+
+**🏛️ Schemes + Market Integration:**
+```
+User: "I want to start organic farming"
+→ Govt Schemes Agent: Finds organic farming subsidies
+→ Market Agent: Provides organic crop price premiums
+→ Combined Response: Financial viability analysis with subsidy options
+```
+
+**🌡️ Weather + Memory Context:**
+```
+Session Context: "5-acre wheat farm in Punjab"
+User: "Will it rain tomorrow?"
+→ Memory: Retrieves Punjab location + wheat crop context
+→ Weather Agent: Punjab-specific forecast
+→ Response: "For your wheat farm in Punjab, expect..."
+```
+
+#### **Testing Different Agent Types:**
+
+**🌤️ Weather Agent Examples:**
+- "What's the current weather for my farm?"
+- "Should I irrigate my wheat today?"
+- "7-day weather forecast for crop planning"
+- "Historical rainfall patterns for this season"
+- "Are there any weather alerts for my area?"
+
+**🏛️ Government Schemes Examples:**
+- "Subsidies available for drip irrigation"
+- "PM-KISAN scheme eligibility and benefits"
+- "Organic farming certification support"
+- "Crop insurance schemes in Maharashtra"
+- "Solar pump subsidy application process"
+
+**📈 Market Agent Examples:**
+- "Current wheat prices in Punjab markets"
+- "Best time to sell my tomato crop"
+- "Price trends for organic vegetables"
+- "Market demand for millets this season"
+- "Transportation costs to nearest mandi"
+
+**🌾 Agronomist Agent Examples:**
+- "How to improve soil fertility naturally?"
+- "Pest control for cotton bollworm"
+- "Crop rotation for sustainable farming"
+- "Water management during drought"
+- "Organic fertilizer recommendations"
+
+**🔄 Cross-Agent Collaborative Queries:**
+- "Weather-based fertilizer application timing"
+- "Market trends for monsoon-dependent crops"
+- "Government schemes for climate-resilient farming"
+- "Drought management with available subsidies"
+- "Organic farming: weather, market, and policy guide"
+
+#### **Advanced Assistant Features:**
+
+**🎯 Smart Intent Detection:**
+```
+Query: "My tomato plants are wilting, it's been dry"
+→ Detects: Weather + Agronomist intent
+→ Weather Agent: Checks rainfall and humidity
+→ Agronomist: Analyzes wilting causes and solutions
+→ Response: Weather-informed irrigation recommendations
+```
+
+**💾 Context Persistence:**
+```
+Session History:
+1. "I have 2 acres of rice in Bihar"
+2. "What's the weather forecast?"
+→ Agent remembers: crop=rice, location=Bihar, area=2-acres
+→ Provides: Bihar-specific weather for rice farming
+```
+
+**🔧 Tool Integration:**
+- **Weather APIs**: OpenWeatherMap for real-time conditions
+- **Government APIs**: Direct integration with scheme databases  
+- **Market APIs**: Live pricing from agricultural commodity exchanges
+- **Knowledge Bases**: Comprehensive agricultural best practices database
+
+#### **Agent Implementation Architecture:**
+
+**📁 Code Structure:**
+```
+server/agent/
+├── orchestrator_agent.py       # Main agent coordinator
+├── delegating_agent.py         # Intent classification
+├── composer_agent.py           # Response composition
+├── agents/
+│   ├── weather_agent.py        # Weather specialist
+│   ├── govt_scheme_agent.py    # Government schemes
+│   ├── market_agent.py         # Market information
+│   └── plant_doc_agent.py      # Plant diagnosis
+├── memory/
+│   ├── memory_agent.py         # mem0 integration
+│   └── checkpointer.py         # Session management
+└── prompts/
+    ├── intent_classification.py
+    └── response_composition.py
+```
+
+**⚡ Performance Features:**
+- **Streaming Responses**: Real-time token delivery for better UX
+- **Parallel Tool Execution**: Multiple API calls processed simultaneously
+- **Smart Caching**: Memory layer reduces redundant API calls
+- **Fallback Systems**: Graceful degradation when external services fail
+- **Error Recovery**: Automatic retry logic with exponential backoff
+
+**🔄 Request/Response Flow:**
+```
+POST /agent/complete
+{
+  "messages": [...],
+  "context": {
+    "session_id": "unique_id",
+    "lat": 28.6139,
+    "lon": 77.2090,
+    "locale": "en-IN"
+  }
+}
+
+Response:
+{
+  "text": "Based on your wheat farm in Punjab...",
+  "intent": "weather",
+  "citations": []
+}
+```
 
 
-## 📞 Contact
+## Mobile UX Guidelines
 
----
+- Responsive layout and touch-friendly controls
+- Clear cards with primary actions visible
+- Accessible colors/contrast; large tap targets
 
-<div align="center">
-  
-  **Made with ❤️ by Priyanshu for sustainable agriculture**
-<br>
-</div>
+
+## Contributing
+
+- Conventional commits, TypeScript best practices
+- Keep components modular and under ~300 lines where feasible
+- Avoid introducing new patterns before iterating on existing ones
+- Update docs and tests for changes
+
+## License
+
+MIT
