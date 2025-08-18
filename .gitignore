@@ -34,6 +34,7 @@ server/agent/agents/__pycache__
 server/agent/nodes/__pycache__
 server/api/__pycache__
 server/infra/__pycache__
+server/.env
 
 /resources
 
