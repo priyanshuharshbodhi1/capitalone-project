@@ -1,1 +1,6 @@
-/* /index.html 200
+# Proxy API routes to Render backend (must be BEFORE the SPA catch-all)
+ /api/* https://shetkari.onrender.com/api/:splat 200
+ /agent/* https://shetkari.onrender.com/agent/:splat 200
+
+ # SPA fallback
+ /* /index.html 200
