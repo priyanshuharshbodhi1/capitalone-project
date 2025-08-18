@@ -280,5 +280,72 @@
     "suitableCrops": "தற்போதைய சூழ்நிலைக்கு ஏற்ற பயிர்கள் எவை?",
     "improveSoilQuality": "என் மண்ணின் தரத்தை எப்படி மேம்படுத்தலாம்?",
     "typeMessage": "உங்கள் செய்தியை இங்கு தட்டச்சு செய்யவும்..."
+  },
+  "plantdoc": {
+    "title": "PlantDoc",
+    "subtitle": "AI-Powered Crop Disease Diagnosis & Treatment Recommendations",
+    "uploadTitle": "Upload Plant Image",
+    "previewAlt": "Plant preview",
+    "uploadHint": "Click to upload or drag and drop a plant image",
+    "uploadTypes": "PNG, JPG, JPEG up to 10MB",
+    "plantNameTitle": "Plant Name",
+    "plantNamePlaceholder": "Enter the plant name (e.g., Tomato, Wheat, Rice...)",
+    "detailsTitle": "Additional Details",
+    "detailsPlaceholder": "Describe any symptoms you've noticed, when they started, or any treatments you've tried...",
+    "location": {
+      "title": "Location",
+      "captured": "Location captured",
+      "capturedSuccess": "Location captured successfully",
+      "unknownPlace": "Unknown Place",
+      "unknownState": "Unknown State",
+      "state": "State",
+      "locationFound": "Location found",
+      "getting": "Getting location...",
+      "getCurrent": "Get current location"
+    },
+    "analyzing": "Analyzing...",
+    "diagnose": "Diagnose Plant",
+    "clearAll": "Clear All",
+    "success": {
+      "completed": "Diagnosis completed successfully!"
+    },
+    "errors": {
+      "invalidImageFile": "Please select a valid image file",
+      "geolocationNotSupported": "Geolocation not supported",
+      "locationAccess": "Unable to get location. Please ensure location access is enabled.",
+      "diagnosisFailed": "Diagnosis failed",
+      "diagnosisFailedTryAgain": "Diagnosis failed. Please try again.",
+      "unableToProcess": "Unable to Process Image",
+      "invalidImageNotPlant": "Please upload a plant image - current image cannot be processed",
+      "nameMismatch": "The plant in the image does not match the plant name provided",
+      "technicalError": "Technical error occurred - please try again with a clearer image"
+    },
+    "healthy": {
+      "title": "Healthy Plant Detected",
+      "message": "Great news! Your plant appears healthy with no visible disease symptoms.",
+      "keepHealthy": "Keep Your Plant Healthy"
+    },
+    "results": {
+      "title": "Comprehensive Diagnosis Results",
+      "identifiedDisease": "Identified Disease",
+      "severity": "Severity",
+      "confidence": "Confidence",
+      "stage": "Stage",
+      "affected": "Affected",
+      "understanding": "Understanding the Disease",
+      "economicImpact": "Economic Impact",
+      "immediateAction": "Immediate Action Required",
+      "symptoms": "Detailed Symptoms Analysis",
+      "treatment": "Scientific Treatment Recommendations",
+      "treatmentTiming": "Optimal Treatment Timing",
+      "localRemedies": "Traditional & Affordable Remedies",
+      "prevention": "Prevention Strategies",
+      "followUp": "Long-term Care & Monitoring"
+    },
+    "validation": {
+      "selectImage": "Please select an image first",
+      "enterPlantName": "Please enter the plant name",
+      "captureLocation": "Please capture your location first"
+    }
   }
 }

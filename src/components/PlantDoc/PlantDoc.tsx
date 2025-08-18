@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Camera, Upload, MapPin, Loader2, Leaf, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface LocationData {
   latitude: number;
@@ -30,6 +31,7 @@ interface DiagnosisResult {
 
 const PlantDoc: React.FC = () => {
   const { currentLanguage } = useLanguage();
+  const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [description, setDescription] = useState('');
@@ -48,9 +50,9 @@ const PlantDoc: React.FC = () => {
       reader.onload = (e) => setImagePreview(e.target?.result as string);
       reader.readAsDataURL(file);
     } else {
-      toast.error("Please select a valid image file");
+      toast.error(t('plantdoc.errors.invalidImageFile'));
     }
-  }, []);
+  }, [t]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +72,7 @@ const PlantDoc: React.FC = () => {
     setIsGettingLocation(true);
     try {
       if (!navigator.geolocation) {
-        throw new Error("Geolocation not supported");
+        throw new Error(t('plantdoc.errors.geolocationNotSupported'));
       }
 
       const position = await new Promise<GeolocationPosition>(
@@ -95,25 +97,25 @@ const PlantDoc: React.FC = () => {
           data.address?.city ||
           data.address?.town ||
           data.address?.village ||
-          "Unknown Place";
-        const state = data.address?.state || "State";
-        const address = data.display_name || "Location found";
+          t('plantdoc.location.unknownPlace');
+        const state = data.address?.state || t('plantdoc.location.state');
+        const address = data.display_name || t('plantdoc.location.locationFound');
 
         setLocation({ latitude, longitude, placeName, state, address });
-        toast.success("Location captured successfully");
+        toast.success(t('plantdoc.location.capturedSuccess'));
       } catch {
         setLocation({
           latitude,
           longitude,
-          placeName: "Unknown Place",
-          state: "Unknown State",
-          address: "Location found",
+          placeName: t('plantdoc.location.unknownPlace'),
+          state: t('plantdoc.location.unknownState'),
+          address: t('plantdoc.location.locationFound'),
         });
-        toast.success("Location captured successfully");
+        toast.success(t('plantdoc.location.capturedSuccess'));
       }
     } catch {
       toast.error(
-        "Unable to get location. Please ensure location access is enabled."
+        t('plantdoc.errors.locationAccess')
       );
     } finally {
       setIsGettingLocation(false);
@@ -128,17 +130,17 @@ const PlantDoc: React.FC = () => {
     let hasErrors = false;
 
     if (!selectedImage) {
-      toast.error("Please select an image first");
+      toast.error(t('plantdoc.validation.selectImage'));
       hasErrors = true;
     }
 
     if (!plantName.trim()) {
-      toast.error("Please enter the plant name");
+      toast.error(t('plantdoc.validation.enterPlantName'));
       hasErrors = true;
     }
 
     if (!location) {
-      toast.error("Please capture your location first");
+      toast.error(t('plantdoc.validation.captureLocation'));
       hasErrors = true;
     }
 
@@ -164,7 +166,7 @@ const PlantDoc: React.FC = () => {
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Diagnosis failed");
+      if (!response.ok) throw new Error(t('plantdoc.errors.diagnosisFailed'));
 
       const result = await response.json();
       setDiagnosis(result);
@@ -176,9 +178,9 @@ const PlantDoc: React.FC = () => {
       setDescription("");
       setLocation(null);
 
-      toast.success("Diagnosis completed successfully!");
+      toast.success(t('plantdoc.success.completed'));
     } catch (error) {
-      toast.error("Diagnosis failed. Please try again.");
+      toast.error(t('plantdoc.errors.diagnosisFailedTryAgain'));
       console.error("Diagnosis error:", error);
     } finally {
       setIsLoading(false);
@@ -248,10 +250,10 @@ const PlantDoc: React.FC = () => {
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            PlantDoc
+            {t('plantdoc.title')}
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            AI-Powered Crop Disease Diagnosis & Treatment Recommendations
+            {t('plantdoc.subtitle')}
           </p>
         </div>
 
@@ -261,7 +263,7 @@ const PlantDoc: React.FC = () => {
             {/* Image Upload */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Upload Plant Image
+                {t('plantdoc.uploadTitle')}
               </h3>
 
               <div
@@ -286,7 +288,7 @@ const PlantDoc: React.FC = () => {
                   <div className="relative">
                     <img
                       src={imagePreview}
-                      alt="Plant preview"
+                      alt={t('plantdoc.previewAlt')}
                       className="max-h-64 mx-auto rounded-lg shadow-sm"
                     />
                     <button
@@ -310,10 +312,10 @@ const PlantDoc: React.FC = () => {
                       <Upload className="h-8 w-8 text-gray-400" />
                     </div>
                     <p className="text-gray-600">
-                      Click to upload or drag and drop a plant image
+                      {t('plantdoc.uploadHint')}
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, JPEG up to 10MB
+                      {t('plantdoc.uploadTypes')}
                     </p>
                   </div>
                 )}
@@ -326,13 +328,13 @@ const PlantDoc: React.FC = () => {
             {/* Plant Name */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Plant Name
+                {t('plantdoc.plantNameTitle')}
               </h3>
               <input
                 type="text"
                 value={plantName}
                 onChange={(e) => setPlantName(e.target.value)}
-                placeholder="Enter the plant name (e.g., Tomato, Wheat, Rice...)"
+                placeholder={t('plantdoc.plantNamePlaceholder')}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm ${
                   showValidationErrors && !plantName.trim()
                     ? "border-red-300"
@@ -344,12 +346,12 @@ const PlantDoc: React.FC = () => {
             {/* Additional Details */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Additional Details
+                {t('plantdoc.detailsTitle')}
               </h3>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe any symptoms you've noticed, when they started, or any treatments you've tried..."
+                placeholder={t('plantdoc.detailsPlaceholder')}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none text-sm"
               />
@@ -358,14 +360,14 @@ const PlantDoc: React.FC = () => {
             {/* Location */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Location
+                {t('plantdoc.location.title')}
               </h3>
               {location ? (
                 <div className="flex items-start space-x-3 p-3 bg-emerald-50 rounded-lg">
                   <MapPin className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-emerald-900">
-                      Location captured
+                      {t('plantdoc.location.captured')}
                     </p>
                     <p className="text-xs text-emerald-700">
                       {location.placeName}, {location.state}
@@ -393,8 +395,8 @@ const PlantDoc: React.FC = () => {
                   )}
                   <span className="text-sm text-gray-700">
                     {isGettingLocation
-                      ? "Getting location..."
-                      : "Get current location"}
+                      ? t('plantdoc.location.getting')
+                      : t('plantdoc.location.getCurrent')}
                   </span>
                 </button>
               )}
@@ -412,12 +414,12 @@ const PlantDoc: React.FC = () => {
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Analyzing...</span>
+                <span>{t('plantdoc.analyzing')}</span>
               </>
             ) : (
               <>
                 <Leaf className="h-5 w-5" />
-                <span>Diagnose Plant</span>
+                <span>{t('plantdoc.diagnose')}</span>
               </>
             )}
           </button>
@@ -425,7 +427,7 @@ const PlantDoc: React.FC = () => {
             onClick={clearAll}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
           >
-            Clear All
+            {t('plantdoc.clearAll')}
           </button>
         </div>
 
@@ -438,11 +440,11 @@ const PlantDoc: React.FC = () => {
                 <div className="flex items-center space-x-3 text-red-600">
                   <X className="h-6 w-6" />
                   <div>
-                    <h3 className="text-lg font-semibold">Unable to Process Image</h3>
+                    <h3 className="text-lg font-semibold">{t('plantdoc.errors.unableToProcess')}</h3>
                     <p className="text-sm text-red-500 mt-1">
-                      {diagnosis.disease === 'Invalid Image - Not a Plant' && 'Please upload a plant image - current image cannot be processed'}
-                      {diagnosis.disease === 'Plant Name Mismatch' && 'The plant in the image does not match the plant name provided'}
-                      {(diagnosis.disease === 'Analysis Error' || diagnosis.disease === 'Analysis Failed') && 'Technical error occurred - please try again with a clearer image'}
+                      {diagnosis.disease === 'Invalid Image - Not a Plant' && t('plantdoc.errors.invalidImageNotPlant')}
+                      {diagnosis.disease === 'Plant Name Mismatch' && t('plantdoc.errors.nameMismatch')}
+                      {(diagnosis.disease === 'Analysis Error' || diagnosis.disease === 'Analysis Failed') && t('plantdoc.errors.technicalError')}
                     </p>
                   </div>
                 </div>
@@ -455,15 +457,15 @@ const PlantDoc: React.FC = () => {
                 <div className="flex items-center space-x-3 text-green-600">
                   <CheckCircle className="h-6 w-6" />
                   <div>
-                    <h3 className="text-lg font-semibold">Healthy Plant Detected</h3>
+                    <h3 className="text-lg font-semibold">{t('plantdoc.healthy.title')}</h3>
                     <p className="text-sm text-green-600 mt-1">
-                      Great news! Your plant appears healthy with no visible disease symptoms.
+                      {t('plantdoc.healthy.message')}
                     </p>
                   </div>
                 </div>
                 {diagnosis.prevention.length > 0 && (
                   <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                    <h4 className="font-medium text-green-900 mb-2">🛡️ Keep Your Plant Healthy</h4>
+                    <h4 className="font-medium text-green-900 mb-2">{t('plantdoc.healthy.keepHealthy')}</h4>
                     <ul className="space-y-1 text-sm text-green-700">
                       {diagnosis.prevention.map((tip, idx) => (
                         <li key={idx}>• {tip}</li>
@@ -477,24 +479,24 @@ const PlantDoc: React.FC = () => {
             {/* Full Diagnosis for Valid Disease Cases */}
             {isValidPlantDiagnosis(diagnosis) && !isHealthyPlant(diagnosis) && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Comprehensive Diagnosis Results</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('plantdoc.results.title')}</h3>
                 
                 {/* Disease Info Header */}
                 <div className="space-y-6">
                   <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 rounded-lg border border-emerald-200">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-lg font-semibold text-gray-900">Identified Disease</h4>
+                      <h4 className="text-lg font-semibold text-gray-900">{t('plantdoc.results.identifiedDisease')}</h4>
                       <div className={`flex items-center space-x-1 px-3 py-1 rounded-full border text-sm font-medium ${getSeverityColor(diagnosis.severity)}`}>
                         {getSeverityIcon(diagnosis.severity)}
-                        <span className="capitalize">{diagnosis.severity} Severity</span>
+                        <span className="capitalize">{diagnosis.severity} {t('plantdoc.results.severity')}</span>
                       </div>
                     </div>
                     <p className="text-xl font-bold text-emerald-700 mb-2">{diagnosis.disease}</p>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>Confidence: {Math.round(diagnosis.confidence * 100)}%</span>
-                      {diagnosis.stage && <span>Stage: {diagnosis.stage}</span>}
+                      <span>{t('plantdoc.results.confidence')}: {Math.round(diagnosis.confidence * 100)}%</span>
+                      {diagnosis.stage && <span>{t('plantdoc.results.stage')}: {diagnosis.stage}</span>}
                       {diagnosis.affectedParts.length > 0 && (
-                        <span>Affected: {diagnosis.affectedParts.join(', ')}</span>
+                        <span>{t('plantdoc.results.affected')}: {diagnosis.affectedParts.join(', ')}</span>
                       )}
                     </div>
                   </div>
@@ -504,7 +506,7 @@ const PlantDoc: React.FC = () => {
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                       <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
                         <Leaf className="h-4 w-4 mr-2 text-blue-600" />
-                        Understanding the Disease
+                        {t('plantdoc.results.understanding')}
                       </h4>
                       <p className="text-sm text-gray-700 leading-relaxed">{diagnosis.diseaseExplanation}</p>
                     </div>
@@ -515,7 +517,7 @@ const PlantDoc: React.FC = () => {
                     <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                       <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
                         <AlertTriangle className="h-4 w-4 mr-2 text-amber-600" />
-                        Economic Impact
+                        {t('plantdoc.results.economicImpact')}
                       </h4>
                       <p className="text-sm text-gray-700 leading-relaxed">{diagnosis.economicImpact}</p>
                     </div>
@@ -526,7 +528,7 @@ const PlantDoc: React.FC = () => {
                     <div className="bg-red-50 p-4 rounded-lg border border-red-200">
                       <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
                         <CheckCircle className="h-4 w-4 mr-2 text-red-600" />
-                        Immediate Action Required
+                        {t('plantdoc.results.immediateAction')}
                       </h4>
                       <p className="text-sm text-gray-700 leading-relaxed font-medium">{diagnosis.recommendedAction}</p>
                     </div>
@@ -535,7 +537,7 @@ const PlantDoc: React.FC = () => {
                   {/* Symptoms */}
                   {diagnosis.symptoms.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">🔍 Detailed Symptoms Analysis</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">{t('plantdoc.results.symptoms')}</h4>
                       <div className="space-y-2">
                         {diagnosis.symptoms.map((symptom, idx) => (
                           <div key={idx} className="bg-gray-50 p-3 rounded-lg border">
@@ -549,7 +551,7 @@ const PlantDoc: React.FC = () => {
                   {/* Treatment */}
                   {diagnosis.treatment.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">💊 Scientific Treatment Recommendations</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">{t('plantdoc.results.treatment')}</h4>
                       <div className="space-y-3">
                         {diagnosis.treatment.map((treatment, idx) => (
                           <div key={idx} className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
@@ -563,7 +565,7 @@ const PlantDoc: React.FC = () => {
                   {/* Treatment Timing */}
                   {diagnosis.treatmentTiming && (
                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">⏰ Optimal Treatment Timing</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">{t('plantdoc.results.treatmentTiming')}</h4>
                       <p className="text-sm text-gray-700 leading-relaxed">{diagnosis.treatmentTiming}</p>
                     </div>
                   )}
@@ -571,7 +573,7 @@ const PlantDoc: React.FC = () => {
                   {/* Local Remedies */}
                   {diagnosis.localRemedies.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">🌿 Traditional & Affordable Remedies</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">{t('plantdoc.results.localRemedies')}</h4>
                       <div className="space-y-3">
                         {diagnosis.localRemedies.map((remedy, idx) => (
                           <div key={idx} className="bg-green-50 p-3 rounded-lg border border-green-200">
@@ -585,7 +587,7 @@ const PlantDoc: React.FC = () => {
                   {/* Prevention */}
                   {diagnosis.prevention.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">🛡️ Prevention Strategies</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">{t('plantdoc.results.prevention')}</h4>
                       <div className="space-y-3">
                         {diagnosis.prevention.map((tip, idx) => (
                           <div key={idx} className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
@@ -599,7 +601,7 @@ const PlantDoc: React.FC = () => {
                   {/* Follow-up Care */}
                   {diagnosis.followUpCare && (
                     <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">📋 Long-term Care & Monitoring</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">{t('plantdoc.results.followUp')}</h4>
                       <p className="text-sm text-gray-700 leading-relaxed">{diagnosis.followUpCare}</p>
                     </div>
                   )}

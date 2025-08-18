@@ -58,7 +58,6 @@ const Settings: React.FC = () => {
   const { t } = useTranslation();
   const { currentLanguage, changeLanguage, languages } = useLanguage();
   const [activeTab, setActiveTab] = useState<'profile' | 'devices' | 'thresholds' | 'language'>('profile');
-  const [showAllLanguages, setShowAllLanguages] = useState(false);
   
   // Profile state
   const [formData, setFormData] = useState({
@@ -447,12 +446,27 @@ const Settings: React.FC = () => {
   // Allow adding multiple devices (no limit)
   const canAddDevice = true;
 
-  // Priority languages to show first
-  const priorityLanguages = ['english', 'hindi', 'marathi', 'tamil', 'telugu'];
-  const filteredLanguages = showAllLanguages 
-    ? languages 
-    : languages.filter(lang => priorityLanguages.includes(lang.code));
-  const remainingLanguagesCount = languages.length - priorityLanguages.length;
+  // Supported languages for switching in Settings
+  const supportedLanguageCodes = new Set([
+    'english',
+    'hindi',
+    'bengali',
+    'marathi',
+    'gujarati',
+    'punjabi',
+    'odia',
+    'assamese',
+    'malayalam',
+    'kannada',
+    'tamil',
+    'telugu',
+    'urdu',
+    'nepali',
+  ] as const);
+
+  const supportedLanguages = languages.filter(l => supportedLanguageCodes.has(l.code as any));
+  const unsupportedLanguages = languages.filter(l => !supportedLanguageCodes.has(l.code as any));
+  const orderedLanguages = [...supportedLanguages, ...unsupportedLanguages];
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
@@ -1103,54 +1117,42 @@ const Settings: React.FC = () => {
                   
                   {/* Language Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                    {filteredLanguages.map((language) => (
-                      <button
-                        key={language.code}
-                        onClick={() => changeLanguage(language.code)}
-                        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                          currentLanguage === language.code
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3 min-w-0 flex-1">
-                          <Globe className="h-5 w-5 flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium truncate">{language.name}</div>
-                            <div className="text-sm opacity-75 truncate">{language.nativeName}</div>
+                    {orderedLanguages.map((language) => {
+                      const isSupported = supportedLanguageCodes.has(language.code as any);
+                      return (
+                        <button
+                          key={language.code}
+                          onClick={() => {
+                            if (isSupported) changeLanguage(language.code);
+                          }}
+                          disabled={!isSupported}
+                          title={isSupported ? '' : 'not completely supported.'}
+                          className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                            isSupported
+                              ? (currentLanguage === language.code
+                                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50')
+                              : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          }`}
+                          aria-disabled={!isSupported}
+                        >
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
+                            <Globe className="h-5 w-5 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium truncate">{language.name}</div>
+                              <div className={`text-sm truncate ${isSupported ? 'opacity-75' : 'opacity-60'}`}>{language.nativeName}</div>
+                              {!isSupported && (
+                                <div className="text-xs text-gray-500 mt-1">not completely supported.</div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        {currentLanguage === language.code && (
-                          <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 ml-2" />
-                        )}
-                      </button>
-                    ))}
+                          {isSupported && currentLanguage === language.code && (
+                            <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 ml-2" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-
-                  {/* Show All Languages Toggle */}
-                  {!showAllLanguages && remainingLanguagesCount > 0 && (
-                    <div className="text-center">
-                      <button
-                        onClick={() => setShowAllLanguages(true)}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200"
-                      >
-                        <Globe className="h-4 w-4 mr-2" />
-                        Show All 22 Languages (+{remainingLanguagesCount} more)
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Show Less Button */}
-                  {showAllLanguages && (
-                    <div className="text-center">
-                      <button
-                        onClick={() => setShowAllLanguages(false)}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200"
-                      >
-                        Show Less Languages
-                      </button>
-                    </div>
-                  )}
 
                   {/* Language Preference Notice */}
                   <div className="mt-6 p-4 bg-blue-50 rounded-lg">
