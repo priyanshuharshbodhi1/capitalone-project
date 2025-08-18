@@ -32,12 +32,12 @@ Return the response as a well-formatted markdown text with:
 Format each scheme as:
 # **1. Scheme Name**
 
-**Description:** Brief overview in 2-3 sentences
+**Description:** Brief overview in with benifits for farmers
 
 **Eligibility:** 
 - Point 1
 - Point 2
-(you can put as many points as needed)
+...More points(you can put as many points as required in the scheme)
 
 **Application Process:** How to apply online
 
@@ -49,12 +49,12 @@ Format each scheme as:
 
 # **2. Scheme Name**
 
-**Description:** Brief overview in 2-3 sentences
+**Description:** Brief overview in with benifits for farmers
 
 **Eligibility:** 
 - Point 1
 - Point 2
-(you can put as many points as needed)
+...More points(you can put as many points as required in the scheme)
 
 **Application Process:** How to apply online
 
@@ -66,12 +66,12 @@ Format each scheme as:
 
 # **3. Scheme Name**
 
-**Description:** Brief overview in 2-3 sentences
+**Description:** Brief overview in with benifits for farmers
 
 **Eligibility:** 
 - Point 1
 - Point 2
-(you can put as many points as needed)
+...More points(you can put as many points as required in the scheme)
 
 **Application Process:** How to apply online
 
