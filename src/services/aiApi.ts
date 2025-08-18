@@ -26,7 +26,7 @@ class AIService {
   }
 
   // Get AI recommendations via Supabase Edge Function (avoids CORS)
-  async getRecommendations(sensorData: SensorData): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback' }> {
+  async getRecommendations(sensorData: SensorData, language?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback'; model?: string }> {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       console.warn('⚠️ AI: Supabase not configured, using fallback recommendations');
       return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback' };
@@ -41,7 +41,7 @@ class AIService {
           'Authorization': `Bearer ${this.supabaseAnonKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sensorData }),
+        body: JSON.stringify({ sensorData, language }),
       });
 
       if (!response.ok) {
@@ -55,8 +55,8 @@ class AIService {
         throw new Error(responseData.message || 'Edge function returned error');
       }
 
-      console.log(`✅ AI: Received ${responseData.recommendations.length} recommendations from ${responseData.source}`);
-      return { recommendations: responseData.recommendations, source: (responseData.source === 'ai' ? 'ai' : 'fallback') };
+      console.log(`✅ AI: Received ${responseData.recommendations.length} recommendations from ${responseData.source}${responseData.model ? ` (model: ${responseData.model})` : ''}`);
+      return { recommendations: responseData.recommendations, source: (responseData.source === 'ai' ? 'ai' : 'fallback'), model: responseData.model };
 
     } catch (error) {
       console.error('❌ AI: Error calling edge function:', error);

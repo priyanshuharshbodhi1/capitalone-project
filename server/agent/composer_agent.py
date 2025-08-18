@@ -30,19 +30,8 @@ def compose_answer(tools_used: List[Dict[str, Any]], intent: str, locale: str | 
 
     Returns dict with {text, citations}
     """
+    # Remove citations processing as requested by user
     citations: List[Dict[str, Any]] = []
-    for t in tools_used:
-        data = t.get("output", {})
-        srcs = data.get("sources") or data.get("source_urls") or []
-        if isinstance(srcs, dict):
-            srcs = [srcs]
-        for s in srcs:
-            if isinstance(s, str):
-                citations.append({"url": s, "tool": t["name"]})
-            elif isinstance(s, dict):
-                s = {k: v for k, v in s.items() if k in {"url", "title", "page"}}
-                s["tool"] = t["name"]
-                citations.append(s)
 
     # If Gemini is available, use it to craft natural text constrained to tools
     client = _gemini_client()
@@ -71,8 +60,7 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
         return (
             "I can help with farm weather and market prices.\n"
             "- Ask things like: 'Weather for the next 3 days in my area' or 'Tomato prices near Pune'.\n"
-            "- You can also ask about irrigation, fertilizer timing, or disease prevention and I'll use available data.\n"
-            "\nTL;DR: Ask a weather or market question for specific, data-backed advice."
+            "- You can also ask about irrigation, fertilizer timing, or disease prevention and I'll use available data."
         )
 
     if intent == "weather":
@@ -225,16 +213,7 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
         elif schemes_info:
             lines.append(schemes_info)
         
-        # Add source citations for transparency
-        if sources:
-            lines.append("\n**Sources:**")
-            for i, source in enumerate(sources[:3], 1):  # Show top 3 sources
-                if isinstance(source, str):
-                    lines.append(f"{i}. {source}")
-                elif isinstance(source, dict):
-                    title = source.get("title", source.get("url", "Government Source"))
-                    url = source.get("url", "")
-                    lines.append(f"{i}. {title}" + (f" - {url}" if url else ""))
+        # Citations removed as requested by user
         
         return "\n".join(lines)
 
@@ -253,7 +232,6 @@ def _fallback_text(tools_used: List[Dict[str, Any]], intent: str) -> str:
         if trend:
             lines.append(f"Trend: {trend}.")
         lines.append("\nAdvice: If prices are rising, consider phased sales; if falling, explore nearby markets or collective selling.")
-        lines.append("TL;DR: Use current price and trend to time your sale.")
         return "\n".join(lines)
 
     # Safe default

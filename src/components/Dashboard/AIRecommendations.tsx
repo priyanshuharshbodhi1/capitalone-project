@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 // Language-specific translation removed
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Brain, 
   Sparkles, 
@@ -8,17 +9,15 @@ import {
   Beaker, 
   Sprout, 
   Lightbulb,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
   Loader2,
   RefreshCw,
   Zap,
-  Cloud
+  
 } from 'lucide-react';
 import { SensorData } from '../../types';
 import { aiApi } from '../../services/aiApi';
-import { alertService } from '../../services/alertService';
 
 interface AIRecommendation {
   type: 'practice' | 'fertilizer' | 'crop' | 'insight';
@@ -36,7 +35,7 @@ interface AIRecommendationsProps {
 
 const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => {
   const { t } = useTranslation();
-  // currentLanguage removed
+  const { currentLanguage } = useLanguage();
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +43,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
   const [isConfigured, setIsConfigured] = useState(false);
   // Translation removed
   const [error, setError] = useState<string | null>(null);
-  const [source, setSource] = useState<'cloud' | 'fallback' | null>(null);
+  const [model, setModel] = useState<string | null>(null);
 
   useEffect(() => {
     // Check AI configuration on component mount
@@ -70,10 +69,10 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
         setRefreshing(true);
       }
       
-      // Always use the edge function approach (handles both cloud AI and fallback)
-      const { recommendations: recs, source } = await aiApi.getRecommendations(sensorData);
+      // Always use the edge function approach (handles both AI and fallback)
+      const { recommendations: recs, model } = await aiApi.getRecommendations(sensorData, currentLanguage);
       setRecommendations(recs);
-      setSource(source === 'ai' ? 'cloud' : 'fallback');
+      setModel(model ?? null);
       
       setHasLoadedOnce(true);
 
@@ -91,7 +90,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
     } catch (error) {
       console.error('❌ AIRecommendations: Error fetching recommendations:', error);
       setError('Failed to generate AI recommendations');
-      setSource('fallback');
+      setModel(null);
       
       // Set empty recommendations on error
       setRecommendations([]);
@@ -99,7 +98,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       setLoading(false);
       setRefreshing(false);
     }
-  }, [sensorData]);
+  }, [sensorData, currentLanguage]);
 
   useEffect(() => {
     // Only fetch recommendations on first load (first login)
@@ -191,20 +190,10 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
           <div>
             <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
             <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
-              {source === 'cloud' ? (
+              {model === 'gpt-5' && (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
                   <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
-                </>
-              ) : source === 'fallback' ? (
-                <>
-                  <Cloud className="h-3 w-3 text-yellow-500" />
-                  <span className="text-xs text-yellow-600 font-medium">Rule based</span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="h-3 w-3 text-gray-500" />
-                  <span className="text-xs text-gray-600 font-medium">Ready</span>
                 </>
               )}
             </div>
@@ -294,15 +283,10 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                       </div>
                       
                       <div className="flex items-center space-x-1">
-                        {source === 'cloud' ? (
+                        {model === 'gpt-5' && (
                           <>
                             <Zap className="h-3 w-3 text-indigo-500" />
                             <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
-                          </>
-                        ) : (
-                          <>
-                            <TrendingUp className="h-3 w-3 text-yellow-500" />
-                            <span className="text-xs text-yellow-600 font-medium">Rule-Based</span>
                           </>
                         )}
                       </div>
@@ -318,10 +302,12 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       <div className="mt-3 sm:mt-4 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-gray-200">
         <div className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-1 sm:space-x-2">
-            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${source === 'cloud' ? 'bg-indigo-400 animate-pulse' : 'bg-yellow-400'}`}></div>
-            <span className="text-xs">
-              {source === 'cloud' ? 'AI recommendation engine' : 'Fallback recommendation system'}
-            </span>
+            {model === 'gpt-5' && (
+              <>
+                <div className="w-2 h-2 rounded-full flex-shrink-0 bg-indigo-400 animate-pulse"></div>
+                <span className="text-xs">AI recommendation engine</span>
+              </>
+            )}
           </div>
           <span className="text-xs text-right sm:text-left">
             {hasLoadedOnce ? 'Click refresh for new insights' : 'Auto-generated on first load'}
