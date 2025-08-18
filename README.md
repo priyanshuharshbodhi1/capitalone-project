@@ -73,27 +73,20 @@ Shetkari monitors key farm parameters, analyzes trends, and provides actionable,
 - Weather forecasts for crop planning and harvest timing  
 - Historical weather analysis for seasonal planning
 - Weather alerts and warnings for crop protection
-- Integration with OpenWeatherMap API for accurate data
 
 **🏛️ Government Schemes Agent:**
 - Agricultural subsidies and government schemes search
 - Policy information and eligibility criteria
-- Application guidance for farming benefits
-- State-specific scheme recommendations
 - Integration with government databases and APIs
 
 **🌾 Agronomist Agent:**
 - General farming advice and best practices
-- Crop selection and rotation recommendations
-- Soil management and fertilization guidance
 - Pest and disease prevention strategies
 - Irrigation and water management advice
 
 **📈 Market Agent(Not Implemented):**
 - Current crop prices and market trends
-- Price forecasting and market analysis
 - Best selling locations and market intelligence
-- Commodity trading insights
 - Integration with agricultural market data sources
 
 **Finance Agent(Not Implemented)**
@@ -124,7 +117,8 @@ Shetkari monitors key farm parameters, analyzes trends, and provides actionable,
 - **Assistant Integration**: Diagnosed diseases can be discussed with agricultural agents for comprehensive treatment plans
 
 ## Architecture
-
+![IoT Artecture Diagram](assets/IoT_Arc.png)
+![Assistant/Chatbot Agentic Artecture](assets/Agentic_Arc.png)
 
 ## Monitored Parameters(IoT)
 
@@ -259,6 +253,8 @@ Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 ```
 
 ### **Arduino Code Example**
+![IoT Setup](assets/IoT_Setup.png)
+![Ardino IDE](assets/screenshot.png)
 
 
 ## Testing the Application
