@@ -20,7 +20,6 @@ Shetkari monitors key farm parameters, analyzes trends, and provides actionable,
 ## **Credentials [If new account creation didn't work]**
 ```
 email: priyanshuqpwp@gmail.com
-
 password: 123456
 ```
 
@@ -140,6 +139,8 @@ password: 123456
 - Phosphorus (ppm)
 - Potassium (ppm)
 
+## Mobile View
+<img src="assets/mobiel_view.gif" alt="Demo" height="400" width="auto"/>
 
 ## Local Setup
 
@@ -339,11 +340,6 @@ server/agent/
     ├── intent_classification.py
     └── response_composition.py
 ```
-
-
-## Mobile View
-<img src="assets/mobiel_view.gif" alt="Demo" height="400" width="auto"/>
-
 
 ## License
 
