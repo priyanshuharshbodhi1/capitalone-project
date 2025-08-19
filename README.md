@@ -17,6 +17,13 @@ Introducing Shetkari, India's everything app for farmers. It's a smart agricultu
 
 Shetkari monitors key farm parameters, analyzes trends, and provides actionable, localized recommendations. It supports both real devices (ESP32) and a mock-sensor page for demos/testing.
 
+## **Credentials [If new account creation didn't work]**
+```
+email: priyanshuqpwp@gmail.com
+
+password: 123456
+```
+
 ## Key Features
 
 - Real-time sensor monitoring (10+ parameters)
@@ -208,6 +215,13 @@ OS-specific notes:
 - Windows:
   - Use WSL2 (recommended) or native Python and Node
   - Activate venv with `.venv\Scripts\activate`
+
+## **Credentials [If new account creation didn't work]**
+```
+email: priyanshuqpwp@gmail.com
+
+password: 123456
+```
 
 ## **Key Screens**
 
