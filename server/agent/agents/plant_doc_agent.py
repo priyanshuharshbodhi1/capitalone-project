@@ -217,7 +217,7 @@ class PlantDocAgent:
             
             response = openai_service.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
-                model="gpt-4",
+                model="gpt-4o",
                 max_tokens=800,
                 temperature=0.1,
                 timeout=30

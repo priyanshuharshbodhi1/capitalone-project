@@ -36,7 +36,7 @@ class OpenAIService:
     def chat_completion(
         self,
         messages: List[Dict[str, Any]],
-        model: str = "gpt-4",
+        model: str = "gpt-4o",
         max_tokens: int = 1500,
         temperature: float = 0.1,
         timeout: int = 60
