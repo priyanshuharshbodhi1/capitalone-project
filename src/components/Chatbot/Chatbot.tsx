@@ -340,12 +340,10 @@ const Chatbot: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {
                   [
-                  t('assistant.optimizeIrrigation'),
-                  t('assistant.bestTimeForFertilizer'),
-                  t('assistant.optimalSoilPH'),
+                  t('assistant.govtPoliciesDripIrrigation'),
+                  t('assistant.weatherNext2Weeks'),
                   t('assistant.preventPlantDiseases'),
-                  t('assistant.suitableCrops'),
-                  t('assistant.improveSoilQuality')
+                  t('assistant.bestTimeForFertilizer')
                   ]
                   // Show only first 3 questions on mobile
                   .filter((_, idx) => !isMobile || idx < 3)

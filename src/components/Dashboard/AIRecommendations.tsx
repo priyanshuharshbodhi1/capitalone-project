@@ -64,6 +64,12 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       return;
     }
     
+    console.log('🤖 AIRecommendations: Fetching recommendations', {
+      isManualRefresh,
+      hasLoadedOnce,
+      hasSensorData: !!sensorData
+    });
+    
     try {
       setError(null);
       
@@ -138,7 +144,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
     } else if (sensorData && hasLoadedOnce) {
       setLoading(false);
     }
-  }, [sensorData, hasLoadedOnce, fetchRecommendations]);
+  }, [hasLoadedOnce, fetchRecommendations]); // Removed sensorData dependency to prevent auto-refresh
 
   // Watch for language changes and refresh recommendations
   useEffect(() => {

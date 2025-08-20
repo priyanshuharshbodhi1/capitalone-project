@@ -277,12 +277,10 @@
     "subtitle": "AI-powered farming recommendations",
     "greeting": "Hello! I'm your Shetkari farming assistant. How can I help you today?",
     "suggestedQuestions": "Suggested Questions",
-    "optimizeIrrigation": "How should I optimize irrigation?",
-    "bestTimeForFertilizer": "When is the best time to apply fertilizer?",
-    "optimalSoilPH": "What's the optimal soil pH for my crops?",
+    "govtPoliciesDripIrrigation": "Give me some govt policies for drip irrigation in maharashtra.",
+    "weatherNext2Weeks": "What will be the weather for next 2 weeks.",
     "preventPlantDiseases": "How can I prevent common plant diseases?",
-    "suitableCrops": "What crops are suitable for my current conditions?",
-    "improveSoilQuality": "How can I improve my soil quality?",
+    "bestTimeForFertilizer": "When is the best time to apply fertilizer?",
     "typeMessage": "Type your message here..."
   },
   "plantdoc": {
