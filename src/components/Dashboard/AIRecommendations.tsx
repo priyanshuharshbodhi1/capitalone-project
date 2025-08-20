@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 // Language-specific translation removed
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Brain, 
   Sparkles, 
@@ -36,6 +37,7 @@ interface AIRecommendationsProps {
 const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => {
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
+  const { user } = useAuth();
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -70,7 +72,35 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       }
       
       // Always use the edge function approach (handles both AI and fallback)
-      const { recommendations: recs, model } = await aiApi.getRecommendations(sensorData, currentLanguage);
+      // Get user location from user profile, fallback to localStorage, then default
+      const userLocation = user?.location || localStorage.getItem('userLocation') || 'India';
+      
+      // Get language directly from localStorage (most reliable source)
+      const userLanguage = localStorage.getItem('userLanguage') || 'english';
+      
+      console.log('🌍 AIRecommendations: User context for AI:', {
+        contextLanguage: currentLanguage,
+        userLanguageFromProfile: user?.language,
+        localStorageLanguage: userLanguage,
+        location: userLocation,
+        userId: user?.id,
+        userFromProfile: user?.location,
+        usingLanguageForAI: userLanguage
+      });
+      
+      // Let's verify which language value we're actually sending
+      console.log('📝 AIRecommendations: Language verification:', {
+        sendingToAI: userLanguage,
+        isNonEnglish: userLanguage !== 'english',
+        shouldGetTranslatedResponse: userLanguage !== 'english',
+        contextVsLocalStorage: {
+          context: currentLanguage,
+          localStorage: userLanguage,
+          match: currentLanguage === userLanguage
+        }
+      });
+      
+      const { recommendations: recs, model } = await aiApi.getRecommendations(sensorData, userLanguage, userLocation);
       setRecommendations(recs);
       setModel(model ?? null);
       
@@ -98,7 +128,7 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       setLoading(false);
       setRefreshing(false);
     }
-  }, [sensorData, currentLanguage]);
+  }, [sensorData]); // Removed currentLanguage dependency since we get language directly from localStorage
 
   useEffect(() => {
     // Only fetch recommendations on first load (first login)
@@ -109,6 +139,22 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       setLoading(false);
     }
   }, [sensorData, hasLoadedOnce, fetchRecommendations]);
+
+  // Watch for language changes and refresh recommendations
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      console.log('🔄 AIRecommendations: Language changed, refreshing recommendations...');
+      if (sensorData && hasLoadedOnce) {
+        fetchRecommendations(true); // Force refresh when language changes
+      }
+    };
+
+    // Listen for changes to currentLanguage context
+    // This will trigger when user changes language in settings
+    if (hasLoadedOnce) {
+      handleLanguageChange();
+    }
+  }, [currentLanguage, sensorData, hasLoadedOnce, fetchRecommendations]);
 
   const handleRefresh = () => {
     console.log('🔄 AIRecommendations: Manual refresh triggered');
@@ -190,10 +236,12 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
           <div>
             <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
             <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
-              {model === 'gpt-5' && (
+              {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
-                  <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
+                  <span className="text-xs text-indigo-600 font-medium">
+                    {model === 'gpt-4o' ? 'GPT-4o' : model === 'ibm-granite-3-8b' ? 'IBM Granite' : 'AI Powered'}
+                  </span>
                 </>
               )}
             </div>
@@ -283,10 +331,12 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                       </div>
                       
                       <div className="flex items-center space-x-1">
-                        {model === 'gpt-5' && (
+                        {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
                           <>
                             <Zap className="h-3 w-3 text-indigo-500" />
-                            <span className="text-xs text-indigo-600 font-medium">AI Powered</span>
+                            <span className="text-xs text-indigo-600 font-medium">
+                              {model === 'gpt-4o' ? 'GPT-4o' : model === 'ibm-granite-3-8b' ? 'IBM Granite' : 'AI Powered'}
+                            </span>
                           </>
                         )}
                       </div>
@@ -302,10 +352,14 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       <div className="mt-3 sm:mt-4 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-gray-200">
         <div className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-1 sm:space-x-2">
-            {model === 'gpt-5' && (
+            {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
               <>
                 <div className="w-2 h-2 rounded-full flex-shrink-0 bg-indigo-400 animate-pulse"></div>
-                <span className="text-xs">AI recommendation engine</span>
+                <span className="text-xs">
+                  {model === 'gpt-4o' ? 'GPT-4o recommendation engine' : 
+                   model === 'ibm-granite-3-8b' ? 'IBM Granite recommendation engine' : 
+                   'AI recommendation engine'}
+                </span>
               </>
             )}
           </div>

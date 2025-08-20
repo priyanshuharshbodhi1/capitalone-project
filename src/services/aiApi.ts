@@ -26,14 +26,18 @@ class AIService {
   }
 
   // Get AI recommendations via Supabase Edge Function (avoids CORS)
-  async getRecommendations(sensorData: SensorData, language?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback'; model?: string }> {
+  async getRecommendations(sensorData: SensorData, language?: string, location?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback'; model?: string }> {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       console.warn('⚠️ AI: Supabase not configured, using fallback recommendations');
       return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback' };
     }
 
     try {
-      console.log('🤖 AI: Calling edge function for recommendations...');
+      console.log('🤖 AI: Calling edge function for recommendations...', {
+        language,
+        location,
+        edgeFunctionUrl: this.edgeFunctionUrl
+      });
       
       const response = await fetch(this.edgeFunctionUrl, {
         method: 'POST',
@@ -41,7 +45,11 @@ class AIService {
           'Authorization': `Bearer ${this.supabaseAnonKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sensorData, language }),
+        body: JSON.stringify({ 
+          sensorData, 
+          userLanguage: language, 
+          userLocation: location 
+        }),
       });
 
       if (!response.ok) {

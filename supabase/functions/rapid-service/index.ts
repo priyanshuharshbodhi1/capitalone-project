@@ -42,14 +42,15 @@ interface AlertWebhookPayload {
 // Configuration for webhook URLs
 const WEBHOOK_CONFIGS = [
   {
-    name: 'Primary Webhook',
-    url: Deno.env.get('ALERT_WEBHOOK_URL') || 'https://webhook.site/your-webhook-id',
-    enabled: true,
+    name: 'Zapier SMS/Email',
+    url: Deno.env.get('ZAPIER_WEBHOOK_URL') || 'https://hooks.zapier.com/hooks/catch/24232349/u67i2w3/',
+    enabled: true, // Always enabled - this is our main webhook
     headers: {
       'Content-Type': 'application/json',
       'X-Source': 'EcoBolt-Alert-System',
     }
-  },
+  }
+  // Removed other webhooks to avoid rate limit errors
 ];
 
 async function sendWebhook(config: any, payload: AlertWebhookPayload, retries = 3): Promise<boolean> {
@@ -62,10 +63,78 @@ async function sendWebhook(config: any, payload: AlertWebhookPayload, retries = 
     try {
       console.log(`Sending webhook to ${config.name} (attempt ${attempt}/${retries})`);
       
+      // Transform payload for different webhook types
+      let webhookPayload = payload;
+      
+      // Special formatting for Zapier/Twilio SMS
+      if (config.name.includes('Zapier')) {
+        webhookPayload = {
+          ...payload,
+          // Add SMS-friendly fields for Twilio
+          to_number: payload.user.phone,
+          phone_number: payload.user.phone,
+          to: payload.user.phone,
+          message_body: payload.alert.message,
+          sms_body: payload.alert.message,
+          // Add email-friendly fields
+          email_to: payload.user.email,
+          email_subject: `🚨 Farm Alert: ${payload.alert.parameter.toUpperCase()}`,
+          email_body: `
+Alert: ${payload.alert.message}
+
+Device: ${payload.device.name}
+Location: ${payload.device.location}
+Parameter: ${payload.alert.parameter}
+Current Value: ${payload.alert.current_value}
+Threshold: ${payload.alert.threshold_min || 'N/A'} - ${payload.alert.threshold_max || 'N/A'}
+Severity: ${payload.severity}
+
+Time: ${payload.timestamp}
+Alert ID: ${payload.alert.id}
+          `.trim()
+        };
+      }
+      
+      // Special formatting for Slack
+      if (config.name.includes('Slack')) {
+        webhookPayload = {
+          text: `🚨 *Shetkari Alert*`,
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Alert:* ${payload.alert.message}\n*Device:* ${payload.device.name}\n*Parameter:* ${payload.alert.parameter}\n*Value:* ${payload.alert.current_value}\n*Severity:* ${payload.severity}`
+              }
+            }
+          ]
+        } as any;
+      }
+      
+      // Special formatting for Discord
+      if (config.name.includes('Discord')) {
+        webhookPayload = {
+          embeds: [
+            {
+              title: '🚨 Shaetkari Alert',
+              description: payload.alert.message,
+              color: payload.severity === 'HIGH' ? 0xff0000 : payload.severity === 'LOW' ? 0xffaa00 : 0x00ff00,
+              fields: [
+                { name: 'Device', value: payload.device.name, inline: true },
+                { name: 'Parameter', value: payload.alert.parameter, inline: true },
+                { name: 'Value', value: payload.alert.current_value.toString(), inline: true },
+                { name: 'Severity', value: payload.severity, inline: true },
+              ],
+              timestamp: payload.timestamp,
+            }
+          ]
+        } as any;
+      }
+      
       const response = await fetch(config.url, {
         method: 'POST',
         headers: config.headers,
-        body: JSON.stringify(payload),
+        body: JSON.stringify(webhookPayload),
       });
 
       if (response.ok) {

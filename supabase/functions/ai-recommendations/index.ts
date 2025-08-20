@@ -50,6 +50,10 @@ const AI_PROJECT_ID = '376d3ee9-d461-4ec8-9fc2-eaac7675b030';
 const IAM_URL = 'https://iam.cloud.ibm.com/identity/token';
 const AI_URL = 'https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29';
 
+// OpenAI configuration (primary AI service)
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || '';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+
 // Generate IAM token for AI authentication
 async function generateToken(): Promise<string> {
   try {
@@ -83,8 +87,139 @@ async function generateToken(): Promise<string> {
   }
 }
 
-// Generate system prompt with current sensor data
-function generateSystemPrompt(sensorData: SensorData): string {
+// Get OpenAI GPT-4o recommendations (primary AI service)
+async function getOpenAIRecommendations(sensorData: SensorData, userLocation?: string, userLanguage?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback' }> {
+  try {
+    console.log('🤖 AI Edge Function: Trying OpenAI GPT-4o as primary AI service...');
+    
+    if (!OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured');
+    }
+    
+    const systemPrompt = generateSystemPrompt(sensorData, userLocation, userLanguage);
+    
+    console.log('📝 AI Edge Function: Generated system prompt preview:', {
+      promptLength: systemPrompt.length,
+      hasLocationContext: systemPrompt.includes('User Location:'),
+      hasLanguageContext: systemPrompt.includes('CRITICAL LANGUAGE REQUIREMENT:'),
+      userLanguage,
+      userLocation,
+      isNonEnglish: userLanguage && userLanguage !== 'english',
+      languageInstructions: userLanguage && userLanguage !== 'english' ? `Should respond in ${userLanguage}` : 'Should respond in English'
+    });
+    
+    // Log a sample of the actual prompt to verify language instructions are included
+    if (userLanguage && userLanguage !== 'english') {
+      console.log('🔍 AI Edge Function: Language context in prompt:', 
+        systemPrompt.substring(systemPrompt.indexOf('CRITICAL LANGUAGE REQUIREMENT:'), 
+        systemPrompt.indexOf('CRITICAL LANGUAGE REQUIREMENT:') + 300));
+      
+      // Add a simple test prompt to make sure OpenAI understands
+      console.log('🧪 AI Edge Function: Testing language instruction with direct example');
+    }
+    
+    const payload = {
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        }
+      ],
+      temperature: 0,
+      max_tokens: 2000
+    };
+
+    console.log('🚀 AI Edge Function: Sending request to OpenAI API...');
+    
+    const response = await fetch(OPENAI_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API request failed: ${response.status} - ${errorText}`);
+    }
+
+    const responseData = await response.json();
+    console.log('✅ AI Edge Function: OpenAI response received');
+
+    // Extract the AI response content
+    const aiResponse = responseData.choices?.[0]?.message?.content;
+    
+    if (!aiResponse) {
+      throw new Error('No content in OpenAI response');
+    }
+
+    console.log('🔍 AI Edge Function: Parsing OpenAI response...');
+    
+    // Parse the JSON response from the AI
+    let recommendations: AIRecommendation[];
+    try {
+      // Clean the response in case there's extra text around the JSON
+      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+      const jsonString = jsonMatch ? jsonMatch[0] : aiResponse;
+      recommendations = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('❌ AI Edge Function: Failed to parse OpenAI response as JSON:', parseError);
+      console.log('Raw OpenAI response:', aiResponse);
+      
+      // Return fallback recommendations if parsing fails
+      return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+    }
+
+    // Validate the recommendations structure
+    const validRecommendations = recommendations.filter(rec => 
+      rec.type && rec.title && rec.description && 
+      typeof rec.confidence === 'number' && rec.priority && 
+      typeof rec.actionable === 'boolean' && rec.reasoning
+    );
+
+    console.log(`✅ AI Edge Function: Generated ${validRecommendations.length} valid recommendations from OpenAI`);
+    
+    // Log a sample recommendation to verify language
+    if (validRecommendations.length > 0 && userLanguage && userLanguage !== 'english') {
+      console.log('🔍 AI Edge Function: Sample recommendation language check:', {
+        userLanguage,
+        sampleTitle: validRecommendations[0].title,
+        sampleDescription: validRecommendations[0].description.substring(0, 100),
+        appearsToBeInRequestedLanguage: !validRecommendations[0].title.match(/^[a-zA-Z\s]+$/) || validRecommendations[0].title.includes('।') || validRecommendations[0].title.includes('़') // Basic check for non-Latin characters
+      });
+    }
+    
+    return { recommendations: validRecommendations, source: 'ai' };
+
+  } catch (error) {
+    console.error('❌ AI Edge Function: Error getting OpenAI recommendations:', error);
+    
+    // Return fallback recommendations on error
+    return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+  }
+}
+
+// Generate system prompt with current sensor data, location, and language context
+function generateSystemPrompt(sensorData: SensorData, userLocation?: string, userLanguage?: string): string {
+  const locationContext = userLocation ? `\n\nUser Location: ${userLocation}\nPlease consider local climate, soil conditions, and regional farming practices specific to this location when providing recommendations.` : '';
+  const languageContext = userLanguage && userLanguage !== 'english' ? `\n\n🚨 CRITICAL LANGUAGE REQUIREMENT 🚨: 
+  
+  ALL RECOMMENDATIONS MUST BE PROVIDED IN ${userLanguage.toUpperCase()} LANGUAGE ONLY.
+  
+  - Translate the "title" field completely into ${userLanguage}
+  - Translate the "description" field completely into ${userLanguage}  
+  - Translate the "reasoning" field completely into ${userLanguage}
+  - DO NOT USE ANY ENGLISH WORDS in the response
+  - The user speaks ${userLanguage} as their primary language
+  - They require agricultural advice in ${userLanguage} for proper understanding
+  - Example: If the language is "hindi", respond with "सिंचाई बढ़ाएं" not "Increase Irrigation"
+  - If language is "${userLanguage}", ALL content must be in ${userLanguage} script/characters
+  
+  REMEMBER: The entire JSON response content must be in ${userLanguage} language.` : '';
+  
   return `You are an agricultural AI assistant. Based on the provided sensor data, historical trends, and farm profile, generate a list of actionable farming recommendations and insights.
 
 Your response MUST be a JSON array of objects. Each object in the array MUST adhere to the following structure:
@@ -114,9 +249,16 @@ ${JSON.stringify({
   p: sensorData.p,
   k: sensorData.k,
   ph: sensorData.ph
-}, null, 2)}
+}, null, 2)}${locationContext}${languageContext}
 
-Generate the recommendations now.`;
+${userLanguage && userLanguage !== 'english' ? `
+🚨 FINAL REMINDER 🚨: 
+- RESPOND ENTIRELY IN ${userLanguage.toUpperCase()} LANGUAGE
+- ALL JSON CONTENT (title, description, reasoning) MUST BE IN ${userLanguage.toUpperCase()}
+- NO ENGLISH WORDS ALLOWED IN THE RESPONSE
+- TRANSLATE EVERYTHING TO ${userLanguage.toUpperCase()}` : ''}
+
+Generate the recommendations now based on the user's location and provide them in their preferred language.`;
 }
 
 // Fallback recommendations when AI is unavailable
@@ -193,10 +335,28 @@ function getFallbackRecommendations(sensorData: SensorData): AIRecommendation[] 
   return recommendations;
 }
 
-// Get AI recommendations
-async function getRecommendations(sensorData: SensorData): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback' }> {
+// Get AI recommendations (tries OpenAI GPT-4o first, then rule-based fallback)
+async function getRecommendations(sensorData: SensorData, userLocation?: string, userLanguage?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback'; model?: string }> {
+  // Try OpenAI GPT-4o first
   try {
-    console.log('🤖 AI Edge Function: Generating AI recommendations...');
+    const openaiResult = await getOpenAIRecommendations(sensorData, userLocation, userLanguage);
+    if (openaiResult.source === 'ai') {
+      return { ...openaiResult, model: 'gpt-4o' };
+    }
+    // If OpenAI failed, fall through to rule-based fallback
+  } catch (openaiError) {
+    console.error('❌ AI Edge Function: OpenAI failed:', openaiError);
+  }
+  
+  // OpenAI failed, use rule-based fallback
+  console.log('🔄 AI Edge Function: AI system failed, using rule-based fallback');
+  return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+
+  /* 
+  // IBM WatsonX code (kept for future use but not currently active)
+  // First try IBM WatsonX
+  try {
+    console.log('🤖 AI Edge Function: Trying IBM WatsonX first...');
     
     // Get access token
     const accessToken = await generateToken();
@@ -206,7 +366,7 @@ async function getRecommendations(sensorData: SensorData): Promise<{ recommendat
       messages: [
         {
           role: 'system',
-          content: generateSystemPrompt(sensorData)
+          content: generateSystemPrompt(sensorData, userLocation, userLanguage)
         }
       ],
       project_id: AI_PROJECT_ID,
@@ -220,7 +380,7 @@ async function getRecommendations(sensorData: SensorData): Promise<{ recommendat
       stop: []
     };
 
-    console.log('🚀 AI Edge Function: Sending request to AI API...');
+    console.log('🚀 AI Edge Function: Sending request to IBM WatsonX API...');
     
     const response = await fetch(AI_URL, {
       method: 'POST',
@@ -234,20 +394,20 @@ async function getRecommendations(sensorData: SensorData): Promise<{ recommendat
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`AI API request failed: ${response.status} - ${errorText}`);
+      throw new Error(`IBM WatsonX API request failed: ${response.status} - ${errorText}`);
     }
 
     const responseData = await response.json();
-    console.log('✅ AI Edge Function: Response received');
+    console.log('✅ AI Edge Function: IBM WatsonX response received');
 
     // Extract the AI response content
     const aiResponse = responseData.choices?.[0]?.message?.content;
     
     if (!aiResponse) {
-      throw new Error('No content in AI response');
+      throw new Error('No content in IBM WatsonX response');
     }
 
-    console.log('🔍 AI Edge Function: Parsing AI response...');
+    console.log('🔍 AI Edge Function: Parsing IBM WatsonX response...');
     
     // Parse the JSON response from the AI
     let recommendations: AIRecommendation[];
@@ -257,11 +417,9 @@ async function getRecommendations(sensorData: SensorData): Promise<{ recommendat
       const jsonString = jsonMatch ? jsonMatch[0] : aiResponse;
       recommendations = JSON.parse(jsonString);
     } catch (parseError) {
-      console.error('❌ AI Edge Function: Failed to parse AI response as JSON:', parseError);
-      console.log('Raw AI response:', aiResponse);
-      
-      // Return fallback recommendations if parsing fails
-      return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+      console.error('❌ AI Edge Function: Failed to parse IBM WatsonX response as JSON:', parseError);
+      console.log('Raw IBM WatsonX response:', aiResponse);
+      throw new Error('Failed to parse IBM WatsonX response');
     }
 
     // Validate the recommendations structure
@@ -271,15 +429,14 @@ async function getRecommendations(sensorData: SensorData): Promise<{ recommendat
       typeof rec.actionable === 'boolean' && rec.reasoning
     );
 
-    console.log(`✅ AI Edge Function: Generated ${validRecommendations.length} valid recommendations`);
-    return { recommendations: validRecommendations, source: 'ai' };
+    console.log(`✅ AI Edge Function: Generated ${validRecommendations.length} valid recommendations from IBM WatsonX`);
+    return { recommendations: validRecommendations, source: 'ai', model: 'ibm-granite-3-8b' };
 
-  } catch (error) {
-    console.error('❌ AI Edge Function: Error getting recommendations:', error);
-    
-    // Return fallback recommendations on error
-    return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+  } catch (ibmError) {
+    console.error('❌ AI Edge Function: IBM WatsonX failed:', ibmError);
+    // Continue to OpenAI fallback...
   }
+  */
 }
 
 Deno.serve(async (req: Request) => {
@@ -298,8 +455,12 @@ Deno.serve(async (req: Request) => {
   try {
     console.log('🤖 AI Edge Function: Request received');
     
-    // Parse the sensor data from request body
-    const { sensorData }: { sensorData: SensorData } = await req.json();
+    // Parse the sensor data and optional user context from request body
+    const { sensorData, userLocation, userLanguage }: { 
+      sensorData: SensorData; 
+      userLocation?: string; 
+      userLanguage?: string; 
+    } = await req.json();
     
     if (!sensorData) {
       return new Response(
@@ -308,24 +469,29 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log('📊 AI Edge Function: Processing sensor data:', {
+    console.log('📊 AI Edge Function: Processing request with context:', {
       timestamp: sensorData.timestamp,
       atmoTemp: sensorData.atmoTemp,
       moisture: sensorData.moisture,
       ph: sensorData.ph,
+      userLocation: userLocation || 'Not specified',
+      userLanguage: userLanguage || 'english',
+      hasOpenAIKey: !!OPENAI_API_KEY,
+      openAIKeyLength: OPENAI_API_KEY ? OPENAI_API_KEY.length : 0
     });
 
-    // Get recommendations
-    const { recommendations, source } = await getRecommendations(sensorData);
+    // Get recommendations with user context
+    const { recommendations, source, model } = await getRecommendations(sensorData, userLocation, userLanguage);
     
-    console.log(`📋 AI Edge Function: Returning ${recommendations.length} recommendations (source: ${source})`);
+    console.log(`📋 AI Edge Function: Returning ${recommendations.length} recommendations (source: ${source}${model ? `, model: ${model}` : ''})`);
 
     return new Response(
       JSON.stringify({
         success: true,
         recommendations,
         timestamp: new Date().toISOString(),
-        source
+        source,
+        model
       }),
       { 
         status: 200, 
