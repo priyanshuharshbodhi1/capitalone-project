@@ -350,7 +350,7 @@ async function getRecommendations(sensorData: SensorData, userLocation?: string,
   
   // OpenAI failed, use rule-based fallback
   console.log('🔄 AI Edge Function: AI system failed, using rule-based fallback');
-  return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback' };
+  return { recommendations: getFallbackRecommendations(sensorData), source: 'fallback', model: 'rule-based' };
 
   /* 
   // IBM WatsonX code (kept for future use but not currently active)

@@ -236,11 +236,11 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
           <div>
             <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{t('ai.recommendations')}</h2>
             <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
-              {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
+              {model && (
                 <>
                   <Zap className="h-3 w-3 text-indigo-500" />
                   <span className="text-xs text-indigo-600 font-medium">
-                    {model === 'gpt-4o' ? 'GPT-4o' : model === 'ibm-granite-3-8b' ? 'IBM Granite' : 'AI Powered'}
+                    {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') ? 'AI Powered' : 'Rule Based'}
                   </span>
                 </>
               )}
@@ -331,11 +331,11 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
                       </div>
                       
                       <div className="flex items-center space-x-1">
-                        {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
+                        {model && (
                           <>
                             <Zap className="h-3 w-3 text-indigo-500" />
                             <span className="text-xs text-indigo-600 font-medium">
-                              {model === 'gpt-4o' ? 'GPT-4o' : model === 'ibm-granite-3-8b' ? 'IBM Granite' : 'AI Powered'}
+                              {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') ? 'AI Powered' : 'Rule Based'}
                             </span>
                           </>
                         )}
@@ -352,13 +352,11 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ sensorData }) => 
       <div className="mt-3 sm:mt-4 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-gray-200">
         <div className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-1 sm:space-x-2">
-            {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') && (
+            {model && (
               <>
                 <div className="w-2 h-2 rounded-full flex-shrink-0 bg-indigo-400 animate-pulse"></div>
                 <span className="text-xs">
-                  {model === 'gpt-4o' ? 'GPT-4o recommendation engine' : 
-                   model === 'ibm-granite-3-8b' ? 'IBM Granite recommendation engine' : 
-                   'AI recommendation engine'}
+                  {(model === 'gpt-4o' || model === 'ibm-granite-3-8b') ? 'AI recommendation engine' : 'Rule-based recommendation engine'}
                 </span>
               </>
             )}

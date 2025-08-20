@@ -29,7 +29,7 @@ class AIService {
   async getRecommendations(sensorData: SensorData, language?: string, location?: string): Promise<{ recommendations: AIRecommendation[]; source: 'ai' | 'fallback'; model?: string }> {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       console.warn('⚠️ AI: Supabase not configured, using fallback recommendations');
-      return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback' };
+      return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback', model: 'rule-based' };
     }
 
     try {
@@ -70,7 +70,7 @@ class AIService {
       console.error('❌ AI: Error calling edge function:', error);
       
       // Return fallback recommendations on error
-      return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback' };
+      return { recommendations: this.getFallbackRecommendations(sensorData), source: 'fallback', model: 'rule-based' };
     }
   }
 
