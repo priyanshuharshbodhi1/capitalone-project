@@ -20,4 +20,11 @@ app.include_router(plantdoc_router, prefix="/api", tags=["plantdoc"])
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    """Lightweight health check endpoint for uptime monitoring"""
+    from datetime import datetime
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
+@app.get("/ping")
+def ping():
+    """Minimal ping endpoint for keep-alive requests"""
+    return "pong"
