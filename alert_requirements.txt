@@ -1,0 +1,4 @@
+# Alert Processing Service Dependencies
+httpx>=0.24.0
+asyncio
+python-dotenv>=1.0.0
