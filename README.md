@@ -1,5 +1,9 @@
 # Shetkari – Agricultural IoT Monitoring System
 
+Demo: 
+
+Hosted Link: https://shetkari-ai.netlify.app/
+
 Every year, farmers face unpredictable crop losses due to poor visibility into real-time farm conditions.
 From erratic weather and poor irrigation to delayed responses to soil imbalances, traditional farming lacks intelligent 24/7 monitoring systems that can provide timely alerts or guidance.
 
